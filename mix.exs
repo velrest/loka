@@ -88,7 +88,9 @@ defmodule Loka.MixProject do
       {:gettext, "~> 1.0"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},
-      {:bandit, "~> 1.5"}
+      {:bandit, "~> 1.5"},
+      {:mix_test_interactive, "~> 5.0", only: :dev, runtime: false},
+      {:phoenix_test, "~> 0.8.2", only: :test, runtime: false}
     ]
   end
 

@@ -28,6 +28,7 @@ defmodule LokaWeb.ConnCase do
       import Plug.Conn
       import Phoenix.ConnTest
       import LokaWeb.ConnCase
+      import PhoenixTest
     end
   end
 
