@@ -26,7 +26,7 @@ defmodule LokaWeb.Layouts do
 
   """
   attr :flash, :map, required: true, doc: "the map of flash messages"
-  attr :curent_user, Loka.Accounts.User, required: false
+  attr :current_user, Loka.Accounts.User, required: false
 
   attr :current_scope, :map,
     default: nil,
@@ -137,7 +137,7 @@ defmodule LokaWeb.Layouts do
 
       <.nav_bar current_user={@current_user} />
   """
-  attr :curent_user, Loka.Accounts.User, required: false
+  attr :current_user, Loka.Accounts.User, required: false
 
   def nav_bar(assigns) do
     ~H"""

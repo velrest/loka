@@ -1,7 +1,7 @@
 defmodule LokaWeb.Shop.LandingPageLive do
   use LokaWeb, :live_view
 
-  alias LokaWeb.Inventory
+  # alias LokaWeb.Inventory
 
   on_mount {LokaWeb.LiveUserAuth, :live_user_optional}
 
@@ -16,7 +16,7 @@ defmodule LokaWeb.Shop.LandingPageLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    current_user = socket.assigns.current_user
+    # current_user = socket.assigns.current_user
     {:ok, socket}
   end
 end
