@@ -1,7 +1,7 @@
-defmodule Inventory.Item do
+defmodule Loka.Inventory.Item do
   use Ash.Resource,
     otp_app: :loka,
-    domain: Inventory,
+    domain: Loka.Inventory,
     data_layer: AshPostgres.DataLayer,
     extensions: [AshPaperTrail.Resource, AshArchival.Resource],
     authorizers: [Ash.Policy.Authorizer]
@@ -14,12 +14,26 @@ defmodule Inventory.Item do
   actions do
     defaults [:read]
 
-    read :list_items
+    read :list_all_items
+
+    create :create_item do
+      accept [:name, :description, :price]
+    end
+
+    destroy :archive_item
   end
 
   policies do
     policy action_type(:read) do
       authorize_if always()
+    end
+
+    policy action_type(:create) do
+      authorize_if actor_present()
+    end
+
+    policy action_type(:destroy) do
+      authorize_if actor_present()
     end
   end
 

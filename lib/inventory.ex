@@ -1,4 +1,4 @@
-defmodule Inventory do
+defmodule Loka.Inventory do
   use Ash.Domain,
     otp_app: :loka,
     extensions: [AshPaperTrail.Domain, AshPhoenix, AshAdmin.Domain]
@@ -12,6 +12,10 @@ defmodule Inventory do
   end
 
   resources do
-    resource Inventory.Item
+    resource Loka.Inventory.Item do
+      define :list_all_items
+      define :create_item
+      define :archive_item
+    end
   end
 end
