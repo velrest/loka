@@ -198,7 +198,7 @@ defmodule LokaWeb.Layouts do
               </li>
               <li><a>Settings</a></li>
               <li><.theme_toggle /></li>
-              <li><a>Logout</a></li>
+              <li><.link patch={~p"/sign-out"}>{gettext("Sign Out")}</.link></li>
             <% else %>
               <li><.link patch={~p"/sign-in"}>{gettext("Sign In")}</.link></li>
               <li><.link patch={~p"/register"}>{gettext("Register")}</.link></li>
