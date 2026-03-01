@@ -43,7 +43,7 @@ defmodule LokaWeb.Router do
   scope "/", LokaWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    # get "/", PageController, :home
     auth_routes AuthController, Loka.Accounts.User, path: "/auth"
     sign_out_route AuthController
 

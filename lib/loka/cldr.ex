@@ -1,5 +1,5 @@
 defmodule Loka.Cldr do
   use Cldr,
-    locales: ["en"],
-    default_locale: "en"
+    locales: ["de-CH", "fr-CH"],
+    providers: [Cldr.Number, Cldr.Calendar, Cldr.DateTime]
 end

@@ -7,7 +7,7 @@
 # General application configuration
 import Config
 
-config :ex_cldr, default_backend: Loka.Cldr
+config :ex_cldr, default_locale: "de-CH", default_backend: Loka.Cldr
 config :ash_oban, pro?: false
 
 config :loka, Oban,
