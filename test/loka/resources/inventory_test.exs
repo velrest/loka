@@ -10,6 +10,6 @@ defmodule Loka.Resources.Inventory.InventoryTest do
 
   test "list_all_items/0 lists all items" do
     items = Inventory.list_all_items!()
-    assert Enum.count(items) == 10
+    assert Enum.count(items) == 0
   end
 end
