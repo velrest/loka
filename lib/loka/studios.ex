@@ -3,5 +3,6 @@ defmodule Loka.Studios do
     otp_app: :loka
 
   resources do
+    resource Loka.Studios.Studio
   end
 end
