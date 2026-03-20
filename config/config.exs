@@ -65,7 +65,7 @@ config :spark,
 config :loka,
   ecto_repos: [Loka.Repo],
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [Loka.Accounts, Loka.Inventory],
+  ash_domains: [Loka.Studios, Loka.Accounts, Loka.Inventory],
   ash_authentication: [return_error_on_invalid_magic_link_token?: true]
 
 # Configure the endpoint
