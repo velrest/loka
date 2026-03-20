@@ -51,7 +51,7 @@ defmodule LokaWeb do
   def live_view do
     quote do
       use Phoenix.LiveView
-
+      on_mount LokaWeb.Utils.AssignCurrentPath
       unquote(html_helpers())
     end
   end
@@ -86,6 +86,7 @@ defmodule LokaWeb do
       import Phoenix.HTML
       # Core UI components
       import LokaWeb.CoreComponents
+      import LokaWeb.LokaComponents
 
       # Common modules used in templates
       alias Phoenix.LiveView.JS
