@@ -20,16 +20,22 @@ sh <(curl 'https://ash-hq.org/install/loka?install=phoenix') \
         --setup --yes
 ```
 
-- Account: Any user related data for login or billing
-  - User
-  - Address
-  - ...
-- Inventory: All shop related resrouces for managing sells
-  - Item
-  - 
-- Shop
-  - Cart
-  - Payments
+- **Account**: Manages user identity and personal data.
+  - `User`: A person who can be a buyer or a studio owner. Handled by Ash Authentication.
+  - `Address`: A user's billing or shipping address.
+
+- **Studios**: Represents the ceramic studios on the platform.
+  - `Studio`: The main entity with a `name`, `description`, and `owner`.
+  - `Address`: The physical location of the studio with geocoordinates for mapping.
+
+- **Inventory**: Contains the items that studios sell.
+  - `Item`: A product sold by a `Studio`, with `name`, `description`, `price`, etc.
+  - `Image`: For multiple pictures per `Item`.
+
+- **Commerce**: Handles all shopping-related logic.
+  - `Order`: A record of a transaction, linking a `User`, a `Studio`, and `OrderItem`s.
+  - `OrderItem`: A line item in an order.
+  - `Cart`: A temporary holder for a user's intended purchases.
 
 ## Learn more
 
