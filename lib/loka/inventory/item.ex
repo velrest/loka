@@ -11,6 +11,15 @@ defmodule Loka.Inventory.Item do
     repo Loka.Repo
   end
 
+  paper_trail do
+    primary_key_type(:uuid_v7)
+    change_tracking_mode(:changes_only)
+    store_action_name?(true)
+    ignore_attributes([:inserted_at, :updated_at])
+    # This is handled by ash_archival
+    ignore_actions([:destroy])
+  end
+
   actions do
     defaults [:read]
 
@@ -57,14 +66,5 @@ defmodule Loka.Inventory.Item do
     end
 
     timestamps()
-
-    paper_trail do
-      primary_key_type(:uuid_v7)
-      change_tracking_mode(:changes_only)
-      store_action_name?(true)
-      ignore_attributes([:inserted_at, :updated_at])
-      # This is handled by ash_archival
-      ignore_actions([:destroy])
-    end
   end
 end

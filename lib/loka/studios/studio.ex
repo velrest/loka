@@ -11,6 +11,15 @@ defmodule Loka.Studios.Studio do
     repo Loka.Repo
   end
 
+  paper_trail do
+    primary_key_type(:uuid_v7)
+    change_tracking_mode(:changes_only)
+    store_action_name?(true)
+    ignore_attributes([:inserted_at, :updated_at])
+    # This is handled by ash_archival
+    ignore_actions([:destroy])
+  end
+
   actions do
     defaults [:read]
   end
@@ -30,14 +39,9 @@ defmodule Loka.Studios.Studio do
     end
 
     timestamps()
+  end
 
-    paper_trail do
-      primary_key_type(:uuid_v7)
-      change_tracking_mode(:changes_only)
-      store_action_name?(true)
-      ignore_attributes([:inserted_at, :updated_at])
-      # This is handled by ash_archival
-      ignore_actions([:destroy])
-    end
+  relationships do
+    has_many :owners, Loka.Accounts.User
   end
 end

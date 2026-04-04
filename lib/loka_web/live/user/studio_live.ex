@@ -16,9 +16,19 @@ defmodule LokaWeb.User.StudioLive do
         <.profile_tab_nav active={@current_path} />
       </:nav>
 
-      <div class="flex flex-col items-center justify-center py-20 gap-4">
-        <p class="text-xl">{gettext("Add your studio!")}</p>
-        <.button>{gettext("Continue")}</.button>
+      <div class="flex flex-col items-center justify-center py-24 gap-6 text-center max-w-sm mx-auto">
+        <div class="bg-primary/10 text-primary rounded-2xl p-6">
+          <.icon name="hero-building-storefront" class="size-14" />
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <h2 class="text-3xl font-bold tracking-tight">{gettext("Your studio awaits")}</h2>
+          <p class="text-base-content/60 text-sm leading-relaxed">
+            {gettext("Reach new customers, showcase your craft, and build something people love.")}
+          </p>
+        </div>
+
+        <.button class="btn btn-primary btn-wide mt-2">{gettext("Open your studio")}</.button>
       </div>
     </Layouts.app>
     """
