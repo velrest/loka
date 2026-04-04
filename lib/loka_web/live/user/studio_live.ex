@@ -1,4 +1,4 @@
-defmodule LokaWeb.User.ProfileLive do
+defmodule LokaWeb.User.StudioLive do
   use LokaWeb, :live_view
 
   on_mount {LokaWeb.LiveUserAuth, :live_user_required}
@@ -16,19 +16,10 @@ defmodule LokaWeb.User.ProfileLive do
         <.profile_tab_nav active={@current_path} />
       </:nav>
 
-      <.header>
-        {gettext("Profile")}
-        <:subtitle>{gettext("View your account details.")}</:subtitle>
-      </.header>
-
-      <.list>
-        <:item title={gettext("User ID")}>
-          {@current_user.id}
-        </:item>
-        <:item title={gettext("Email")}>
-          {@current_user.email}
-        </:item>
-      </.list>
+      <div class="flex flex-col items-center justify-center py-20 gap-4">
+        <p class="text-xl">{gettext("Add your studio!")}</p>
+        <.button>{gettext("Continue")}</.button>
+      </div>
     </Layouts.app>
     """
   end

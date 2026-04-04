@@ -25,7 +25,7 @@ defmodule LokaWeb.LokaComponents do
 
   def tab_nav(assigns) do
     ~H"""
-    <div role="tablist" class="tabs tabs-box">
+    <div role="tablist" class="tabs tabs-box mx-4 sm:mx-6 lg:mx-8 my-2">
       <.link
         :for={item <- @item}
         role="tab"
@@ -52,6 +52,7 @@ defmodule LokaWeb.LokaComponents do
     <.tab_nav active_path={@active}>
       <:item link="/me">{gettext("Profile")}</:item>
       <:item link="/me/settings">{gettext("Settings")}</:item>
+      <:item link="/me/studio">{gettext("Studio")}</:item>
     </.tab_nav>
     """
   end
