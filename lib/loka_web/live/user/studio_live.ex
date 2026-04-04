@@ -5,7 +5,36 @@ defmodule LokaWeb.User.StudioLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    {:ok, studio} = Loka.Studios.get_own_studio(actor: socket.assigns.current_user)
+
+    {:ok, assign(socket, studio: studio, show_form: false, form: nil)}
+  end
+
+  @impl true
+  def handle_event("show_form", _params, socket) do
+    form =
+      AshPhoenix.Form.for_action(Loka.Studios.Studio, :create_studio,
+        actor: socket.assigns.current_user
+      )
+
+    {:noreply, assign(socket, show_form: true, form: to_form(form))}
+  end
+
+  @impl true
+  def handle_event("validate", params, socket) do
+    form = AshPhoenix.Form.validate(socket.assigns.form.source, params["studio"] || %{})
+    {:noreply, assign(socket, form: to_form(form))}
+  end
+
+  @impl true
+  def handle_event("save", params, socket) do
+    case AshPhoenix.Form.submit(socket.assigns.form.source, params: params["studio"] || %{}) do
+      {:ok, studio} ->
+        {:noreply, assign(socket, studio: studio, show_form: false, form: nil)}
+
+      {:error, form} ->
+        {:noreply, assign(socket, form: to_form(form))}
+    end
   end
 
   @impl true
@@ -16,20 +45,29 @@ defmodule LokaWeb.User.StudioLive do
         <.profile_tab_nav active={@current_path} />
       </:nav>
 
-      <div class="flex flex-col items-center justify-center py-24 gap-6 text-center max-w-sm mx-auto">
-        <div class="bg-primary/10 text-primary rounded-2xl p-6">
-          <.icon name="hero-building-storefront" class="size-14" />
+      <%= if @studio do %>
+        <div class="px-4 py-10 sm:px-6 lg:px-8">
+          <.header>
+            {@studio.name}
+            <:subtitle>{gettext("Your studio is live.")}</:subtitle>
+          </.header>
         </div>
+      <% else %>
+        <div class="flex flex-col items-center justify-center py-24 gap-6 text-center max-w-sm mx-auto">
+          <div class="bg-primary/10 text-primary rounded-2xl p-6">
+            <.icon name="hero-building-storefront" class="size-14" />
+          </div>
 
-        <div class="flex flex-col gap-2">
-          <h2 class="text-3xl font-bold tracking-tight">{gettext("Your studio awaits")}</h2>
-          <p class="text-base-content/60 text-sm leading-relaxed">
-            {gettext("Reach new customers, showcase your craft, and build something people love.")}
-          </p>
+          <div class="flex flex-col gap-2">
+            <h2 class="text-3xl font-bold tracking-tight">{gettext("Your studio awaits")}</h2>
+            <p class="text-base-content/60 text-sm leading-relaxed">
+              {gettext("Reach new customers, showcase your craft, and build something people love.")}
+            </p>
+          </div>
+
+          <.button class="btn btn-primary btn-wide mt-2">{gettext("Open your studio")}</.button>
         </div>
-
-        <.button class="btn btn-primary btn-wide mt-2">{gettext("Open your studio")}</.button>
-      </div>
+      <% end %>
     </Layouts.app>
     """
   end
