@@ -1,0 +1,58 @@
+defmodule LokaWeb.LokaComponents do
+  @moduledoc """
+  Provides loka UI components.
+  """
+  use Phoenix.Component
+  use Gettext, backend: LokaWeb.Gettext
+
+  alias Phoenix.LiveView.JS
+
+  @doc """
+  Renders a tab nav with links.
+
+  ## Examples
+
+      <.tab_nav>
+        <:link title="Title">{@post.title}</:item>
+        <:link title="Views">{@post.views}</:item>
+      </.tab_nav>
+  """
+  attr :active_path, :string, default: "", doc: "The currently active path for marking tabs"
+
+  slot :item, required: true do
+    attr :link, :string, required: true
+  end
+
+  def tab_nav(assigns) do
+    ~H"""
+    <div role="tablist" class="tabs tabs-box">
+      <.link
+        :for={item <- @item}
+        role="tab"
+        class={["tab", if(item.link == @active_path, do: "tab-active")]}
+        navigate={item.link}
+      >
+        {render_slot(item)}
+      </.link>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders the tab nav for /me.
+
+  ## Examples
+
+      <.profile_tab_nav active={@current_path} /
+  """
+  attr :active, :string, required: true
+
+  def profile_tab_nav(assigns) do
+    ~H"""
+    <.tab_nav active_path={@active}>
+      <:item link="/me">{gettext("Profile")}</:item>
+      <:item link="/me/settings">{gettext("Settings")}</:item>
+    </.tab_nav>
+    """
+  end
+end

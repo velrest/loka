@@ -141,7 +141,7 @@ defmodule LokaWeb.Layouts do
     ~H"""
     <div class="navbar bg-base-100 shadow-sm">
       <div class="flex-1">
-        <a class="btn btn-ghost text-xl">keraloka</a>
+        <.link class="btn btn-ghost text-xl" patch={~p"/"}>{gettext("keraloka")}</.link>
       </div>
       <div class="flex-none">
         <input type="text" placeholder="Search" class="input input-bordered w-24 md:w-auto" />
@@ -189,12 +189,8 @@ defmodule LokaWeb.Layouts do
             class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
           >
             <%= if @current_user do %>
-              <li>
-                <a class="justify-between">
-                  Profile <span class="badge">New</span>
-                </a>
-              </li>
-              <li><a>Settings</a></li>
+              <li><.link navigate={~p"/me"}>{gettext("Profile")}</.link></li>
+              <li><.link navigate={~p"/me/settings"}>{gettext("Settings")}</.link></li>
               <li><.theme_toggle /></li>
               <li><.link patch={~p"/sign-out"}>{gettext("Sign Out")}</.link></li>
             <% else %>
