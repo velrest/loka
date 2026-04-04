@@ -290,7 +290,7 @@ defmodule Loka.Accounts.User do
   end
 
   relationships do
-    belongs_to :studio, Loka.Studios.Studio
+    has_one :studio, Loka.Studios.Studio
   end
 
   identities do

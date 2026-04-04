@@ -14,19 +14,26 @@ defmodule LokaWeb.User.StudioLive do
   def handle_event("show_form", _params, socket) do
     form =
       AshPhoenix.Form.for_action(Loka.Studios.Studio, :create_studio,
-        actor: socket.assigns.current_user
+        actor: socket.assigns.current_user,
+        as: "studio"
       )
 
     {:noreply, assign(socket, show_form: true, form: to_form(form))}
   end
 
   @impl true
+  def handle_event("validate", _params, %{assigns: %{form: nil}} = socket),
+    do: {:noreply, socket}
+
   def handle_event("validate", params, socket) do
     form = AshPhoenix.Form.validate(socket.assigns.form.source, params["studio"] || %{})
     {:noreply, assign(socket, form: to_form(form))}
   end
 
   @impl true
+  def handle_event("save", _params, %{assigns: %{form: nil}} = socket),
+    do: {:noreply, socket}
+
   def handle_event("save", params, socket) do
     case AshPhoenix.Form.submit(socket.assigns.form.source, params: params["studio"] || %{}) do
       {:ok, studio} ->
@@ -53,20 +60,38 @@ defmodule LokaWeb.User.StudioLive do
           </.header>
         </div>
       <% else %>
-        <div class="flex flex-col items-center justify-center py-24 gap-6 text-center max-w-sm mx-auto">
-          <div class="bg-primary/10 text-primary rounded-2xl p-6">
-            <.icon name="hero-building-storefront" class="size-14" />
-          </div>
+        <%= if @show_form do %>
+          <div class="px-4 py-10 sm:px-6 lg:px-8 max-w-sm">
+            <.header>{gettext("Name your studio")}</.header>
 
-          <div class="flex flex-col gap-2">
-            <h2 class="text-3xl font-bold tracking-tight">{gettext("Your studio awaits")}</h2>
-            <p class="text-base-content/60 text-sm leading-relaxed">
-              {gettext("Reach new customers, showcase your craft, and build something people love.")}
-            </p>
+            <.form
+              for={@form}
+              phx-change="validate"
+              phx-submit="save"
+              class="mt-6 flex flex-col gap-4"
+            >
+              <.input field={@form[:name]} type="text" label={gettext("Studio name")} />
+              <.button type="submit" class="btn btn-primary">{gettext("Create studio")}</.button>
+            </.form>
           </div>
+        <% else %>
+          <div class="flex flex-col items-center justify-center py-24 gap-6 text-center max-w-sm mx-auto">
+            <div class="bg-primary/10 text-primary rounded-2xl p-6">
+              <.icon name="hero-building-storefront" class="size-14" />
+            </div>
 
-          <.button class="btn btn-primary btn-wide mt-2">{gettext("Open your studio")}</.button>
-        </div>
+            <div class="flex flex-col gap-2">
+              <h2 class="text-3xl font-bold tracking-tight">{gettext("Your studio awaits")}</h2>
+              <p class="text-base-content/60 text-sm leading-relaxed">
+                {gettext("Reach new customers, showcase your craft, and build something people love.")}
+              </p>
+            </div>
+
+            <.button phx-click="show_form" class="btn btn-primary btn-wide mt-2">
+              {gettext("Open your studio")}
+            </.button>
+          </div>
+        <% end %>
       <% end %>
     </Layouts.app>
     """

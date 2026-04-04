@@ -4,7 +4,7 @@ defmodule Loka.Studios do
     extensions: [AshPaperTrail.Domain, AshPhoenix, AshAdmin.Domain]
 
   paper_trail do
-    include_versions?(false)
+    include_versions?(true)
   end
 
   admin do
@@ -12,6 +12,11 @@ defmodule Loka.Studios do
   end
 
   resources do
-    resource Loka.Studios.Studio
+    resource Loka.Studios.Studio do
+      define :create_studio
+      define :list_all_studios
+      define :get_own_studio, not_found_error?: false
+      define :archive_studio
+    end
   end
 end

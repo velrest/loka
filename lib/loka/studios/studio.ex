@@ -22,11 +22,35 @@ defmodule Loka.Studios.Studio do
 
   actions do
     defaults [:read]
+
+    read :list_all_studios
+
+    read :get_own_studio do
+      get? true
+      filter expr(owner == ^actor(:id))
+    end
+
+    create :create_studio do
+      accept [:name]
+
+      change relate_actor(:owner)
+    end
+
+    destroy :archive_studio
   end
 
   policies do
     policy action_type(:read) do
       authorize_if always()
+    end
+
+    policy action_type(:create) do
+      authorize_if actor_present()
+      authorize_if expr(not actor(:studio))
+    end
+
+    policy action_type(:destroy) do
+      authorize_if relates_to_actor_via(:owner)
     end
   end
 
@@ -42,6 +66,6 @@ defmodule Loka.Studios.Studio do
   end
 
   relationships do
-    has_many :owners, Loka.Accounts.User
+    belongs_to :owner, Loka.Accounts.User
   end
 end

@@ -4,7 +4,7 @@ defmodule Loka.Inventory do
     extensions: [AshPaperTrail.Domain, AshPhoenix, AshAdmin.Domain]
 
   paper_trail do
-    include_versions?(false)
+    include_versions?(true)
   end
 
   admin do
