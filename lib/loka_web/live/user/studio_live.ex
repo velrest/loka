@@ -13,7 +13,7 @@ defmodule LokaWeb.User.StudioLive do
   @impl true
   def handle_event("show_form", _params, socket) do
     form =
-      AshPhoenix.Form.for_action(Loka.Studios.Studio, :create_studio,
+      Loka.Studios.form_to_create_studio(
         actor: socket.assigns.current_user,
         as: "studio"
       )

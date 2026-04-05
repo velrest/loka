@@ -20,6 +20,8 @@ defmodule Loka.Inventory do
 
     resource Loka.Inventory.Stock do
       define :list_all_stock
+      define :list_studio_stock
+      define :get_stock, args: [:id], not_found_error?: false
       define :create_stock
       define :update_stock
       define :archive_stock

@@ -26,6 +26,19 @@ defmodule Loka.Inventory.Stock do
       prepare build(load: [:item])
     end
 
+    read :list_studio_stock do
+      prepare build(load: [:item])
+      filter expr(studio.owner_id == ^actor(:id))
+    end
+
+    read :get_stock do
+      argument :id, :uuid, allow_nil?: false
+      get? true
+      get_by :id
+      prepare build(load: [:item])
+      filter expr(studio.owner_id == ^actor(:id))
+    end
+
     create :create_stock do
       accept [:quantity, :price]
       argument :item, :map, allow_nil?: false

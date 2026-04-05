@@ -5,8 +5,6 @@ defmodule LokaWeb.LokaComponents do
   use Phoenix.Component
   use Gettext, backend: LokaWeb.Gettext
 
-  alias Phoenix.LiveView.JS
-
   @doc """
   Renders a tab nav with links.
 

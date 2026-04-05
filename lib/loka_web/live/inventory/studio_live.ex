@@ -11,7 +11,8 @@ defmodule LokaWeb.Inventory.StudioLive do
 
       {:ok, studio} ->
         form =
-          AshPhoenix.Form.for_update(studio, :update_studio,
+          Loka.Studios.form_to_update_studio(
+            studio,
             actor: socket.assigns.current_user,
             as: "studio"
           )

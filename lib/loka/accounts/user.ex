@@ -289,10 +289,6 @@ defmodule Loka.Accounts.User do
     attribute :confirmed_at, :utc_datetime_usec
   end
 
-  relationships do
-    has_one :studio, Loka.Studios.Studio
-  end
-
   identities do
     identity :unique_email, [:email]
   end
