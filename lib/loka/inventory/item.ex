@@ -72,5 +72,6 @@ defmodule Loka.Inventory.Item do
 
   relationships do
     has_many :stock, Loka.Inventory.Stock
+    has_many :images, Loka.Inventory.Image
   end
 end

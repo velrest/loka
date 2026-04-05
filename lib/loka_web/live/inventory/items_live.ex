@@ -8,49 +8,7 @@ defmodule LokaWeb.Inventory.ItemsLive do
   def mount(_params, _session, socket) do
     user = socket.assigns.current_user
     stock = Inventory.list_studio_stock!(actor: user)
-    {:ok, assign(socket, stock: stock, show_form: false, form: nil)}
-  end
-
-  @impl true
-  def handle_event("show_form", _params, socket) do
-    form =
-      Loka.Inventory.form_to_create_stock(actor: socket.assigns.current_user)
-      |> AshPhoenix.Form.add_form(:item)
-      |> to_form()
-
-    {:noreply, assign(socket, show_form: true, form: form)}
-  end
-
-  def handle_event("hide_form", _params, socket) do
-    {:noreply, assign(socket, show_form: false, form: nil)}
-  end
-
-  @impl true
-  def handle_event("validate", _params, %{assigns: %{form: nil}} = socket),
-    do: {:noreply, socket}
-
-  def handle_event("validate", params, socket) do
-    form = AshPhoenix.Form.validate(socket.assigns.form.source, params["form"] || %{})
-    {:noreply, assign(socket, form: to_form(form))}
-  end
-
-  @impl true
-  def handle_event("save", _params, %{assigns: %{form: nil}} = socket),
-    do: {:noreply, socket}
-
-  def handle_event("save", params, socket) do
-    case AshPhoenix.Form.submit(socket.assigns.form.source, params: params["form"] || %{}) do
-      {:ok, _stock} ->
-        stock = Inventory.list_studio_stock!(actor: socket.assigns.current_user)
-
-        {:noreply,
-         socket
-         |> put_flash(:info, gettext("Item created."))
-         |> assign(stock: stock, show_form: false, form: nil)}
-
-      {:error, form} ->
-        {:noreply, assign(socket, form: to_form(form))}
-    end
+    {:ok, assign(socket, stock: stock)}
   end
 
   @impl true
@@ -65,26 +23,11 @@ defmodule LokaWeb.Inventory.ItemsLive do
         <.header>
           {gettext("Items")}
           <:actions>
-            <.button :if={not @show_form} phx-click="show_form" class="btn btn-primary btn-sm">
+            <.link navigate={~p"/inventory/items/new"} class="btn btn-primary btn-sm">
               {gettext("New item")}
-            </.button>
-            <.button :if={@show_form} phx-click="hide_form" class="btn btn-ghost btn-sm">
-              {gettext("Cancel")}
-            </.button>
+            </.link>
           </:actions>
         </.header>
-
-        <div :if={@show_form} class="mt-6 max-w-sm">
-          <.form for={@form} phx-change="validate" phx-submit="save" class="flex flex-col gap-4">
-            <.inputs_for :let={item_form} field={@form[:item]}>
-              <.input field={item_form[:name]} type="text" label={gettext("Name")} />
-              <.input field={item_form[:description]} type="text" label={gettext("Description")} />
-            </.inputs_for>
-            <.input field={@form[:price]} type="text" label={gettext("Price (e.g. CHF 100)")} />
-            <.input field={@form[:quantity]} type="number" label={gettext("Quantity")} />
-            <.button type="submit" class="btn btn-primary">{gettext("Create item")}</.button>
-          </.form>
-        </div>
 
         <div class="mt-8">
           <table :if={@stock != []} class="table w-full">

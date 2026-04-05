@@ -43,6 +43,7 @@ defmodule LokaWeb.Router do
 
       live "/inventory/studio", Inventory.StudioLive
       live "/inventory/items", Inventory.ItemsLive
+      live "/inventory/items/new", Inventory.ItemEditLive
       live "/inventory/items/:id", Inventory.ItemEditLive
     end
   end

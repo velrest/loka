@@ -26,5 +26,11 @@ defmodule Loka.Inventory do
       define :update_stock
       define :archive_stock
     end
+
+    resource Loka.Inventory.Image do
+      define :list_item_images, args: [:item_id]
+      define :create_image
+      define :delete_image
+    end
   end
 end

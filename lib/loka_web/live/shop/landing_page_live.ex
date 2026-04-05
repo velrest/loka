@@ -17,7 +17,7 @@ defmodule LokaWeb.Shop.LandingPageLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    stock = Inventory.list_all_stock!()
+    stock = Inventory.list_all_stock!(load: [item: :images])
     {:ok, assign(socket, stock: stock)}
   end
 
@@ -28,10 +28,33 @@ defmodule LokaWeb.Shop.LandingPageLive do
     ~H"""
     <div class="card bg-base-100 w-80 shadow-sm mr-5" {@rest}>
       <figure>
-        <img
-          src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Flookaside.fbsbx.com%2Flookaside%2Fcrawler%2Fmedia%2F%3Fmedia_id%3D962791577098035&f=1&nofb=1&ipt=8f18ed6357d8760c90a1ebec72e15716b3ddc2164eeaf1d2a4ecf0b84060f5ea"
-          alt="Shoes"
-        />
+        <div class="carousel w-full">
+          <div
+            :for={{image, index} <- Enum.with_index(@stock.item.images)}
+            id={"slide_#{@stock.item.id}_#{index}"}
+            class="carousel-item relative w-full"
+          >
+            <img
+              src={image.path}
+              alt={@stock.item.name}
+              class="w-full"
+            />
+            <div class="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
+              <a
+                href={"#slide_#{@stock.item.id}_#{if index == 0, do: length(@stock.item.images) -1, else: index - 1}"}
+                class="btn btn-circle"
+              >
+                ❮
+              </a>
+              <a
+                href={"#slide_#{@stock.item.id}_#{if index == length(@stock.item.images) - 1 , do: 0, else: index + 1}"}
+                class="btn btn-circle"
+              >
+                ❯
+              </a>
+            </div>
+          </div>
+        </div>
       </figure>
       <div class="card-body">
         <h2 class="card-title">{@stock.item.name}</h2>
