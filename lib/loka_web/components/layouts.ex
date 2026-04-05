@@ -196,6 +196,7 @@ defmodule LokaWeb.Layouts do
             <ul>
               <%= if @current_user do %>
                 <li><.link navigate={~p"/me"}>{gettext("Profile")}</.link></li>
+                <li><.link navigate={~p"/inventory/studio"}>{gettext("Manage Studio")}</.link></li>
                 <li><.link patch={~p"/sign-out"}>{gettext("Sign Out")}</.link></li>
               <% else %>
                 <li><.link patch={~p"/sign-in"}>{gettext("Sign In")}</.link></li>

@@ -14,8 +14,15 @@ defmodule Loka.Inventory do
   resources do
     resource Loka.Inventory.Item do
       define :list_all_items
-      define :create_item
+      define :update_item
       define :archive_item
+    end
+
+    resource Loka.Inventory.Stock do
+      define :list_all_stock
+      define :create_stock
+      define :update_stock
+      define :archive_stock
     end
   end
 end

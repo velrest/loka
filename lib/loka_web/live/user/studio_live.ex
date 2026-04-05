@@ -52,18 +52,21 @@ defmodule LokaWeb.User.StudioLive do
         <.profile_tab_nav active={@current_path} />
       </:nav>
 
-      <%= if @studio do %>
-        <div class="px-4 py-10 sm:px-6 lg:px-8">
+      <%= cond do %>
+        <% @studio -> %>
           <.header>
             {@studio.name}
             <:subtitle>{gettext("Your studio is live.")}</:subtitle>
           </.header>
-        </div>
-      <% else %>
-        <%= if @show_form do %>
+          <div class="px-4 py-10 sm:px-6 lg:px-8">
+            <.link navigate={~p"/inventory/studio"}>{gettext("Manage studio")}</.link>
+          </div>
+        <% @show_form -> %>
+          <.header>
+            {gettext("Name your studio")}
+            <:subtitle>{gettext("This can be changed at any time.")}</:subtitle>
+          </.header>
           <div class="px-4 py-10 sm:px-6 lg:px-8 max-w-sm">
-            <.header>{gettext("Name your studio")}</.header>
-
             <.form
               for={@form}
               phx-change="validate"
@@ -74,7 +77,7 @@ defmodule LokaWeb.User.StudioLive do
               <.button type="submit" class="btn btn-primary">{gettext("Create studio")}</.button>
             </.form>
           </div>
-        <% else %>
+        <% true -> %>
           <div class="flex flex-col items-center justify-center py-24 gap-6 text-center max-w-sm mx-auto">
             <div class="bg-primary/10 text-primary rounded-2xl p-6">
               <.icon name="hero-building-storefront" class="size-14" />
@@ -91,7 +94,6 @@ defmodule LokaWeb.User.StudioLive do
               {gettext("Open your studio")}
             </.button>
           </div>
-        <% end %>
       <% end %>
     </Layouts.app>
     """

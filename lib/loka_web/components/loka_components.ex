@@ -56,4 +56,22 @@ defmodule LokaWeb.LokaComponents do
     </.tab_nav>
     """
   end
+
+  @doc """
+  Renders the tab nav for /inventory.
+
+  ## Examples
+
+      <.inventory_tab_nav active={@current_path} /
+  """
+  attr :active, :string, required: true
+
+  def inventory_tab_nav(assigns) do
+    ~H"""
+    <.tab_nav active_path={@active}>
+      <:item link="/inventory/studio">{gettext("Studio")}</:item>
+      <:item link="/inventory/items">{gettext("Items")}</:item>
+    </.tab_nav>
+    """
+  end
 end

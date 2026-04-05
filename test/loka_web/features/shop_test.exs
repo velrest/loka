@@ -2,21 +2,23 @@ defmodule LokaWeb.Features.ShopTest do
   use LokaWeb.ConnCase, async: true
 
   alias Loka.Inventory
-  # Might need this pretty soon
-  # alias Loka.Support.UserHelpers
 
   setup %{conn: conn} do
     user = Loka.Support.UserHelpers.create_user()
+    Loka.Studios.create_studio!(%{name: "Test Studio"}, actor: user)
 
-    Inventory.create_item!(%{name: "Test", description: "Test", price: Money.new(:CHF, 100)},
+    Inventory.create_stock!(
+      %{quantity: 1, price: Money.new(:CHF, 100), item: %{name: "Cup", description: "A cup"}},
       actor: user
     )
 
-    Inventory.create_item!(%{name: "Test", description: "Test", price: Money.new(:CHF, 100)},
+    Inventory.create_stock!(
+      %{quantity: 2, price: Money.new(:CHF, 200), item: %{name: "Bowl", description: "A bowl"}},
       actor: user
     )
 
-    Inventory.create_item!(%{name: "Test", description: "Test", price: Money.new(:CHF, 100)},
+    Inventory.create_stock!(
+      %{quantity: 3, price: Money.new(:CHF, 300), item: %{name: "Plate", description: "A plate"}},
       actor: user
     )
 
@@ -24,7 +26,7 @@ defmodule LokaWeb.Features.ShopTest do
   end
 
   describe "landing page" do
-    test "renders all items", %{conn: conn} do
+    test "renders all stock entries", %{conn: conn} do
       conn
       |> visit(~p"/")
       |> assert_has("[data-item]", count: 3)

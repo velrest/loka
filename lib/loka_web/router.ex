@@ -40,6 +40,9 @@ defmodule LokaWeb.Router do
       live "/me/settings", User.SettingsLive
       live "/me/studio", User.StudioLive
       live "/me", User.ProfileLive
+
+      live "/inventory/studio", Inventory.StudioLive
+      live "/inventory/items", Inventory.ItemsLive
     end
   end
 

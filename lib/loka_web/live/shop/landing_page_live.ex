@@ -9,7 +9,7 @@ defmodule LokaWeb.Shop.LandingPageLive do
     ~H"""
     <Layouts.app current_user={@current_user} flash={@flash}>
       <div class="flex flex-wrap">
-        <.item_card :for={item <- @items} data-item={item.id} item={item} />
+        <.stock_card :for={stock <- @stock} data-item={stock.id} stock={stock} />
       </div>
     </Layouts.app>
     """
@@ -17,22 +17,14 @@ defmodule LokaWeb.Shop.LandingPageLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    # current_user = socket.assigns.current_user
-    items = Inventory.list_all_items!()
-    {:ok, assign(socket, items: items)}
+    stock = Inventory.list_all_stock!()
+    {:ok, assign(socket, stock: stock)}
   end
 
-  @doc """
-  Renders a Inventory.Item as a card.
-
-  ## Examples
-
-      <.item_card item={item} />
-  """
-  attr :item, Inventory.Item, required: true
+  attr :stock, Inventory.Stock, required: true
   attr :rest, :global
 
-  defp item_card(assigns) do
+  defp stock_card(assigns) do
     ~H"""
     <div class="card bg-base-100 w-80 shadow-sm mr-5" {@rest}>
       <figure>
@@ -42,12 +34,12 @@ defmodule LokaWeb.Shop.LandingPageLive do
         />
       </figure>
       <div class="card-body">
-        <h2 class="card-title">{@item.name}</h2>
+        <h2 class="card-title">{@stock.item.name}</h2>
         <p>
-          {@item.description}
+          {@stock.item.description}
         </p>
         <div class="card-actions justify-between items-center">
-          <span class="text-xl">{@item.price}</span>
+          <span class="text-xl">{@stock.price}</span>
           <button class="btn btn-primary">{gettext("In den Warenkorb")}</button>
         </div>
       </div>

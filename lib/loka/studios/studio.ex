@@ -36,6 +36,10 @@ defmodule Loka.Studios.Studio do
       change relate_actor(:owner)
     end
 
+    update :update_studio do
+      accept [:name]
+    end
+
     destroy :archive_studio
   end
 
@@ -50,6 +54,10 @@ defmodule Loka.Studios.Studio do
     end
 
     policy action_type(:destroy) do
+      authorize_if relates_to_actor_via(:owner)
+    end
+
+    policy action_type(:update) do
       authorize_if relates_to_actor_via(:owner)
     end
   end
@@ -67,5 +75,6 @@ defmodule Loka.Studios.Studio do
 
   relationships do
     belongs_to :owner, Loka.Accounts.User
+    has_many :stock, Loka.Inventory.Stock
   end
 end

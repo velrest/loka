@@ -1,20 +1,100 @@
 defmodule Loka.Resources.Inventory.InventoryTest do
-  use Loka.DataCase
+  use Loka.DataCase, async: true
 
   alias Loka.Inventory
+  alias Loka.Support.UserHelpers
 
   setup do
-    user = Loka.Support.UserHelpers.create_user()
+    owner = UserHelpers.create_user()
+    other = UserHelpers.create_user()
 
-    Inventory.create_item!(%{name: "Test", description: "Test", price: Money.new(:CHF, 100)},
-      actor: user
-    )
+    {:ok, studio} = Loka.Studios.create_studio(%{name: "My Studio"}, actor: owner)
 
-    %{user: user}
+    {:ok, stock} =
+      Inventory.create_stock(
+        %{
+          quantity: 5,
+          price: Money.new(:CHF, 100),
+          item: %{name: "Widget", description: "A widget"}
+        },
+        actor: owner
+      )
+
+    item = stock.item
+
+    %{owner: owner, other: other, studio: studio, item: item, stock: stock}
   end
 
-  test "list_all_items/0 lists all items" do
-    items = Inventory.list_all_items!()
-    assert Enum.count(items) == 1
+  describe "list_all_items" do
+    test "returns all items", %{item: item} do
+      assert {:ok, items} = Inventory.list_all_items()
+      assert Enum.any?(items, &(&1.id == item.id))
+    end
+  end
+
+  describe "create_stock" do
+    test "actor with a studio can create stock with an inline item", %{owner: owner} do
+      assert {:ok, stock} =
+               Inventory.create_stock(
+                 %{
+                   quantity: 1,
+                   price: Money.new(:CHF, 200),
+                   item: %{name: "New Item", description: "Desc"}
+                 },
+                 actor: owner
+               )
+
+      assert stock.quantity == 1
+    end
+
+    test "actor without a studio cannot create stock", %{other: other} do
+      assert {:error, _} =
+               Inventory.create_stock(
+                 %{
+                   quantity: 1,
+                   price: Money.new(:CHF, 200),
+                   item: %{name: "New Item", description: "Desc"}
+                 },
+                 actor: other
+               )
+    end
+
+    test "unauthenticated actor cannot create stock" do
+      assert {:error, _} =
+               Inventory.create_stock(%{
+                 quantity: 1,
+                 price: Money.new(:CHF, 200),
+                 item: %{name: "New Item", description: "Desc"}
+               })
+    end
+  end
+
+  describe "update_item" do
+    test "studio owner with stock can update an item", %{owner: owner, item: item} do
+      assert {:ok, updated} = Inventory.update_item(item, %{name: "Updated"}, actor: owner)
+      assert updated.name == "Updated"
+    end
+
+    test "actor without stock for the item cannot update it", %{other: other, item: item} do
+      assert {:error, _} = Inventory.update_item(item, %{name: "Updated"}, actor: other)
+    end
+
+    test "unauthenticated actor cannot update an item", %{item: item} do
+      assert {:error, _} = Inventory.update_item(item, %{name: "Updated"})
+    end
+  end
+
+  describe "archive_item" do
+    test "studio owner with stock can archive an item", %{owner: owner, item: item} do
+      assert {:ok, _} = Inventory.archive_item(item, actor: owner)
+    end
+
+    test "actor without stock for the item cannot archive it", %{other: other, item: item} do
+      assert {:error, _} = Inventory.archive_item(item, actor: other)
+    end
+
+    test "unauthenticated actor cannot archive an item", %{item: item} do
+      assert {:error, _} = Inventory.archive_item(item)
+    end
   end
 end

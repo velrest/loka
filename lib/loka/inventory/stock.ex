@@ -1,4 +1,4 @@
-defmodule Loka.Inventory.Item do
+defmodule Loka.Inventory.Stock do
   use Ash.Resource,
     otp_app: :loka,
     domain: Loka.Inventory,
@@ -7,7 +7,7 @@ defmodule Loka.Inventory.Item do
     authorizers: [Ash.Policy.Authorizer]
 
   postgres do
-    table "items"
+    table "stock"
     repo Loka.Repo
   end
 
@@ -22,18 +22,23 @@ defmodule Loka.Inventory.Item do
   actions do
     defaults [:read]
 
-    read :list_all_items
-
-    create :create_item do
-      primary? true
-      accept [:name, :description]
+    read :list_all_stock do
+      prepare build(load: [:item])
     end
 
-    update :update_item do
-      accept [:name, :description]
+    create :create_stock do
+      accept [:quantity, :price]
+      argument :item, :map, allow_nil?: false
+
+      change manage_relationship(:item, type: :create)
+      change Loka.Changes.SetStudioFromActor
     end
 
-    destroy :archive_item
+    update :update_stock do
+      accept [:quantity, :price]
+    end
+
+    destroy :archive_stock
   end
 
   policies do
@@ -46,23 +51,24 @@ defmodule Loka.Inventory.Item do
     end
 
     policy action_type(:update) do
-      authorize_if expr(exists(stock, studio.owner_id == ^actor(:id)))
+      authorize_if expr(studio.owner_id == ^actor(:id))
     end
 
     policy action_type(:destroy) do
-      authorize_if expr(exists(stock, studio.owner_id == ^actor(:id)))
+      authorize_if expr(studio.owner_id == ^actor(:id))
     end
   end
 
   attributes do
     uuid_v7_primary_key :id
 
-    attribute :name, :string do
+    attribute :quantity, :integer do
       allow_nil? false
       public? true
+      constraints min: 0
     end
 
-    attribute :description, :string do
+    attribute :price, :money do
       allow_nil? false
       public? true
     end
@@ -71,6 +77,16 @@ defmodule Loka.Inventory.Item do
   end
 
   relationships do
-    has_many :stock, Loka.Inventory.Stock
+    belongs_to :item, Loka.Inventory.Item do
+      allow_nil? false
+    end
+
+    belongs_to :studio, Loka.Studios.Studio do
+      allow_nil? false
+    end
+  end
+
+  identities do
+    identity :unique_item_per_studio, [:item_id, :studio_id]
   end
 end
