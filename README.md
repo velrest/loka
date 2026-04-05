@@ -37,6 +37,12 @@ sh <(curl 'https://ash-hq.org/install/loka?install=phoenix') \
   - `OrderItem`: A line item in an order.
   - `Cart`: A temporary holder for a user's intended purchases.
 
+## Users
+Password is `password123` for all users
+- user@loka.com Normal user
+- studio1@loka.com Studio 1
+- studio2@loka.com Studio 2
+
 ## Learn more
 
 * Official website: https://www.phoenixframework.org/
