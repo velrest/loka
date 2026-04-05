@@ -4,6 +4,13 @@ defmodule Loka.Support.UserHelpers do
 
   alias Loka.Accounts.User
 
+  def create_studio_owner() do
+    owner = create_user()
+    studio = Loka.Studios.create_studio!(%{name: "My Studio"}, actor: owner)
+
+    %{owner: Ash.load!(owner, :studio), studio: studio}
+  end
+
   def create_user(params \\ %{}) do
     unique_id = System.unique_integer([:positive, :monotonic])
 
@@ -18,6 +25,7 @@ defmodule Loka.Support.UserHelpers do
       authorize?: false
     )
     |> Ash.create!()
+    |> Ash.load!(:studio)
   end
 
   def sign_in(conn, email, password) do

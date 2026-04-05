@@ -28,15 +28,12 @@ defmodule Loka.Inventory.Stock do
 
     read :list_studio_stock do
       prepare build(load: [:item])
-      filter expr(studio.owner_id == ^actor(:id))
     end
 
     read :get_stock do
       argument :id, :uuid, allow_nil?: false
-      get? true
       get_by :id
       prepare build(load: [:item])
-      filter expr(studio.owner_id == ^actor(:id))
     end
 
     create :create_stock do
@@ -44,7 +41,7 @@ defmodule Loka.Inventory.Stock do
       argument :item, :map, allow_nil?: false
 
       change manage_relationship(:item, type: :create)
-      change Loka.Changes.SetStudioFromActor
+      change relate_actor(:studio, field: :studio)
     end
 
     update :update_stock do
@@ -64,11 +61,11 @@ defmodule Loka.Inventory.Stock do
     end
 
     policy action_type(:update) do
-      authorize_if expr(studio.owner_id == ^actor(:id))
+      authorize_if relates_to_actor_via([:studio, :owner])
     end
 
     policy action_type(:destroy) do
-      authorize_if expr(studio.owner_id == ^actor(:id))
+      authorize_if relates_to_actor_via([:studio, :owner])
     end
   end
 

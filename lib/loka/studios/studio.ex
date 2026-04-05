@@ -27,7 +27,6 @@ defmodule Loka.Studios.Studio do
 
     read :get_own_studio do
       get? true
-      filter expr(owner == ^actor(:id))
     end
 
     create :create_studio do
@@ -44,6 +43,10 @@ defmodule Loka.Studios.Studio do
   end
 
   policies do
+    policy action(:get_own_studios) do
+      authorize_if relates_to_actor_via(:owner)
+    end
+
     policy action_type(:read) do
       authorize_if always()
     end

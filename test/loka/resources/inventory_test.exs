@@ -8,10 +8,11 @@ defmodule Loka.Resources.Inventory.InventoryTest do
     owner = UserHelpers.create_user()
     other = UserHelpers.create_user()
 
-    {:ok, studio} = Loka.Studios.create_studio(%{name: "My Studio"}, actor: owner)
+    studio = Loka.Studios.create_studio!(%{name: "My Studio"}, actor: owner)
+    owner = Ash.load!(owner, :studio)
 
-    {:ok, stock} =
-      Inventory.create_stock(
+    stock =
+      Inventory.create_stock!(
         %{
           quantity: 5,
           price: Money.new(:CHF, 100),

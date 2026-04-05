@@ -4,8 +4,7 @@ defmodule LokaWeb.Features.ShopTest do
   alias Loka.Inventory
 
   setup %{conn: conn} do
-    user = Loka.Support.UserHelpers.create_user()
-    Loka.Studios.create_studio!(%{name: "Test Studio"}, actor: user)
+    %{owner: user} = Loka.Support.UserHelpers.create_studio_owner()
 
     Inventory.create_stock!(
       %{quantity: 1, price: Money.new(:CHF, 100), item: %{name: "Cup", description: "A cup"}},

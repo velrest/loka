@@ -5,14 +5,11 @@ defmodule Loka.Resources.ImageTest do
   alias Loka.Support.UserHelpers
 
   setup do
-    owner = UserHelpers.create_user()
+    %{owner: owner} = UserHelpers.create_studio_owner()
     other = UserHelpers.create_user()
 
-    {:ok, _studio} = Loka.Studios.create_studio(%{name: "My Studio"}, actor: owner)
-    {:ok, _studio2} = Loka.Studios.create_studio(%{name: "Other Studio"}, actor: other)
-
-    {:ok, stock} =
-      Inventory.create_stock(
+    stock =
+      Inventory.create_stock!(
         %{
           quantity: 5,
           price: Money.new(:CHF, 100),

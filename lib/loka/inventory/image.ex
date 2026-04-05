@@ -21,9 +21,14 @@ defmodule Loka.Inventory.Image do
 
     create :create_image do
       accept [:path, :filename, :position, :item_id]
+      argument :item_id, :uuid, allow_nil?: false
+      change manage_relationship(:item, :item_id, type: :append)
     end
 
-    destroy :delete_image
+    destroy :delete_image do
+      argument :item_id, :uuid, allow_nil?: false
+      change Loka.Changes.RemoveImageFile
+    end
   end
 
   policies do
@@ -36,7 +41,7 @@ defmodule Loka.Inventory.Image do
     end
 
     policy action_type(:destroy) do
-      authorize_if expr(exists(item.stock, studio.owner_id == ^actor(:id)))
+      authorize_if relates_to_actor_via([:item, :stock, :studio, :owner])
     end
   end
 

@@ -6,9 +6,7 @@ defmodule Loka.Checks.ActorHasStudio do
   def match?(nil, _context, _opts), do: false
 
   def match?(actor, _context, _opts) do
-    case Loka.Studios.get_own_studio(actor: actor) do
-      {:ok, studio} when not is_nil(studio) -> true
-      _ -> false
-    end
+    actor = Ash.load!(actor, :studio)
+    not is_nil(actor.studio)
   end
 end

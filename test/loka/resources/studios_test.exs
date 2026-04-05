@@ -5,7 +5,7 @@ defmodule Loka.Resources.StudiosTest do
   alias Loka.Support.UserHelpers
 
   setup do
-    owner = UserHelpers.create_user()
+    %{owner: owner} = UserHelpers.create_studio_owner()
     other = UserHelpers.create_user()
     %{owner: owner, other: other}
   end

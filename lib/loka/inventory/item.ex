@@ -46,11 +46,11 @@ defmodule Loka.Inventory.Item do
     end
 
     policy action_type(:update) do
-      authorize_if expr(exists(stock, studio.owner_id == ^actor(:id)))
+      authorize_if relates_to_actor_via([:stock, :studio, :owner])
     end
 
     policy action_type(:destroy) do
-      authorize_if expr(exists(stock, studio.owner_id == ^actor(:id)))
+      authorize_if relates_to_actor_via([:stock, :studio, :owner])
     end
   end
 

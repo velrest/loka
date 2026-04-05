@@ -26,7 +26,7 @@ defmodule LokaWeb.Inventory.ItemEditLive do
           Loka.Inventory.form_to_update_item(stock.item, actor: user, as: "item")
           |> to_form()
 
-        {:ok, images} = Inventory.list_item_images(stock.item.id)
+        images = Inventory.list_item_images!(stock.item.id)
 
         socket =
           socket
@@ -35,9 +35,9 @@ defmodule LokaWeb.Inventory.ItemEditLive do
             stock: stock,
             stock_form: stock_form,
             item_form: item_form,
-            images: images,
             show_confirm: false
           )
+          |> stream(:images, images)
           |> allow_upload(:images,
             accept: ~w[.jpg .jpeg .png .webp],
             max_entries: 5,
@@ -59,7 +59,8 @@ defmodule LokaWeb.Inventory.ItemEditLive do
 
     socket =
       socket
-      |> assign(mode: :create, form: form, images: [], show_confirm: false)
+      |> assign(mode: :create, form: form, show_confirm: false)
+      |> stream(:images, [])
       |> allow_upload(:images,
         accept: ~w[.jpg .jpeg .png .webp],
         max_entries: 5,
@@ -71,12 +72,12 @@ defmodule LokaWeb.Inventory.ItemEditLive do
 
   @impl true
   def handle_event("validate", params, socket) do
-    form = AshPhoenix.Form.validate(socket.assigns.form.source, params["form"] || %{})
+    form = AshPhoenix.Form.validate(socket.assigns.form.source, params["form"])
     {:noreply, assign(socket, form: to_form(form))}
   end
 
   def handle_event("save", params, socket) do
-    case AshPhoenix.Form.submit(socket.assigns.form.source, params: params["form"] || %{}) do
+    case AshPhoenix.Form.submit(socket.assigns.form.source, params: params["form"]) do
       {:ok, stock} ->
         socket = consume_and_save_images(socket, stock.item_id)
 
@@ -92,18 +93,18 @@ defmodule LokaWeb.Inventory.ItemEditLive do
 
   @impl true
   def handle_event("validate_stock", params, socket) do
-    form = AshPhoenix.Form.validate(socket.assigns.stock_form.source, params["stock"] || %{})
+    form = AshPhoenix.Form.validate(socket.assigns.stock_form.source, params["stock"])
     {:noreply, assign(socket, stock_form: to_form(form))}
   end
 
   def handle_event("validate_item", params, socket) do
-    form = AshPhoenix.Form.validate(socket.assigns.item_form.source, params["item"] || %{})
+    form = AshPhoenix.Form.validate(socket.assigns.item_form.source, params["item"])
     {:noreply, assign(socket, item_form: to_form(form))}
   end
 
   @impl true
   def handle_event("save_stock", params, socket) do
-    case AshPhoenix.Form.submit(socket.assigns.stock_form.source, params: params["stock"] || %{}) do
+    case AshPhoenix.Form.submit(socket.assigns.stock_form.source, params: params["stock"]) do
       {:ok, stock} ->
         stock_form =
           AshPhoenix.Form.for_update(stock, :update_stock,
@@ -123,7 +124,7 @@ defmodule LokaWeb.Inventory.ItemEditLive do
   end
 
   def handle_event("save_item", params, socket) do
-    case AshPhoenix.Form.submit(socket.assigns.item_form.source, params: params["item"] || %{}) do
+    case AshPhoenix.Form.submit(socket.assigns.item_form.source, params: params["item"]) do
       {:ok, item} ->
         socket = consume_and_save_images(socket, item.id)
 
@@ -134,13 +135,13 @@ defmodule LokaWeb.Inventory.ItemEditLive do
           )
           |> to_form()
 
-        {:ok, images} = Inventory.list_item_images(item.id)
+        images = Inventory.list_item_images!(item.id)
 
         {:noreply,
          socket
          |> put_flash(:info, gettext("Item details updated."))
          |> assign(item_form: item_form)
-         |> assign(images: images)}
+         |> stream(:images, images)}
 
       {:error, form} ->
         {:noreply, assign(socket, item_form: to_form(form))}
@@ -184,13 +185,7 @@ defmodule LokaWeb.Inventory.ItemEditLive do
       image ->
         case Inventory.delete_image(image, actor: socket.assigns.current_user) do
           :ok ->
-            _ =
-              File.rm(
-                Path.join([:code.priv_dir(:loka), "static", String.trim_leading(image.path, "/")])
-              )
-
-            images = Enum.reject(socket.assigns.images, &(&1.id == id))
-            {:noreply, assign(socket, images: images)}
+            {:noreply, stream_delete(socket, :images, image)}
 
           {:error, _} ->
             {:noreply, put_flash(socket, :error, gettext("Could not remove image."))}

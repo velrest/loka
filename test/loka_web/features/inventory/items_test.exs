@@ -6,8 +6,7 @@ defmodule LokaWeb.Features.Inventory.ItemsTest do
   @password "password123"
 
   setup %{conn: conn} do
-    user = UserHelpers.create_user(%{password: @password})
-    {:ok, _studio} = Loka.Studios.create_studio(%{name: "My Studio"}, actor: user)
+    %{owner: user} = Loka.Support.UserHelpers.create_studio_owner()
     logged_in = UserHelpers.sign_in(conn, user.email, @password)
     %{user: user, conn: logged_in}
   end
