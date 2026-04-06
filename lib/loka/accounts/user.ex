@@ -274,6 +274,10 @@ defmodule Loka.Accounts.User do
     end
   end
 
+  preparations do
+    prepare build(load: :has_studio?)
+  end
+
   attributes do
     uuid_primary_key :id
 
@@ -293,6 +297,10 @@ defmodule Loka.Accounts.User do
     has_one :studio, Loka.Studios.Studio do
       destination_attribute :owner_id
     end
+  end
+
+  calculations do
+    calculate :has_studio?, :boolean, expr(exists(studio))
   end
 
   identities do

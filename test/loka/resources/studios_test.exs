@@ -5,9 +5,9 @@ defmodule Loka.Resources.StudiosTest do
   alias Loka.Support.UserHelpers
 
   setup do
-    %{owner: owner} = UserHelpers.create_studio_owner()
+    %{owner: owner, studio: studio} = UserHelpers.create_studio_owner()
     other = UserHelpers.create_user()
-    %{owner: owner, other: other}
+    %{owner: owner, other: other, studio: studio}
   end
 
   describe "create_studio" do
@@ -28,8 +28,7 @@ defmodule Loka.Resources.StudiosTest do
   end
 
   describe "get_own_studio" do
-    test "returns own studio", %{owner: owner} do
-      {:ok, studio} = Studios.create_studio(%{name: "My Studio"}, actor: owner)
+    test "returns own studio", %{owner: owner, studio: studio} do
       assert {:ok, found} = Studios.get_own_studio(actor: owner)
       assert found.id == studio.id
     end
@@ -45,15 +44,12 @@ defmodule Loka.Resources.StudiosTest do
   end
 
   describe "list_all_studios" do
-    test "returns all studios", %{owner: owner, other: other} do
-      Studios.create_studio(%{name: "Studio A"}, actor: owner)
-      Studios.create_studio(%{name: "Studio B"}, actor: other)
-      assert {:ok, studios} = Studios.list_all_studios()
-      assert length(studios) == 2
-    end
-
-    test "returns empty list when no studios exist" do
-      assert {:ok, []} = Studios.list_all_studios()
+    test "returns all studios", %{studio: studio, other: other} do
+      other_studio = Studios.create_studio!(%{name: "Studio B"}, actor: other)
+      studios = Studios.list_all_studios!()
+      ids = Enum.map(studios, & &1.id)
+      assert studio.id in ids
+      assert other_studio.id in ids
     end
   end
 

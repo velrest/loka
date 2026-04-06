@@ -9,15 +9,13 @@ defmodule Loka.Resources.Inventory.InventoryTest do
     other = UserHelpers.create_user()
 
     studio = Loka.Studios.create_studio!(%{name: "My Studio"}, actor: owner)
-    owner = Ash.load!(owner, :studio)
+    owner = Ash.load!(owner, :has_studio?)
 
     stock =
       Inventory.create_stock!(
-        %{
-          quantity: 5,
-          price: Money.new(:CHF, 100),
-          item: %{name: "Widget", description: "A widget"}
-        },
+        %{name: "Widget", description: "A widget"},
+        studio.id,
+        %{quantity: 5, price: Money.new(:CHF, 100)},
         actor: owner
       )
 
@@ -34,14 +32,15 @@ defmodule Loka.Resources.Inventory.InventoryTest do
   end
 
   describe "create_stock" do
-    test "actor with a studio can create stock with an inline item", %{owner: owner} do
+    test "actor with a studio can create stock with an inline item", %{
+      owner: owner,
+      studio: studio
+    } do
       assert {:ok, stock} =
                Inventory.create_stock(
-                 %{
-                   quantity: 1,
-                   price: Money.new(:CHF, 200),
-                   item: %{name: "New Item", description: "Desc"}
-                 },
+                 %{name: "New Item", description: "Desc"},
+                 studio.id,
+                 %{quantity: 1, price: Money.new(:CHF, 200)},
                  actor: owner
                )
 
@@ -51,22 +50,20 @@ defmodule Loka.Resources.Inventory.InventoryTest do
     test "actor without a studio cannot create stock", %{other: other} do
       assert {:error, _} =
                Inventory.create_stock(
-                 %{
-                   quantity: 1,
-                   price: Money.new(:CHF, 200),
-                   item: %{name: "New Item", description: "Desc"}
-                 },
+                 %{name: "New Item", description: "Desc"},
+                 nil,
+                 %{quantity: 1, price: Money.new(:CHF, 200)},
                  actor: other
                )
     end
 
     test "unauthenticated actor cannot create stock" do
       assert {:error, _} =
-               Inventory.create_stock(%{
-                 quantity: 1,
-                 price: Money.new(:CHF, 200),
-                 item: %{name: "New Item", description: "Desc"}
-               })
+               Inventory.create_stock(
+                 %{name: "New Item", description: "Desc"},
+                 nil,
+                 %{quantity: 1, price: Money.new(:CHF, 200)}
+               )
     end
   end
 

@@ -43,7 +43,7 @@ defmodule Loka.Studios.Studio do
   end
 
   policies do
-    policy action(:get_own_studios) do
+    policy action(:get_own_studio) do
       authorize_if relates_to_actor_via(:owner)
     end
 

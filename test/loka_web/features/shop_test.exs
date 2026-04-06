@@ -4,22 +4,22 @@ defmodule LokaWeb.Features.ShopTest do
   alias Loka.Inventory
 
   setup %{conn: conn} do
-    %{owner: user} = Loka.Support.UserHelpers.create_studio_owner()
+    %{owner: user, studio: studio} = Loka.Support.UserHelpers.create_studio_owner()
 
     Inventory.create_stock!(
-      %{quantity: 1, price: Money.new(:CHF, 100), item: %{name: "Cup", description: "A cup"}},
-      actor: user
-    )
+      %{name: "Cup", description: "A cup"},
+      studio.id,
+      %{quantity: 1, price: Money.new(:CHF, 100)}, actor: user)
 
     Inventory.create_stock!(
-      %{quantity: 2, price: Money.new(:CHF, 200), item: %{name: "Bowl", description: "A bowl"}},
-      actor: user
-    )
+      %{name: "Bowl", description: "A bowl"},
+      studio.id,
+      %{quantity: 2, price: Money.new(:CHF, 200)}, actor: user)
 
     Inventory.create_stock!(
-      %{quantity: 3, price: Money.new(:CHF, 300), item: %{name: "Plate", description: "A plate"}},
-      actor: user
-    )
+      %{name: "Plate", description: "A plate"},
+      studio.id,
+      %{quantity: 3, price: Money.new(:CHF, 300)}, actor: user)
 
     %{user: user, conn: conn}
   end

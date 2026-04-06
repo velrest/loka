@@ -6,7 +6,8 @@ defmodule LokaWeb.Features.UserStudioTest do
   @password "password123"
 
   setup %{conn: conn} do
-    user = UserHelpers.create_user(%{password: @password}) |> Ash.load!(:studio)
+    # |> Ash.load!(:studio)
+    user = UserHelpers.create_user(%{password: @password})
     logged_in_conn = UserHelpers.sign_in(conn, user.email, @password)
     %{user: user, conn: logged_in_conn}
   end

@@ -51,9 +51,15 @@ defmodule LokaWeb.Inventory.ItemEditLive do
   @impl true
   def mount(_params, _session, socket) do
     user = socket.assigns.current_user
+    studio = Loka.Studios.get_own_studio!(actor: user)
 
     form =
-      Loka.Inventory.form_to_create_stock(actor: user)
+      Loka.Inventory.form_to_create_stock(
+        actor: user,
+        prepare_source: fn changeset ->
+          Ash.Changeset.set_argument(changeset, :studio_id, studio.id)
+        end
+      )
       |> AshPhoenix.Form.add_form(:item)
       |> to_form()
 
@@ -79,7 +85,7 @@ defmodule LokaWeb.Inventory.ItemEditLive do
   def handle_event("save", params, socket) do
     case AshPhoenix.Form.submit(socket.assigns.form.source, params: params["form"]) do
       {:ok, stock} ->
-        socket = consume_and_save_images(socket, stock.item_id)
+        save_image(socket, stock.item_id)
 
         {:noreply,
          socket
@@ -126,8 +132,6 @@ defmodule LokaWeb.Inventory.ItemEditLive do
   def handle_event("save_item", params, socket) do
     case AshPhoenix.Form.submit(socket.assigns.item_form.source, params: params["item"]) do
       {:ok, item} ->
-        socket = consume_and_save_images(socket, item.id)
-
         item_form =
           AshPhoenix.Form.for_update(item, :update_item,
             actor: socket.assigns.current_user,
@@ -135,13 +139,11 @@ defmodule LokaWeb.Inventory.ItemEditLive do
           )
           |> to_form()
 
-        images = Inventory.list_item_images!(item.id)
-
         {:noreply,
          socket
+         |> save_image(item.id)
          |> put_flash(:info, gettext("Item details updated."))
-         |> assign(item_form: item_form)
-         |> stream(:images, images)}
+         |> assign(item_form: item_form)}
 
       {:error, form} ->
         {:noreply, assign(socket, item_form: to_form(form))}
@@ -178,18 +180,20 @@ defmodule LokaWeb.Inventory.ItemEditLive do
   end
 
   def handle_event("remove_image", %{"id" => id}, socket) do
-    case Enum.find(socket.assigns.images, &(&1.id == id)) do
-      nil ->
+    user = socket.assigns.current_user
+
+    case Inventory.get_image(id, actor: user) do
+      {:ok, nil} ->
         {:noreply, socket}
 
-      image ->
-        case Inventory.delete_image(image, actor: socket.assigns.current_user) do
-          :ok ->
-            {:noreply, stream_delete(socket, :images, image)}
-
-          {:error, _} ->
-            {:noreply, put_flash(socket, :error, gettext("Could not remove image."))}
+      {:ok, image} ->
+        case Inventory.delete_image(image, actor: user) do
+          :ok -> {:noreply, stream_delete(socket, :images, image)}
+          {:error, _} -> {:noreply, put_flash(socket, :error, gettext("Could not remove image."))}
         end
+
+      {:error, _} ->
+        {:noreply, socket}
     end
   end
 
@@ -273,16 +277,18 @@ defmodule LokaWeb.Inventory.ItemEditLive do
                   {gettext("Images")} <span class="text-error">*</span>
                 </p>
                 <div class="flex flex-wrap gap-2 mb-2">
-                  <div :for={image <- @images} class="relative">
-                    <img src={image.path} class="w-20 h-20 object-cover rounded" />
-                    <button
-                      type="button"
-                      phx-click="remove_image"
-                      phx-value-id={image.id}
-                      class="absolute -top-1 -right-1 btn btn-circle btn-xs btn-error"
-                    >
-                      Remove
-                    </button>
+                  <div id="item-images" phx-update="stream" class="contents">
+                    <div :for={{dom_id, image} <- @streams.images} id={dom_id} class="relative">
+                      <img src={image.path} class="w-20 h-20 object-cover rounded" />
+                      <button
+                        type="button"
+                        phx-click="remove_image"
+                        phx-value-id={image.id}
+                        class="absolute -top-1 -right-1 btn btn-circle btn-xs btn-error"
+                      >
+                        {gettext("Remove")}
+                      </button>
+                    </div>
                   </div>
                   <div :for={entry <- @uploads.images.entries} class="relative">
                     <.live_img_preview entry={entry} class="w-20 h-20 object-cover rounded" />
@@ -305,7 +311,7 @@ defmodule LokaWeb.Inventory.ItemEditLive do
               <.button
                 type="submit"
                 class="btn btn-primary"
-                disabled={@images == [] and @uploads.images.entries == []}
+                disabled={@uploads.images.entries == []}
               >
                 {gettext("Save item details")}
               </.button>
@@ -359,25 +365,13 @@ defmodule LokaWeb.Inventory.ItemEditLive do
     """
   end
 
-  defp consume_and_save_images(socket, item_id) do
-    existing_count = length(socket.assigns.images)
+  defp save_image(socket, item_id) do
+    new_images =
+      consume_uploaded_entries(socket, :images, fn %{path: tmp_path}, entry ->
+        file = %Plug.Upload{path: tmp_path, filename: entry.client_name}
+        {:ok, Inventory.create_image!(item_id, file, %{}, actor: socket.assigns.current_user)}
+      end)
 
-    consume_uploaded_entries(socket, :images, fn %{path: tmp_path}, entry ->
-      dest_dir = Path.join([:code.priv_dir(:loka), "static", "uploads", "items", item_id])
-      File.mkdir_p!(dest_dir)
-      filename = "#{Ecto.UUID.generate()}#{Path.extname(entry.client_name)}"
-      dest = Path.join(dest_dir, filename)
-      File.cp!(tmp_path, dest)
-      {:ok, %{path: ~p"/uploads/items/#{item_id}/#{filename}", filename: entry.client_name}}
-    end)
-    |> Enum.with_index(existing_count)
-    |> Enum.each(fn {%{path: path, filename: filename}, position} ->
-      Inventory.create_image!(
-        %{path: path, filename: filename, position: position, item_id: item_id},
-        actor: socket.assigns.current_user
-      )
-    end)
-
-    socket
+    stream(socket, :images, new_images, reset: false)
   end
 end

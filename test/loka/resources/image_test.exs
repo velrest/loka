@@ -10,34 +10,30 @@ defmodule Loka.Resources.ImageTest do
 
     stock =
       Inventory.create_stock!(
-        %{
-          quantity: 5,
-          price: Money.new(:CHF, 100),
-          item: %{name: "Widget", description: "A widget"}
-        },
+        %{name: "Widget", description: "A widget"},
+        owner.studio.id,
+        %{quantity: 5, price: Money.new(:CHF, 100)},
         actor: owner
       )
 
     %{owner: owner, other: other, item: stock.item}
   end
 
+  defp make_upload(filename \\ "test.jpg") do
+    tmp_path = Path.join(System.tmp_dir!(), "#{System.unique_integer([:positive])}_#{filename}")
+    File.write!(tmp_path, "fake image content")
+    %Plug.Upload{path: tmp_path, filename: filename, content_type: "image/jpeg"}
+  end
+
   defp create_image(item, actor) do
-    Inventory.create_image(
-      %{
-        path: "/uploads/items/test.jpg",
-        filename: "test.jpg",
-        position: 0,
-        item_id: item.id
-      },
-      actor: actor
-    )
+    Inventory.create_image(item.id, make_upload(), %{}, actor: actor)
   end
 
   describe "create_image" do
     test "studio owner can create an image for their item", %{owner: owner, item: item} do
       assert {:ok, image} = create_image(item, owner)
-      assert image.path == "/uploads/items/test.jpg"
-      assert image.filename == "test.jpg"
+      assert is_binary(image.path)
+      assert is_binary(image.filename)
       assert image.position == 0
     end
 
@@ -47,13 +43,7 @@ defmodule Loka.Resources.ImageTest do
     end
 
     test "unauthenticated actor cannot create an image", %{item: item} do
-      assert {:error, _} =
-               Inventory.create_image(%{
-                 path: "/uploads/items/test.jpg",
-                 filename: "test.jpg",
-                 position: 0,
-                 item_id: item.id
-               })
+      assert {:error, _} = Inventory.create_image(item.id, nil)
     end
   end
 
@@ -78,19 +68,10 @@ defmodule Loka.Resources.ImageTest do
 
   describe "list_item_images" do
     test "returns images for an item ordered by position", %{owner: owner, item: item} do
-      {:ok, _} =
-        Inventory.create_image(
-          %{path: "/uploads/items/b.jpg", filename: "b.jpg", position: 1, item_id: item.id},
-          actor: owner
-        )
+      Inventory.create_image!(item.id, make_upload("b.jpg"), %{}, actor: owner)
+      Inventory.create_image!(item.id, make_upload("a.jpg"), %{}, actor: owner)
 
-      {:ok, _} =
-        Inventory.create_image(
-          %{path: "/uploads/items/a.jpg", filename: "a.jpg", position: 0, item_id: item.id},
-          actor: owner
-        )
-
-      assert {:ok, images} = Inventory.list_item_images(item.id)
+      images = Inventory.list_item_images!(item.id)
       assert length(images) == 2
       assert hd(images).position == 0
       assert List.last(images).position == 1

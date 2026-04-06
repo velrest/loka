@@ -42,7 +42,7 @@ defmodule Loka.Inventory.Item do
     end
 
     policy action_type(:create) do
-      authorize_if Loka.Checks.ActorHasStudio
+      authorize_if actor_attribute_equals(:has_studio?, true)
     end
 
     policy action_type(:update) do

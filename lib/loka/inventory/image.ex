@@ -13,6 +13,11 @@ defmodule Loka.Inventory.Image do
   actions do
     defaults [:read]
 
+    read :get_image do
+      argument :id, :uuid, allow_nil?: false
+      get_by :id
+    end
+
     read :list_item_images do
       argument :item_id, :uuid, allow_nil?: false
       filter expr(item_id == ^arg(:item_id))
@@ -20,14 +25,15 @@ defmodule Loka.Inventory.Image do
     end
 
     create :create_image do
-      accept [:path, :filename, :position, :item_id]
       argument :item_id, :uuid, allow_nil?: false
-      change manage_relationship(:item, :item_id, type: :append)
+      argument :file, :file, allow_nil?: false
+      change manage_relationship(:item_id, :item, type: :append)
+      change Loka.Changes.Image.UploadFile
     end
 
     destroy :delete_image do
-      argument :item_id, :uuid, allow_nil?: false
-      change Loka.Changes.RemoveImageFile
+      require_atomic? false
+      change Loka.Changes.Image.RemoveFile
     end
   end
 
@@ -37,7 +43,7 @@ defmodule Loka.Inventory.Image do
     end
 
     policy action_type(:create) do
-      authorize_if Loka.Checks.ActorHasStudio
+      authorize_if actor_attribute_equals(:has_studio?, true)
     end
 
     policy action_type(:destroy) do

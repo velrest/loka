@@ -23,7 +23,7 @@ defmodule Loka.Inventory.Stock do
     defaults [:read]
 
     read :list_all_stock do
-      prepare build(load: [:item])
+      prepare build(load: [item: [:images]])
     end
 
     read :list_studio_stock do
@@ -39,9 +39,10 @@ defmodule Loka.Inventory.Stock do
     create :create_stock do
       accept [:quantity, :price]
       argument :item, :map, allow_nil?: false
+      argument :studio_id, :uuid, allow_nil?: false
 
       change manage_relationship(:item, type: :create)
-      change relate_actor(:studio, field: :studio)
+      change manage_relationship(:studio_id, :studio, type: :append)
     end
 
     update :update_stock do
@@ -57,7 +58,7 @@ defmodule Loka.Inventory.Stock do
     end
 
     policy action_type(:create) do
-      authorize_if Loka.Checks.ActorHasStudio
+      authorize_if actor_attribute_equals(:has_studio?, true)
     end
 
     policy action_type(:update) do
