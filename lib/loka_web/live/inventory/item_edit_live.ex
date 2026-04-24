@@ -202,7 +202,7 @@ defmodule LokaWeb.Inventory.ItemEditLive do
     ~H"""
     <Layouts.app current_user={@current_user} flash={@flash}>
       <:nav>
-        <.inventory_tab_nav active={@current_path} />
+        <.inventory_tab_nav active={@current_path} partial_match?={true} />
       </:nav>
 
       <div class="px-4 py-10 sm:px-6 lg:px-8 max-w-sm">

@@ -95,4 +95,17 @@ defmodule Loka.Resources.Inventory.InventoryTest do
       assert {:error, _} = Inventory.archive_item(item)
     end
   end
+
+  describe "get_item" do
+    test "returns item with images and stock loaded", %{item: item} do
+      assert {:ok, loaded} = Inventory.get_item(item.id)
+      assert loaded.id == item.id
+      assert %Ash.NotLoaded{} != loaded.images
+      assert %Ash.NotLoaded{} != loaded.stock
+    end
+
+    test "returns nil for unknown id" do
+      assert {:ok, nil} = Inventory.get_item(Ash.UUID.generate())
+    end
+  end
 end

@@ -9,7 +9,11 @@ defmodule LokaWeb.Shop.LandingPageLive do
     ~H"""
     <Layouts.app current_user={@current_user} flash={@flash}>
       <div class="flex flex-wrap">
-        <.stock_card :for={stock <- @stock} data-item={stock.id} stock={stock} />
+        <.stock_card
+          :for={stock <- @stock}
+          data-item={stock.id}
+          stock={stock}
+        />
       </div>
     </Layouts.app>
     """
@@ -57,7 +61,12 @@ defmodule LokaWeb.Shop.LandingPageLive do
         </div>
       </figure>
       <div class="card-body">
-        <h2 class="card-title">{@stock.item.name}</h2>
+        <h2
+          class="card-title"
+          phx-click={JS.patch(~p"/shop/item/#{@stock.item.id}")}
+        >
+          {@stock.item.name}
+        </h2>
         <p>
           {@stock.item.description}
         </p>

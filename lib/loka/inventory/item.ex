@@ -24,6 +24,12 @@ defmodule Loka.Inventory.Item do
 
     read :list_all_items
 
+    read :get_item do
+      argument :id, :uuid, allow_nil?: false
+      get_by :id
+      prepare build(load: [:images, :stock])
+    end
+
     create :create_item do
       primary? true
       accept [:name, :description]

@@ -95,6 +95,10 @@ defmodule Loka.Inventory.Stock do
     belongs_to :studio, Loka.Studios.Studio do
       allow_nil? false
     end
+
+    many_to_many :carts, Loka.Commerce.Cart do
+      through Loka.Commerce.CartStock
+    end
   end
 
   identities do

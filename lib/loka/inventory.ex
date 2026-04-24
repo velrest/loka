@@ -14,6 +14,7 @@ defmodule Loka.Inventory do
   resources do
     resource Loka.Inventory.Item do
       define :list_all_items
+      define :get_item, args: [:id], not_found_error?: false
       define :update_item
       define :archive_item
     end

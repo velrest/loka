@@ -31,4 +31,37 @@ defmodule LokaWeb.Features.ShopTest do
       |> assert_has("[data-item]", count: 3)
     end
   end
+
+  describe "item page" do
+    test "renders item name and description", %{conn: conn} do
+      [stock | _] = Inventory.list_all_stock!(load: [item: :images])
+
+      conn
+      |> visit(~p"/shop/item/#{stock.item.id}")
+      |> assert_has("h1", text: stock.item.name)
+      |> assert_has("[data-testid='item-description']", text: stock.item.description)
+    end
+
+    test "renders item price", %{conn: conn} do
+      [stock | _] = Inventory.list_all_stock!(load: [item: :images])
+
+      conn
+      |> visit(~p"/shop/item/#{stock.item.id}")
+      |> assert_has("[data-testid='item-price']")
+    end
+
+    test "renders add to cart button", %{conn: conn} do
+      [stock | _] = Inventory.list_all_stock!(load: [item: :images])
+
+      conn
+      |> visit(~p"/shop/item/#{stock.item.id}")
+      |> assert_has("button", text: "In den Warenkorb")
+    end
+
+    test "unknown item id redirects to shop", %{conn: conn} do
+      conn
+      |> visit(~p"/shop/item/#{Ash.UUID.generate()}")
+      |> assert_path("/")
+    end
+  end
 end

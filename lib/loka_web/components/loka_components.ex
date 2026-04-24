@@ -16,6 +16,7 @@ defmodule LokaWeb.LokaComponents do
       </.tab_nav>
   """
   attr :active_path, :string, default: "", doc: "The currently active path for marking tabs"
+  attr :partial_match?, :boolean, default: false, doc: "Active if active_path matches partially"
 
   slot :item, required: true do
     attr :link, :string, required: true
@@ -27,7 +28,16 @@ defmodule LokaWeb.LokaComponents do
       <.link
         :for={item <- @item}
         role="tab"
-        class={["tab", if(item.link == @active_path, do: "tab-active")]}
+        class={[
+          "tab",
+          if(
+            if(@partial_match?,
+              do: String.contains?(@active_path, item.link),
+              else: item.link == @active_path
+            ),
+            do: "tab-active"
+          )
+        ]}
         navigate={item.link}
       >
         {render_slot(item)}
@@ -63,10 +73,11 @@ defmodule LokaWeb.LokaComponents do
       <.inventory_tab_nav active={@current_path} /
   """
   attr :active, :string, required: true
+  attr :partial_match?, :boolean, default: false, doc: "Active if active_path matches partially"
 
   def inventory_tab_nav(assigns) do
     ~H"""
-    <.tab_nav active_path={@active}>
+    <.tab_nav active_path={@active} partial_match?={@partial_match?}>
       <:item link="/inventory/studio">{gettext("Studio")}</:item>
       <:item link="/inventory/items">{gettext("Items")}</:item>
     </.tab_nav>
