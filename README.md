@@ -21,21 +21,28 @@ sh <(curl 'https://ash-hq.org/install/loka?install=phoenix') \
 ```
 
 - **Account**: Manages user identity and personal data.
-  - `User`: A person who can be a buyer or a studio owner. Handled by Ash Authentication.
-  - `Address`: A user's billing or shipping address.
+  - `User`: A person who can be a buyer or a studio owner. Fields: `email`, `hashed_password`, `confirmed_at`. Handled by Ash Authentication (password + magic link).
+  - `Address`: A user's billing or shipping address. (Not yet implemented)
 
 - **Studios**: Represents the ceramic studios on the platform.
-  - `Studio`: The main entity with a `name`, `description`, and `owner`.
-  - `Address`: The physical location of the studio with geocoordinates for mapping.
+  - `Studio`: Fields: `name`, `owner` (belongs to `User`). Supports soft-delete and audit trail.
+  - `Address`: The physical location of the studio with geocoordinates for mapping. (Not yet implemented)
 
 - **Inventory**: Contains the items that studios sell.
-  - `Item`: A product sold by a `Studio`, with `name`, `description`, `price`, etc.
-  - `Image`: For multiple pictures per `Item`.
+  - `Item`: A product type with `name` and `description`. Supports soft-delete and audit trail.
+  - `Stock`: Links an `Item` to a `Studio`. Fields: `quantity`, `price` (CHF). One entry per item per studio. Supports soft-delete and audit trail.
+  - `Image`: For multiple pictures per `Item`. (Not yet implemented)
 
-- **Commerce**: Handles all shopping-related logic.
+- **Commerce**: Handles all shopping-related logic. (All not yet implemented)
   - `Order`: A record of a transaction, linking a `User`, a `Studio`, and `OrderItem`s.
   - `OrderItem`: A line item in an order.
   - `Cart`: A temporary holder for a user's intended purchases.
+
+## Users
+Password is `password123` for all users
+- user@loka.com Normal user
+- studio1@loka.com Studio 1
+- studio2@loka.com Studio 2
 
 ## Learn more
 

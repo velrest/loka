@@ -9,7 +9,11 @@ defmodule LokaWeb.Shop.LandingPageLive do
     ~H"""
     <Layouts.app current_user={@current_user} flash={@flash}>
       <div class="flex flex-wrap">
-        <.item_card :for={item <- @items} data-item={item.id} item={item} />
+        <.stock_card
+          :for={stock <- @stock}
+          data-item={stock.id}
+          stock={stock}
+        />
       </div>
     </Layouts.app>
     """
@@ -17,37 +21,57 @@ defmodule LokaWeb.Shop.LandingPageLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    # current_user = socket.assigns.current_user
-    items = Inventory.list_all_items!()
-    {:ok, assign(socket, items: items)}
+    stock = Inventory.list_all_stock!(load: [item: :images])
+    {:ok, assign(socket, stock: stock)}
   end
 
-  @doc """
-  Renders a Inventory.Item as a card.
-
-  ## Examples
-
-      <.item_card item={item} />
-  """
-  attr :item, Inventory.Item, required: true
+  attr :stock, Inventory.Stock, required: true
   attr :rest, :global
 
-  defp item_card(assigns) do
+  defp stock_card(assigns) do
     ~H"""
     <div class="card bg-base-100 w-80 shadow-sm mr-5" {@rest}>
       <figure>
-        <img
-          src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Flookaside.fbsbx.com%2Flookaside%2Fcrawler%2Fmedia%2F%3Fmedia_id%3D962791577098035&f=1&nofb=1&ipt=8f18ed6357d8760c90a1ebec72e15716b3ddc2164eeaf1d2a4ecf0b84060f5ea"
-          alt="Shoes"
-        />
+        <div class="carousel w-full">
+          <div
+            :for={{image, index} <- Enum.with_index(@stock.item.images)}
+            id={"slide_#{@stock.item.id}_#{index}"}
+            class="carousel-item relative w-full"
+          >
+            <img
+              src={image.path}
+              alt={@stock.item.name}
+              class="w-full"
+            />
+            <div class="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
+              <a
+                href={"#slide_#{@stock.item.id}_#{if index == 0, do: length(@stock.item.images) -1, else: index - 1}"}
+                class="btn btn-circle"
+              >
+                ❮
+              </a>
+              <a
+                href={"#slide_#{@stock.item.id}_#{if index == length(@stock.item.images) - 1 , do: 0, else: index + 1}"}
+                class="btn btn-circle"
+              >
+                ❯
+              </a>
+            </div>
+          </div>
+        </div>
       </figure>
       <div class="card-body">
-        <h2 class="card-title">{@item.name}</h2>
+        <h2
+          class="card-title"
+          phx-click={JS.patch(~p"/shop/item/#{@stock.item.id}")}
+        >
+          {@stock.item.name}
+        </h2>
         <p>
-          {@item.description}
+          {@stock.item.description}
         </p>
         <div class="card-actions justify-between items-center">
-          <span class="text-xl">{@item.price}</span>
+          <span class="text-xl">{@stock.price}</span>
           <button class="btn btn-primary">{gettext("In den Warenkorb")}</button>
         </div>
       </div>

@@ -18,11 +18,13 @@ defmodule LokaWeb.User.SettingsLive do
   def render(assigns) do
     ~H"""
     <Layouts.app current_user={@current_user} flash={@flash}>
-      <.profile_tab_nav active={@current_path} />
+      <:nav>
+        <.profile_tab_nav active={@current_path} />
+      </:nav>
 
       <.header>
         {gettext("My Settings")}
-        <:subtitle>{gettext("View your account details.")}</:subtitle>
+        <:subtitle>{gettext("Change account settings like passwords or email")}</:subtitle>
       </.header>
 
       <.list>

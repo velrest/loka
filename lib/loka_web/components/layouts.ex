@@ -34,12 +34,17 @@ defmodule LokaWeb.Layouts do
 
   slot :inner_block, required: true
   slot :inner_content, doc: "ash authentication uses inner_content as a slot"
+  slot :nav, doc: "optional sub-navigation rendered below the header"
 
   def app(assigns) do
     ~H"""
     <header class="navbar px-4 sm:px-6 lg:px-8">
       <.nav_bar current_user={@current_user} />
     </header>
+
+    <%= if @nav != [] do %>
+      {render_slot(@nav)}
+    <% end %>
 
     <main class="px-4 py-20 sm:px-6 lg:px-8">
       {render_slot(@inner_block)}
@@ -103,27 +108,27 @@ defmodule LokaWeb.Layouts do
       <div class="absolute w-1/3 h-full rounded-full border-1 border-base-200 bg-base-100 brightness-200 left-0 [[data-theme=light]_&]:left-1/3 [[data-theme=dark]_&]:left-2/3 transition-[left]" />
 
       <button
-        class="flex p-2 cursor-pointer w-1/3"
+        class="flex items-center justify-center p-2 cursor-pointer w-1/3 opacity-75 hover:opacity-100"
         phx-click={JS.dispatch("phx:set-theme")}
         data-phx-theme="system"
       >
-        <.icon name="hero-computer-desktop-micro" class="size-4 opacity-75 hover:opacity-100" />
+        <.icon name="hero-computer-desktop-micro" class="size-4" />
       </button>
 
       <button
-        class="flex p-2 cursor-pointer w-1/3"
+        class="flex items-center justify-center p-2 cursor-pointer w-1/3 opacity-75 hover:opacity-100"
         phx-click={JS.dispatch("phx:set-theme")}
         data-phx-theme="light"
       >
-        <.icon name="hero-sun-micro" class="size-4 opacity-75 hover:opacity-100" />
+        <.icon name="hero-sun-micro" class="size-4" />
       </button>
 
       <button
-        class="flex p-2 cursor-pointer w-1/3"
+        class="flex items-center justify-center p-2 cursor-pointer w-1/3 opacity-75 hover:opacity-100"
         phx-click={JS.dispatch("phx:set-theme")}
         data-phx-theme="dark"
       >
-        <.icon name="hero-moon-micro" class="size-4 opacity-75 hover:opacity-100" />
+        <.icon name="hero-moon-micro" class="size-4" />
       </button>
     </div>
     """
@@ -184,20 +189,22 @@ defmodule LokaWeb.Layouts do
               <.icon name="hero-user-circle" class="size-8" />
             </div>
           </div>
-          <ul
+          <div
             tabindex="-1"
             class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
           >
-            <%= if @current_user do %>
-              <li><.link navigate={~p"/me"}>{gettext("Profile")}</.link></li>
-              <li><.link navigate={~p"/me/settings"}>{gettext("Settings")}</.link></li>
-              <li><.theme_toggle /></li>
-              <li><.link patch={~p"/sign-out"}>{gettext("Sign Out")}</.link></li>
-            <% else %>
-              <li><.link patch={~p"/sign-in"}>{gettext("Sign In")}</.link></li>
-              <li><.link patch={~p"/register"}>{gettext("Register")}</.link></li>
-            <% end %>
-          </ul>
+            <ul>
+              <%= if @current_user do %>
+                <li><.link navigate={~p"/me"}>{gettext("Profile")}</.link></li>
+                <li><.link navigate={~p"/inventory/studio"}>{gettext("Manage Studio")}</.link></li>
+                <li><.link patch={~p"/sign-out"}>{gettext("Sign Out")}</.link></li>
+              <% else %>
+                <li><.link patch={~p"/sign-in"}>{gettext("Sign In")}</.link></li>
+                <li><.link patch={~p"/register"}>{gettext("Register")}</.link></li>
+              <% end %>
+            </ul>
+            <.theme_toggle />
+          </div>
         </div>
       </div>
     </div>

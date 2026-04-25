@@ -12,7 +12,9 @@ defmodule LokaWeb.User.ProfileLive do
   def render(assigns) do
     ~H"""
     <Layouts.app current_user={@current_user} flash={@flash}>
-      <.profile_tab_nav active={@current_path} />
+      <:nav>
+        <.profile_tab_nav active={@current_path} />
+      </:nav>
 
       <.header>
         {gettext("Profile")}
@@ -27,7 +29,6 @@ defmodule LokaWeb.User.ProfileLive do
           {@current_user.email}
         </:item>
       </.list>
-      <.link navigate={~p"/me/settings"}>{gettext("Settings")}</.link>
     </Layouts.app>
     """
   end

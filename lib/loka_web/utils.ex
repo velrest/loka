@@ -1,5 +1,5 @@
 defmodule LokaWeb.Utils.AssignCurrentPath do
-  import Phoenix.LiveView, only: [on_mount: 4, attach_hook: 4]
+  import Phoenix.LiveView, only: [attach_hook: 4]
   import Phoenix.Component, only: [assign: 2]
 
   def on_mount(:default, _params, _session, socket) do
