@@ -31,18 +31,29 @@ defmodule Loka.Inventory.Stock do
     end
 
     read :get_stock do
-      argument :id, :uuid, allow_nil?: false
       get_by :id
       prepare build(load: [:item])
+    end
+
+    read :get_stock_for_item do
+      argument :item_id, :uuid, allow_nil?: false
+      get? true
+      filter expr(item_id == ^arg(:item_id) and studio.owner_id == ^actor(:id))
     end
 
     create :create_stock do
       accept [:quantity, :price]
       argument :item, :map, allow_nil?: false
-      argument :studio_id, :uuid, allow_nil?: false
 
       change manage_relationship(:item, type: :create)
-      change manage_relationship(:studio_id, :studio, type: :append)
+      change fn changeset, %{actor: actor} ->
+        with actor when not is_nil(actor) <- actor,
+             {:ok, %{studio: %{id: studio_id}}} <- Ash.load(actor, :studio) do
+          Ash.Changeset.force_change_attribute(changeset, :studio_id, studio_id)
+        else
+          _ -> changeset
+        end
+      end
     end
 
     update :update_stock do

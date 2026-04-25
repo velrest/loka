@@ -12,15 +12,8 @@ defmodule Loka.Resources.StockTest do
   end
 
   defp create_stock(owner) do
-    studio_id =
-      case owner.studio do
-        %Loka.Studios.Studio{id: id} -> id
-        _ -> nil
-      end
-
     Inventory.create_stock(
       %{name: "Widget", description: "A widget"},
-      studio_id,
       %{quantity: 10, price: Money.new(:CHF, 500)},
       actor: owner
     )
@@ -41,7 +34,6 @@ defmodule Loka.Resources.StockTest do
       assert {:error, _} =
                Inventory.create_stock(
                  %{name: "Widget", description: "A widget"},
-                 nil,
                  %{quantity: 10, price: Money.new(:CHF, 500)}
                )
     end
@@ -50,7 +42,6 @@ defmodule Loka.Resources.StockTest do
       assert {:error, error} =
                Inventory.create_stock(
                  %{name: "Widget", description: "A widget"},
-                 owner.studio.id,
                  %{quantity: -1, price: Money.new(:CHF, 500)},
                  actor: owner
                )

@@ -14,7 +14,6 @@ defmodule Loka.Inventory.Image do
     defaults [:read]
 
     read :get_image do
-      argument :id, :uuid, allow_nil?: false
       get_by :id
     end
 
@@ -43,7 +42,7 @@ defmodule Loka.Inventory.Image do
     end
 
     policy action_type(:create) do
-      authorize_if actor_attribute_equals(:has_studio?, true)
+      authorize_if Loka.Checks.ActorOwnsItem
     end
 
     policy action_type(:destroy) do

@@ -51,15 +51,9 @@ defmodule LokaWeb.Inventory.ItemEditLive do
   @impl true
   def mount(_params, _session, socket) do
     user = socket.assigns.current_user
-    studio = Loka.Studios.get_own_studio!(actor: user)
 
     form =
-      Loka.Inventory.form_to_create_stock(
-        actor: user,
-        prepare_source: fn changeset ->
-          Ash.Changeset.set_argument(changeset, :studio_id, studio.id)
-        end
-      )
+      Loka.Inventory.form_to_create_stock(actor: user)
       |> AshPhoenix.Form.add_form(:item)
       |> to_form()
 

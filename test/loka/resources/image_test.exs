@@ -11,7 +11,6 @@ defmodule Loka.Resources.ImageTest do
     stock =
       Inventory.create_stock!(
         %{name: "Widget", description: "A widget"},
-        owner.studio.id,
         %{quantity: 5, price: Money.new(:CHF, 100)},
         actor: owner
       )

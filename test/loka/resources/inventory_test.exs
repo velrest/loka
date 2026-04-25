@@ -14,7 +14,6 @@ defmodule Loka.Resources.Inventory.InventoryTest do
     stock =
       Inventory.create_stock!(
         %{name: "Widget", description: "A widget"},
-        studio.id,
         %{quantity: 5, price: Money.new(:CHF, 100)},
         actor: owner
       )
@@ -32,14 +31,10 @@ defmodule Loka.Resources.Inventory.InventoryTest do
   end
 
   describe "create_stock" do
-    test "actor with a studio can create stock with an inline item", %{
-      owner: owner,
-      studio: studio
-    } do
+    test "actor with a studio can create stock with an inline item", %{owner: owner} do
       assert {:ok, stock} =
                Inventory.create_stock(
                  %{name: "New Item", description: "Desc"},
-                 studio.id,
                  %{quantity: 1, price: Money.new(:CHF, 200)},
                  actor: owner
                )
@@ -51,7 +46,6 @@ defmodule Loka.Resources.Inventory.InventoryTest do
       assert {:error, _} =
                Inventory.create_stock(
                  %{name: "New Item", description: "Desc"},
-                 nil,
                  %{quantity: 1, price: Money.new(:CHF, 200)},
                  actor: other
                )
@@ -61,7 +55,6 @@ defmodule Loka.Resources.Inventory.InventoryTest do
       assert {:error, _} =
                Inventory.create_stock(
                  %{name: "New Item", description: "Desc"},
-                 nil,
                  %{quantity: 1, price: Money.new(:CHF, 200)}
                )
     end

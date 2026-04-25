@@ -15,10 +15,14 @@ end
 defmodule Loka.Changes.Image.UploadFile do
   use Ash.Resource.Change
 
-  def change(changeset, _opts, %{actor: actor}) when not is_nil(actor) do
+  def change(changeset, _opts, _context) do
     file = Ash.Changeset.get_argument(changeset, :file)
     item_id = Ash.Changeset.get_argument(changeset, :item_id)
 
+    if is_nil(file) or is_nil(item_id), do: changeset, else: do_upload(changeset, file, item_id)
+  end
+
+  defp do_upload(changeset, file, item_id) do
     dest_dir = Path.join([:code.priv_dir(:loka), "static", "uploads", "items", item_id])
     File.mkdir_p!(dest_dir)
     {:ok, src_path} = Ash.Type.File.path(file)
@@ -33,9 +37,7 @@ defmodule Loka.Changes.Image.UploadFile do
     |> Ash.Changeset.change_attribute(:filename, filename)
     |> Ash.Changeset.change_attribute(
       :position,
-      Loka.Inventory.list_item_images!(item_id) |> length()
+      length(Loka.Inventory.list_item_images!(item_id))
     )
   end
-
-  def change(changeset, _opts, _context), do: changeset
 end

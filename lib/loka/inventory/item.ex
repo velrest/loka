@@ -25,7 +25,6 @@ defmodule Loka.Inventory.Item do
     read :list_all_items
 
     read :get_item do
-      argument :id, :uuid, allow_nil?: false
       get_by :id
       prepare build(load: [:images, :stock])
     end

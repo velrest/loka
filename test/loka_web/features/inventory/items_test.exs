@@ -67,7 +67,6 @@ defmodule LokaWeb.Features.Inventory.ItemsTest do
       {:ok, stock} =
         Loka.Inventory.create_stock(
           %{name: "Bowl", description: "Ceramic bowl"},
-          user.studio.id,
           %{quantity: 3, price: Money.new(:CHF, 150)},
           actor: user
         )
