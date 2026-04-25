@@ -63,13 +63,10 @@ defmodule LokaWeb.Shop.ItemLive do
       {:ok, nil} ->
         {:ok,
          socket
-         |> dbg()
          |> put_flash(:error, gettext("Item not found."))
          |> push_navigate(to: ~p"/")}
 
       {:error, error} ->
-        dbg(error)
-
         {:ok,
          socket
          |> put_flash(:error, gettext("Item not found."))

@@ -11,5 +11,13 @@ defmodule Loka.Commerce do
     end
 
     resource Loka.Commerce.CartStock
+
+    resource Loka.Commerce.Order do
+      define :list_user_orders
+      define :get_order, args: [:id], not_found_error?: false
+      define :place_order, args: [:lines]
+    end
+
+    resource Loka.Commerce.OrderLine
   end
 end
