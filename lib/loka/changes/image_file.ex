@@ -1,15 +1,12 @@
 defmodule Loka.Changes.Image.RemoveFile do
   use Ash.Resource.Change
 
-  def change(changeset, _opts, %{actor: actor}) when not is_nil(actor) do
-    File.rm(
-      Path.join([:code.priv_dir(:loka), "static", String.trim_leading(changeset.data.path, "/")])
-    )
-
-    changeset
-  end
-
   def change(changeset, _opts, _context), do: changeset
+
+  def after_action(_changeset, record, _context) do
+    File.rm(Path.join([:code.priv_dir(:loka), "static", String.trim_leading(record.path, "/")]))
+    {:ok, record}
+  end
 end
 
 defmodule Loka.Changes.Image.UploadFile do
