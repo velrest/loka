@@ -7,7 +7,7 @@ defmodule LokaWeb.Shop.ItemLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app current_user={@current_user} flash={@flash}>
+    <Layouts.app current_user={@current_user} flash={@flash} socket={@socket}>
       <div class="px-4 py-10 sm:px-6 lg:px-8 max-w-2xl">
         <.header>
           {@item.name}
@@ -48,7 +48,12 @@ defmodule LokaWeb.Shop.ItemLive do
           <div :for={stock <- @item.stock} class="card bg-base-100 shadow-sm">
             <div class="card-body flex-row items-center justify-between">
               <span data-testid="item-price" class="text-xl font-semibold">{stock.price}</span>
-              <button class="btn btn-primary">{gettext("In den Warenkorb")}</button>
+              <.live_component
+                module={LokaWeb.Shop.AddToCartLiveComponent}
+                id={"add-to-cart-#{stock.id}"}
+                stock={stock}
+                current_user={@current_user}
+              />
             </div>
           </div>
         </div>
@@ -66,7 +71,7 @@ defmodule LokaWeb.Shop.ItemLive do
          |> put_flash(:error, gettext("Item not found."))
          |> push_navigate(to: ~p"/")}
 
-      {:error, error} ->
+      {:error, _} ->
         {:ok,
          socket
          |> put_flash(:error, gettext("Item not found."))

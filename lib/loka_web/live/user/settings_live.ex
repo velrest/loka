@@ -17,7 +17,7 @@ defmodule LokaWeb.User.SettingsLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app current_user={@current_user} flash={@flash}>
+    <Layouts.app current_user={@current_user} flash={@flash} socket={@socket}>
       <:nav>
         <.profile_tab_nav active={@current_path} />
       </:nav>

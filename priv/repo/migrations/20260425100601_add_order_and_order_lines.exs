@@ -26,7 +26,8 @@ defmodule Loka.Repo.Migrations.AddOrderAndOrderLines do
             name: "orders_user_id_fkey",
             type: :uuid,
             prefix: "public"
-          ), null: false
+          ),
+          null: false
     end
 
     create table(:order_lines, primary_key: false) do
@@ -48,7 +49,8 @@ defmodule Loka.Repo.Migrations.AddOrderAndOrderLines do
             name: "order_lines_order_id_fkey",
             type: :uuid,
             prefix: "public"
-          ), null: false
+          ),
+          null: false
 
       add :stock_id,
           references(:stock,
@@ -56,7 +58,8 @@ defmodule Loka.Repo.Migrations.AddOrderAndOrderLines do
             name: "order_lines_stock_id_fkey",
             type: :uuid,
             prefix: "public"
-          ), null: false
+          ),
+          null: false
     end
   end
 

@@ -7,7 +7,11 @@ defmodule LokaWeb.Shop.LandingPageLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app current_user={@current_user} flash={@flash}>
+    <Layouts.app
+      current_user={@current_user}
+      flash={@flash}
+      socket={@socket}
+    >
       <div class="flex flex-wrap">
         <.stock_card
           :for={stock <- @stock}
@@ -22,7 +26,7 @@ defmodule LokaWeb.Shop.LandingPageLive do
   @impl true
   def mount(_params, _session, socket) do
     stock = Inventory.list_all_stock!(load: [item: :images])
-    {:ok, assign(socket, stock: stock)}
+    {:ok, socket |> assign(stock: stock)}
   end
 
   attr :stock, Inventory.Stock, required: true
@@ -72,7 +76,11 @@ defmodule LokaWeb.Shop.LandingPageLive do
         </p>
         <div class="card-actions justify-between items-center">
           <span class="text-xl">{@stock.price}</span>
-          <button class="btn btn-primary">{gettext("In den Warenkorb")}</button>
+          <.live_component
+            module={LokaWeb.Shop.AddToCartLiveComponent}
+            id={"add-to-cart-#{@stock.id}"}
+            stock={@stock}
+          />
         </div>
       </div>
     </div>

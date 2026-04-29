@@ -85,13 +85,22 @@ defmodule Loka.Resources.OrderTest do
     end
 
     test "buyer can cancel their own order", %{buyer: buyer, order: order} do
-      assert {:ok, cancelled} = Loka.Commerce.Order |> Ash.get!(order.id, actor: buyer) |> Ash.Changeset.for_update(:cancel, %{}, actor: buyer) |> Ash.update()
+      assert {:ok, cancelled} =
+               Loka.Commerce.Order
+               |> Ash.get!(order.id, actor: buyer)
+               |> Ash.Changeset.for_update(:cancel, %{}, actor: buyer)
+               |> Ash.update()
+
       assert cancelled.status == :cancelled
     end
 
     test "other user cannot cancel the order", %{other: other, order: order} do
       order_loaded = Ash.get!(Loka.Commerce.Order, order.id, authorize?: false)
-      assert {:error, _} = order_loaded |> Ash.Changeset.for_update(:cancel, %{}, actor: other) |> Ash.update()
+
+      assert {:error, _} =
+               order_loaded
+               |> Ash.Changeset.for_update(:cancel, %{}, actor: other)
+               |> Ash.update()
     end
   end
 
@@ -103,13 +112,22 @@ defmodule Loka.Resources.OrderTest do
 
     test "studio owner can mark order as paid", %{owner: owner, order: order} do
       order_loaded = Ash.get!(Loka.Commerce.Order, order.id, authorize?: false)
-      assert {:ok, paid} = order_loaded |> Ash.Changeset.for_update(:mark_paid, %{}, actor: owner) |> Ash.update()
+
+      assert {:ok, paid} =
+               order_loaded
+               |> Ash.Changeset.for_update(:mark_paid, %{}, actor: owner)
+               |> Ash.update()
+
       assert paid.status == :paid
     end
 
     test "buyer cannot mark own order as paid", %{buyer: buyer, order: order} do
       order_loaded = Ash.get!(Loka.Commerce.Order, order.id, authorize?: false)
-      assert {:error, _} = order_loaded |> Ash.Changeset.for_update(:mark_paid, %{}, actor: buyer) |> Ash.update()
+
+      assert {:error, _} =
+               order_loaded
+               |> Ash.Changeset.for_update(:mark_paid, %{}, actor: buyer)
+               |> Ash.update()
     end
   end
 
@@ -117,17 +135,23 @@ defmodule Loka.Resources.OrderTest do
     setup %{buyer: buyer, owner: owner, stock: stock} do
       {:ok, order} = Commerce.place_order(lines(stock), actor: buyer)
       order_loaded = Ash.get!(Loka.Commerce.Order, order.id, authorize?: false)
-      {:ok, paid} = order_loaded |> Ash.Changeset.for_update(:mark_paid, %{}, actor: owner) |> Ash.update()
+
+      {:ok, paid} =
+        order_loaded |> Ash.Changeset.for_update(:mark_paid, %{}, actor: owner) |> Ash.update()
+
       %{order: paid}
     end
 
     test "studio owner can fulfil a paid order", %{owner: owner, order: order} do
-      assert {:ok, fulfilled} = order |> Ash.Changeset.for_update(:fulfil, %{}, actor: owner) |> Ash.update()
+      assert {:ok, fulfilled} =
+               order |> Ash.Changeset.for_update(:fulfil, %{}, actor: owner) |> Ash.update()
+
       assert fulfilled.status == :fulfilled
     end
 
     test "buyer cannot fulfil the order", %{buyer: buyer, order: order} do
-      assert {:error, _} = order |> Ash.Changeset.for_update(:fulfil, %{}, actor: buyer) |> Ash.update()
+      assert {:error, _} =
+               order |> Ash.Changeset.for_update(:fulfil, %{}, actor: buyer) |> Ash.update()
     end
   end
 end

@@ -25,7 +25,10 @@ defmodule Loka.Changes.Image.UploadFile do
       changeset
       |> Ash.Changeset.change_attribute(:path, web_path)
       |> Ash.Changeset.change_attribute(:filename, filename)
-      |> Ash.Changeset.change_attribute(:position, length(Loka.Inventory.list_item_images!(item_id)))
+      |> Ash.Changeset.change_attribute(
+        :position,
+        length(Loka.Inventory.list_item_images!(item_id))
+      )
     end
   end
 

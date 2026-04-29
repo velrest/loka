@@ -46,6 +46,7 @@ defmodule Loka.Inventory.Stock do
       argument :item, :map, allow_nil?: false
 
       change manage_relationship(:item, type: :create)
+
       change fn changeset, %{actor: actor} ->
         with actor when not is_nil(actor) <- actor,
              {:ok, %{studio: %{id: studio_id}}} <- Ash.load(actor, :studio) do
