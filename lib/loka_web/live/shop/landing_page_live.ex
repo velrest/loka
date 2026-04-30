@@ -17,6 +17,7 @@ defmodule LokaWeb.Shop.LandingPageLive do
           :for={stock <- @stock}
           data-item={stock.id}
           stock={stock}
+          current_user={@current_user}
         />
       </div>
     </Layouts.app>
@@ -30,6 +31,7 @@ defmodule LokaWeb.Shop.LandingPageLive do
   end
 
   attr :stock, Inventory.Stock, required: true
+  attr :current_user, :any, default: nil
   attr :rest, :global
 
   defp stock_card(assigns) do
@@ -80,6 +82,7 @@ defmodule LokaWeb.Shop.LandingPageLive do
             module={LokaWeb.Shop.AddToCartLiveComponent}
             id={"add-to-cart-#{@stock.id}"}
             stock={@stock}
+            current_user={@current_user}
           />
         </div>
       </div>

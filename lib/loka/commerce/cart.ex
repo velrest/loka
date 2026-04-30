@@ -103,7 +103,7 @@ defmodule Loka.Commerce.Cart do
 
     policy action_type(:destroy) do
       authorize_if relates_to_actor_via(:user)
-      authorize_if expr(is_nil(:user))
+      authorize_if expr(is_nil(user_id))
     end
 
     policy action(:merge_from) do
@@ -143,7 +143,7 @@ defmodule Loka.Commerce.Cart.SubtotalCalc do
   use Ash.Resource.Calculation
 
   @impl true
-  def load(_, _, _), do: [:stocks]
+  def load(_, _, _), do: [stocks: [:price]]
 
   @impl true
   def calculate(records, _, _) do

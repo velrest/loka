@@ -43,4 +43,8 @@ defmodule Loka.Support.UserHelpers do
     conn
     |> visit("/sign-out")
   end
+
+  def log_in_user(conn, user, password \\ "password123") do
+    sign_in(conn, user.email, password).conn
+  end
 end

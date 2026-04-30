@@ -9,7 +9,8 @@ Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
 Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
 
-## Architecture
+## Initial Setup Command
+
 ```bash
 sh <(curl 'https://ash-hq.org/install/loka?install=phoenix') \
         && cd loka && mix igniter.install ash ash_phoenix \
@@ -20,23 +21,26 @@ sh <(curl 'https://ash-hq.org/install/loka?install=phoenix') \
         --setup --yes
 ```
 
-- **Account**: Manages user identity and personal data.
-  - `User`: A person who can be a buyer or a studio owner. Fields: `email`, `hashed_password`, `confirmed_at`. Handled by Ash Authentication (password + magic link).
-  - `Address`: A user's billing or shipping address. (Not yet implemented)
+## Architecture
 
-- **Studios**: Represents the ceramic studios on the platform.
-  - `Studio`: Fields: `name`, `owner` (belongs to `User`). Supports soft-delete and audit trail.
-  - `Address`: The physical location of the studio with geocoordinates for mapping. (Not yet implemented)
+Four Ash domains backed by PostgreSQL. All resources use UUIDv7 primary keys and policy-based authorization.
 
-- **Inventory**: Contains the items that studios sell.
-  - `Item`: A product type with `name` and `description`. Supports soft-delete and audit trail.
-  - `Stock`: Links an `Item` to a `Studio`. Fields: `quantity`, `price` (CHF). One entry per item per studio. Supports soft-delete and audit trail.
-  - `Image`: For multiple pictures per `Item`. (Not yet implemented)
+- **Accounts** — User identity and authentication.
+  - `User`: Buyers and studio owners. Auth via password + magic link (AshAuthentication). Tracks `email`, `hashed_password`, `confirmed_at`. Exposes `has_studio?` calculation and a `studio` relationship.
 
-- **Commerce**: Handles all shopping-related logic. (All not yet implemented)
-  - `Order`: A record of a transaction, linking a `User`, a `Studio`, and `OrderItem`s.
-  - `OrderItem`: A line item in an order.
-  - `Cart`: A temporary holder for a user's intended purchases.
+- **Studios** — Ceramic studios on the platform.
+  - `Studio`: Belongs to a `User` (owner). Fields: `name`. Soft-deleted via AshArchival; mutations audited via AshPaperTrail.
+
+- **Inventory** — Products that studios sell.
+  - `Item`: A product type with `name` and `description`. Has many `Stock` and `Image` records. Soft-deleted and audited.
+  - `Stock`: One listing per item per studio. Fields: `quantity`, `price` (CHF money). Links `Item` → `Studio`. Soft-deleted and audited.
+  - `Image`: Ordered images for an item. Fields: `path`, `filename`, `position`. Files managed via `Loka.Changes.Image`.
+
+- **Commerce** — Shopping cart and order management.
+  - `Cart`: Holds a user's intended purchases. Can be anonymous (no `user_id`) or owned. Supports merging an anonymous cart into a user cart on sign-in. Anonymous carts cleaned up daily via AshOban. Exposes `item_count` aggregate and `subtotal` calculation (CHF).
+  - `CartStock`: Join table between `Cart` and `Stock`.
+  - `Order`: A placed order. Status lifecycle: `pending → paid → fulfilled` (or `cancelled`). Belongs to a `User`.
+  - `OrderLine`: One line per `Stock` entry in an order. Fields: `unit_price`, `quantity`.
 
 ## Users
 Password is `password123` for all users

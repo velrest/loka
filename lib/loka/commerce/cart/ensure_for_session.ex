@@ -21,13 +21,13 @@ defmodule Loka.Commerce.Cart.EnsureForSession do
           Commerce.create_cart(actor: actor)
 
         {nil, anon} ->
-          Commerce.assign_to_user!(anon, actor: actor)
+          {:ok, Commerce.assign_to_user!(anon, actor: actor)}
 
         {cart, nil} ->
           {:ok, cart}
 
         {cart, anon} ->
-          Commerce.merge_from!(%{anonymous_cart_id: anon.id}, actor: actor)
+          {:ok, Commerce.merge_from!(cart, anon.id, actor: actor)}
       end
     else
       case anon_cart do
