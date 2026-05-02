@@ -27,11 +27,12 @@ defmodule Loka.Commerce.Cart do
 
     create :create do
       primary? true
-      change relate_actor(:user)
+      change relate_actor(:user, allow_nil?: true)
     end
 
-    create :create_anonymous do
-      accept []
+    read :old_anonymous do
+      argument :cutoff, :utc_datetime_usec, allow_nil?: false
+      filter expr(is_nil(user_id) and updated_at < ^arg(:cutoff))
     end
 
     read :for_user do
@@ -46,8 +47,6 @@ defmodule Loka.Commerce.Cart do
     end
 
     update :assign_to_user do
-      accept []
-      require_atomic? false
       change relate_actor(:user)
     end
 
@@ -85,16 +84,13 @@ defmodule Loka.Commerce.Cart do
       authorize_if always()
     end
 
-    bypass action(:create_anonymous) do
-      authorize_if always()
-    end
-
     policy action_type(:read) do
       authorize_if relates_to_actor_via(:user)
+      authorize_if expr(is_nil(user_id))
     end
 
     policy action_type(:create) do
-      authorize_if actor_present()
+      authorize_if always()
     end
 
     policy action(:assign_to_user) do

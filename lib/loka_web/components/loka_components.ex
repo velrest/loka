@@ -58,8 +58,8 @@ defmodule LokaWeb.LokaComponents do
   def profile_tab_nav(assigns) do
     ~H"""
     <.tab_nav active_path={@active}>
-      <:item link="/me">{gettext("Profile")}</:item>
-      <:item link="/me/settings">{gettext("Settings")}</:item>
+      <:item link="/me">{gettext("Profil")}</:item>
+      <:item link="/me/settings">{gettext("Einstellungen")}</:item>
       <:item link="/me/studio">{gettext("Studio")}</:item>
     </.tab_nav>
     """
@@ -79,7 +79,7 @@ defmodule LokaWeb.LokaComponents do
     ~H"""
     <.tab_nav active_path={@active} partial_match?={@partial_match?}>
       <:item link="/inventory/studio">{gettext("Studio")}</:item>
-      <:item link="/inventory/items">{gettext("Items")}</:item>
+      <:item link="/inventory/items">{gettext("Artikel")}</:item>
     </.tab_nav>
     """
   end

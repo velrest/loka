@@ -41,13 +41,13 @@ defmodule LokaWeb.Inventory.StudioLive do
       {:ok, _} ->
         {:noreply,
          socket
-         |> put_flash(:info, gettext("Studio deleted."))
+         |> put_flash(:info, gettext("Studio gelöscht."))
          |> push_navigate(to: ~p"/me/studio")}
 
       {:error, _} ->
         {:noreply,
          socket
-         |> put_flash(:error, gettext("Could not delete studio."))
+         |> put_flash(:error, gettext("Studio konnte nicht gelöscht werden."))
          |> assign(show_confirm: false)}
     end
   end
@@ -79,7 +79,7 @@ defmodule LokaWeb.Inventory.StudioLive do
 
         {:noreply,
          socket
-         |> put_flash(:info, gettext("Studio saved successfully."))
+         |> put_flash(:info, gettext("Studio gespeichert."))
          |> assign(studio: studio, form: form, saved: true)}
 
       {:error, form} ->

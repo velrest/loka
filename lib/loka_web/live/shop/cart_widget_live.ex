@@ -35,15 +35,17 @@ defmodule LokaWeb.Shop.CartWidgetLive do
         </div>
         <div
           tabindex="0"
-          class="card card-compact dropdown-content bg-base-100 z-1 mt-3 w-52 shadow"
+          class="card card-compact dropdown-content bg-base-100 border border-base-300 z-1 mt-3 w-52 shadow shadow-black/30"
         >
           <div class="card-body">
             <span class="text-lg font-bold">
               {@cart.item_count} {ngettext("Produkt", "Produkte", @cart.item_count)}
             </span>
-            <span :if={@cart.subtotal} class="text-info">Subtotal: {@cart.subtotal}</span>
+            <span :if={@cart.subtotal} class="text-info">{gettext("Zwischensumme")}: {@cart.subtotal}</span>
             <div class="card-actions">
-              <button class="btn btn-primary btn-block">View cart</button>
+              <.link navigate={~p"/shop/cart"} class="btn btn-primary btn-block">
+                {gettext("Warenkorb anzeigen")}
+              </.link>
             </div>
           </div>
         </div>
@@ -93,13 +95,11 @@ defmodule LokaWeb.Shop.CartWidgetLive do
   end
 
   def handle_event("load_anonymous_cart", %{"cart_id" => cart_id}, socket) do
-    case Commerce.get_anonymous_cart(cart_id) do
+    case Commerce.get_anonymous_cart(cart_id, load: [:item_count, :subtotal]) do
       {:ok, nil} ->
         {:noreply, socket}
 
       {:ok, cart} ->
-        cart = Ash.load!(cart, [:item_count, :subtotal], authorize?: false)
-
         if connected?(socket) do
           Phoenix.PubSub.subscribe(Loka.PubSub, "cart:#{cart.id}")
         end
@@ -129,7 +129,7 @@ defmodule LokaWeb.Shop.CartWidgetLive do
       if user do
         Commerce.get_user_cart!(load: [:item_count, :subtotal], actor: user)
       else
-        Ash.load!(cart, [:item_count, :subtotal], authorize?: false)
+        Commerce.get_anonymous_cart!(cart.id, load: [:item_count, :subtotal])
       end
 
     {:noreply, assign(socket, cart: updated_cart)}

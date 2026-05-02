@@ -17,20 +17,34 @@ defmodule Loka.Commerce.CartStock do
   actions do
     defaults [:read]
 
+    read :for_cart do
+      argument :cart_id, :uuid, allow_nil?: false
+      filter expr(cart_id == ^arg(:cart_id))
+    end
+
     create :create do
       primary? true
       accept [:cart_id, :stock_id]
+    end
+
+    destroy :destroy do
+      primary? true
     end
   end
 
   policies do
     policy action_type(:read) do
-      # TODO: this won't work for anonymous cart
       authorize_if relates_to_actor_via([:cart, :user])
+      authorize_if expr(is_nil(cart.user_id))
     end
 
     policy action_type(:create) do
       authorize_if always()
+    end
+
+    policy action_type(:destroy) do
+      authorize_if relates_to_actor_via([:cart, :user])
+      authorize_if expr(is_nil(cart.user_id))
     end
   end
 

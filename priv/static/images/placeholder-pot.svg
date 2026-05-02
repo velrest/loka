@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Background -->
+  <rect width="400" height="400" fill="#1e1b18"/>
+
+  <!-- Shadow under pot -->
+  <ellipse cx="200" cy="308" rx="68" ry="14" fill="#111" opacity="0.5"/>
+
+  <!-- Pot body (with gap for broken chunk) -->
+  <path d="
+    M148,302
+    Q118,258 122,198
+    Q126,148 162,126
+    Q180,117 200,116
+    Q220,117 238,126
+    Q252,134 260,152
+    L244,162
+    Q236,142 220,133
+    Q210,127 200,127
+    Q190,127 178,133
+    Q148,149 144,198
+    Q140,254 168,296
+    Z
+  " fill="#7a5c42"/>
+
+  <!-- Pot body right side (connected) -->
+  <path d="
+    M244,162
+    Q274,178 278,198
+    Q282,258 252,302
+    L148,302
+    Q168,296 144,198
+    Q148,149 178,133
+    Q190,127 200,127
+    Q210,127 220,133
+    Q236,142 244,162
+    Z
+  " fill="#7a5c42"/>
+
+  <!-- Broken chunk (missing piece outline) -->
+  <path d="M244,162 L268,128 L292,164 L260,152 Z" fill="#1e1b18"/>
+  <path d="M244,162 L268,128 L292,164 L260,152 Z" fill="none" stroke="#9a7458" stroke-width="2" stroke-dasharray="4,3"/>
+
+  <!-- Broken shard on ground -->
+  <path d="M258,314 L278,302 L286,320 Z" fill="#7a5c42" opacity="0.8"/>
+  <path d="M272,320 L290,308 L296,326 Z" fill="#6a4c36" opacity="0.6"/>
+
+  <!-- Crack lines -->
+  <path d="M200,127 L196,158 L204,178 L196,210 L202,242 L196,268" stroke="#5a3e28" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M202,178 L218,190 L212,206" stroke="#5a3e28" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+
+  <!-- Pot rim -->
+  <ellipse cx="200" cy="118" rx="50" ry="16" fill="#8a6848"/>
+  <ellipse cx="200" cy="116" rx="42" ry="11" fill="#3a2818"/>
+
+  <!-- Rim crack -->
+  <path d="M200,107 L204,116 L198,127" stroke="#5a3e28" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+  <!-- Subtle ground line -->
+  <line x1="100" y1="318" x2="300" y2="318" stroke="#3a2e24" stroke-width="1.5" opacity="0.6"/>
+</svg>

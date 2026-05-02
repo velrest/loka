@@ -1,11 +1,11 @@
 defmodule Loka.Changes.Image.RemoveFile do
   use Ash.Resource.Change
 
-  def change(changeset, _opts, _context), do: changeset
-
-  def after_action(_changeset, record, _context) do
-    File.rm(Path.join([:code.priv_dir(:loka), "static", String.trim_leading(record.path, "/")]))
-    {:ok, record}
+  def change(changeset, _opts, _context) do
+    Ash.Changeset.after_action(changeset, fn _changeset, record ->
+      File.rm(Path.join([:code.priv_dir(:loka), "static", String.trim_leading(record.path, "/")]))
+      {:ok, record}
+    end)
   end
 end
 
@@ -29,20 +29,13 @@ defmodule Loka.Changes.Image.UploadFile do
         :position,
         length(Loka.Inventory.list_item_images!(item_id))
       )
-    end
-  end
-
-  def after_action(changeset, record, _context) do
-    file = Ash.Changeset.get_argument(changeset, :file)
-
-    if is_nil(file) do
-      {:ok, record}
-    else
-      dest = Path.join([:code.priv_dir(:loka), "static", String.trim_leading(record.path, "/")])
-      File.mkdir_p!(Path.dirname(dest))
-      {:ok, src_path} = Ash.Type.File.path(file)
-      File.cp!(src_path, dest)
-      {:ok, record}
+      |> Ash.Changeset.after_action(fn _changeset, record ->
+        dest = Path.join([:code.priv_dir(:loka), "static", String.trim_leading(record.path, "/")])
+        File.mkdir_p!(Path.dirname(dest))
+        {:ok, src_path} = Ash.Type.File.path(file)
+        File.cp!(src_path, dest)
+        {:ok, record}
+      end)
     end
   end
 end
