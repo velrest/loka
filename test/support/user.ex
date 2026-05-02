@@ -6,7 +6,7 @@ defmodule Loka.Support.UserHelpers do
 
   def create_studio_owner() do
     owner = create_user()
-    studio = Loka.Studios.create_studio!(%{name: "My Studio"}, actor: owner)
+    studio = Loka.Studios.create_studio!(%{name: "My Studio", city: "Zürich", postal_code: "8001"}, actor: owner)
     owner = Ash.load!(owner, [:studio, :has_studio?])
     %{owner: owner, studio: studio}
   end

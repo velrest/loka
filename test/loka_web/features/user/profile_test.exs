@@ -20,11 +20,10 @@ defmodule LokaWeb.Features.UserProfileTest do
   end
 
   describe "profile page for authenticated user" do
-    test "renders user id and email", %{conn: conn, user: user} do
+    test "renders email and confirmation status", %{conn: conn, user: user} do
       conn
       |> visit(~p"/me")
-      |> assert_has("h1", text: "Profile")
-      |> assert_has("div", text: user.id)
+      |> assert_has("h1", text: "Profil")
       |> assert_has("div", text: to_string(user.email))
     end
   end

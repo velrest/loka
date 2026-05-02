@@ -21,54 +21,54 @@ defmodule LokaWeb.Features.Inventory.StudioTest do
 
   describe "inventory studio page with an existing studio" do
     setup %{user: user} do
-      {:ok, studio} = Loka.Studios.create_studio(%{name: "My Studio"}, actor: user)
+      {:ok, studio} = Loka.Studios.create_studio(%{name: "My Studio", city: "Bern", postal_code: "3000"}, actor: user)
       %{studio: studio}
     end
 
     test "renders the studio update form", %{conn: conn, studio: studio} do
       conn
       |> visit(~p"/inventory/studio")
-      |> assert_has("h1", text: "Manage your studio")
+      |> assert_has("h1", text: "Studio verwalten")
       |> assert_has("input[name='studio[name]'][value='#{studio.name}']")
-      |> assert_has("button", text: "Update studio")
+      |> assert_has("button", text: "Speichern")
     end
 
     test "updating the studio name saves and re-renders", %{conn: conn} do
       conn
       |> visit(~p"/inventory/studio")
-      |> fill_in("Studio name", with: "Renamed Studio")
-      |> click_button("Update studio")
+      |> fill_in("Studioname", with: "Renamed Studio")
+      |> click_button("Speichern")
       |> assert_has("input[name='studio[name]'][value='Renamed Studio']")
     end
 
     test "shows archive button", %{conn: conn} do
       conn
       |> visit(~p"/inventory/studio")
-      |> assert_has("button", text: "Archive studio")
+      |> assert_has("button", text: "Studio archivieren")
     end
 
     test "clicking archive opens confirm modal", %{conn: conn} do
       conn
       |> visit(~p"/inventory/studio")
-      |> click_button("Archive studio")
-      |> assert_has("h3", text: "Archive your studio?")
-      |> assert_has("button", text: "Yes, archive")
-      |> assert_has("button", text: "Cancel")
+      |> click_button("Studio archivieren")
+      |> assert_has("h3", text: "Studio archivieren?")
+      |> assert_has("button", text: "Ja, archivieren")
+      |> assert_has("button", text: "Abbrechen")
     end
 
     test "cancelling the modal closes it", %{conn: conn} do
       conn
       |> visit(~p"/inventory/studio")
-      |> click_button("Archive studio")
-      |> click_button("Cancel")
+      |> click_button("Studio archivieren")
+      |> click_button("Abbrechen")
       |> refute_has("dialog.modal-open")
     end
 
     test "confirming archive redirects to /me/studio", %{conn: conn} do
       conn
       |> visit(~p"/inventory/studio")
-      |> click_button("Archive studio")
-      |> click_button("Yes, archive")
+      |> click_button("Studio archivieren")
+      |> click_button("Ja, archivieren")
       |> assert_path(~p"/me/studio")
     end
   end
@@ -76,7 +76,7 @@ defmodule LokaWeb.Features.Inventory.StudioTest do
   describe "archive authorization" do
     setup do
       other_user = UserHelpers.create_user(%{password: @password})
-      {:ok, studio} = Loka.Studios.create_studio(%{name: "Other Studio"}, actor: other_user)
+      {:ok, studio} = Loka.Studios.create_studio(%{name: "Other Studio", city: "Basel", postal_code: "4000"}, actor: other_user)
       %{studio: studio}
     end
 

@@ -24,7 +24,7 @@ defmodule LokaWeb.Shop.CartWidgetLiveTest do
     end
 
     test "cart widget appears after load_anonymous_cart with valid id", %{conn: conn} do
-      {:ok, anon_cart} = Commerce.create_anonymous_cart()
+      {:ok, anon_cart} = Commerce.create_cart()
 
       {:ok, view, _html} = live(conn, ~p"/")
       widget = find_live_child(view, "cart-widget")
@@ -51,7 +51,7 @@ defmodule LokaWeb.Shop.CartWidgetLiveTest do
           actor: owner
         )
 
-      {:ok, anon_cart} = Commerce.create_anonymous_cart()
+      {:ok, anon_cart} = Commerce.create_cart()
 
       {:ok, view, _html} = live(conn, ~p"/")
       widget = find_live_child(view, "cart-widget")
@@ -119,7 +119,7 @@ defmodule LokaWeb.Shop.CartWidgetLiveTest do
     end
 
     test "ignores load_anonymous_cart event when user is authenticated", %{conn: conn, user: user} do
-      {:ok, anon_cart} = Commerce.create_anonymous_cart()
+      {:ok, anon_cart} = Commerce.create_cart()
       {:ok, _user_cart} = Commerce.create_cart(actor: user)
 
       {:ok, view, _html} = live(conn, ~p"/")

@@ -8,22 +8,22 @@ defmodule Loka.Resources.CartTest do
     %{buyer: UserHelpers.create_user()}
   end
 
-  describe "create_anonymous_cart" do
+  describe "create_cart (anonymous)" do
     test "creates a cart with no user" do
-      assert {:ok, cart} = Commerce.create_anonymous_cart()
+      assert {:ok, cart} = Commerce.create_cart()
       assert is_nil(cart.user_id)
     end
 
     test "each call produces a distinct cart" do
-      {:ok, cart1} = Commerce.create_anonymous_cart()
-      {:ok, cart2} = Commerce.create_anonymous_cart()
+      {:ok, cart1} = Commerce.create_cart()
+      {:ok, cart2} = Commerce.create_cart()
       assert cart1.id != cart2.id
     end
   end
 
   describe "get_anonymous_cart" do
     test "returns cart by id when user_id is nil" do
-      {:ok, cart} = Commerce.create_anonymous_cart()
+      {:ok, cart} = Commerce.create_cart()
       assert {:ok, found} = Commerce.get_anonymous_cart(cart.id)
       assert found.id == cart.id
     end
@@ -40,7 +40,7 @@ defmodule Loka.Resources.CartTest do
 
   describe "assign_to_user" do
     test "sets user_id on an anonymous cart", %{buyer: buyer} do
-      {:ok, anon_cart} = Commerce.create_anonymous_cart()
+      {:ok, anon_cart} = Commerce.create_cart()
 
       {:ok, cart} =
         anon_cart
@@ -51,7 +51,7 @@ defmodule Loka.Resources.CartTest do
     end
 
     test "requires an actor" do
-      {:ok, anon_cart} = Commerce.create_anonymous_cart()
+      {:ok, anon_cart} = Commerce.create_cart()
 
       assert {:error, _} =
                anon_cart
@@ -62,7 +62,7 @@ defmodule Loka.Resources.CartTest do
 
   describe "destroy" do
     test "allows destroying a cart", %{buyer: buyer} do
-      {:ok, cart} = Commerce.create_anonymous_cart()
+      {:ok, cart} = Commerce.create_cart()
       assert :ok = Ash.destroy(cart, actor: buyer)
     end
   end
@@ -82,7 +82,7 @@ defmodule Loka.Resources.CartTest do
     end
 
     test "copies items from anonymous cart into user cart", %{buyer: buyer, stock: stock} do
-      {:ok, anon_cart} = Commerce.create_anonymous_cart()
+      {:ok, anon_cart} = Commerce.create_cart()
       Commerce.add_to_cart!(anon_cart.id, stock.id)
 
       {:ok, user_cart} = Commerce.create_cart(actor: buyer)
@@ -97,7 +97,7 @@ defmodule Loka.Resources.CartTest do
     end
 
     test "deletes the anonymous cart after merge", %{buyer: buyer, stock: stock} do
-      {:ok, anon_cart} = Commerce.create_anonymous_cart()
+      {:ok, anon_cart} = Commerce.create_cart()
       Commerce.add_to_cart!(anon_cart.id, stock.id)
       anon_cart_id = anon_cart.id
 
@@ -111,8 +111,8 @@ defmodule Loka.Resources.CartTest do
     end
 
     test "requires an actor" do
-      {:ok, anon_cart} = Commerce.create_anonymous_cart()
-      {:ok, user_cart} = Commerce.create_anonymous_cart()
+      {:ok, anon_cart} = Commerce.create_cart()
+      {:ok, user_cart} = Commerce.create_cart()
 
       assert {:error, _} =
                user_cart
@@ -141,7 +141,7 @@ defmodule Loka.Resources.CartTest do
     end
 
     test "anonymous user + valid cart ID → returns existing cart" do
-      {:ok, anon_cart} = Commerce.create_anonymous_cart()
+      {:ok, anon_cart} = Commerce.create_cart()
       assert {:ok, cart} = Commerce.ensure_cart_for_session(%{anonymous_cart_id: anon_cart.id})
       assert cart.id == anon_cart.id
     end
@@ -160,7 +160,7 @@ defmodule Loka.Resources.CartTest do
 
     test "logged-in user + no user cart + anon cart → assigns anon cart to user",
          %{buyer: buyer} do
-      {:ok, anon_cart} = Commerce.create_anonymous_cart()
+      {:ok, anon_cart} = Commerce.create_cart()
 
       assert {:ok, cart} =
                Commerce.ensure_cart_for_session(%{anonymous_cart_id: anon_cart.id}, actor: buyer)
@@ -178,7 +178,7 @@ defmodule Loka.Resources.CartTest do
 
     test "logged-in user + user cart + anon cart → merges and returns user cart",
          %{buyer: buyer, stock: stock} do
-      {:ok, anon_cart} = Commerce.create_anonymous_cart()
+      {:ok, anon_cart} = Commerce.create_cart()
       Commerce.add_to_cart!(anon_cart.id, stock.id)
       anon_cart_id = anon_cart.id
 
@@ -196,14 +196,14 @@ defmodule Loka.Resources.CartTest do
 
   describe "cleanup_anonymous" do
     test "deletes anonymous carts not modified in 30+ days" do
-      {:ok, old_cart} = Commerce.create_anonymous_cart()
+      {:ok, old_cart} = Commerce.create_cart()
 
       Loka.Repo.query!(
         "UPDATE cart SET updated_at = $1 WHERE id = $2",
         [DateTime.add(DateTime.utc_now(), -31, :day), Ecto.UUID.dump!(old_cart.id)]
       )
 
-      {:ok, fresh_cart} = Commerce.create_anonymous_cart()
+      {:ok, fresh_cart} = Commerce.create_cart()
 
       assert :ok = Commerce.cleanup_anonymous(authorize?: false)
 

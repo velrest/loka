@@ -7,7 +7,7 @@ defmodule LokaWeb.User.StudioLive do
   def mount(_params, _session, socket) do
     {:ok, studio} = Loka.Studios.get_own_studio(actor: socket.assigns.current_user)
 
-    {:ok, assign(socket, studio: studio, show_form: false, form: nil)}
+    {:ok, assign(socket, studio: studio, show_form: false, form: nil, last_params: %{})}
   end
 
   @impl true
@@ -26,8 +26,9 @@ defmodule LokaWeb.User.StudioLive do
     do: {:noreply, socket}
 
   def handle_event("validate", params, socket) do
-    form = AshPhoenix.Form.validate(socket.assigns.form.source, params["studio"] || %{})
-    {:noreply, assign(socket, form: to_form(form))}
+    raw = params["studio"] || %{}
+    form = AshPhoenix.Form.validate(socket.assigns.form.source, raw)
+    {:noreply, assign(socket, form: to_form(form), last_params: raw)}
   end
 
   @impl true
@@ -42,6 +43,13 @@ defmodule LokaWeb.User.StudioLive do
       {:error, form} ->
         {:noreply, assign(socket, form: to_form(form))}
     end
+  end
+
+  @impl true
+  def handle_info({:city_selected, %{city: city, zip: zip}}, socket) do
+    params = Map.merge(socket.assigns.last_params, %{"city" => city, "postal_code" => zip})
+    form = AshPhoenix.Form.validate(socket.assigns.form.source, params)
+    {:noreply, assign(socket, form: to_form(form), last_params: params)}
   end
 
   @impl true

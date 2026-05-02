@@ -18,13 +18,31 @@ defmodule LokaWeb.Inventory.StudioLive do
           )
           |> to_form()
 
-        {:ok, assign(socket, studio: studio, form: form, saved: false, show_confirm: false)}
+        last_params =
+          Map.new([:name, :street, :house_number, :city, :postal_code], fn field ->
+            {to_string(field), Map.get(studio, field)}
+          end)
+
+        {:ok,
+         assign(socket,
+           studio: studio,
+           form: form,
+           saved: false,
+           show_confirm: false,
+           last_params: last_params
+         )}
     end
   end
 
   @impl true
   def handle_info(:clear_saved, socket) do
     {:noreply, assign(socket, saved: false)}
+  end
+
+  def handle_info({:city_selected, %{city: city, zip: zip}}, socket) do
+    params = Map.merge(socket.assigns.last_params, %{"city" => city, "postal_code" => zip})
+    form = AshPhoenix.Form.validate(socket.assigns.form.source, params)
+    {:noreply, assign(socket, form: to_form(form), last_params: params)}
   end
 
   @impl true
@@ -57,8 +75,9 @@ defmodule LokaWeb.Inventory.StudioLive do
     do: {:noreply, socket}
 
   def handle_event("validate", params, socket) do
-    form = AshPhoenix.Form.validate(socket.assigns.form.source, params["studio"] || %{})
-    {:noreply, assign(socket, form: to_form(form))}
+    raw = params["studio"] || %{}
+    form = AshPhoenix.Form.validate(socket.assigns.form.source, raw)
+    {:noreply, assign(socket, form: to_form(form), last_params: raw)}
   end
 
   @impl true
@@ -95,43 +114,79 @@ defmodule LokaWeb.Inventory.StudioLive do
         <.inventory_tab_nav active={@current_path} />
       </:nav>
 
-      <div class="px-4 py-10 sm:px-6 lg:px-8 max-w-sm">
-        <.header>{gettext("Manage your studio")}</.header>
+      <div class="px-4 py-10 sm:px-6 lg:px-8 max-w-lg">
+        <div class="mb-8">
+          <h1 class="text-2xl font-bold">{gettext("Studio verwalten")}</h1>
+        </div>
 
-        <.form
-          for={@form}
-          phx-change="validate"
-          phx-submit="save"
-          class="mt-6 flex flex-col gap-4"
-        >
-          <.input field={@form[:name]} type="text" label={gettext("Studio name")} />
-          <.button type="submit" class={["btn btn-primary", @saved && "btn-success"]}>
-            <.icon :if={@saved} name="hero-check" class="size-4" />
-            {if @saved, do: gettext("Saved!"), else: gettext("Update studio")}
-          </.button>
-        </.form>
+        <div class="flex flex-col gap-6">
+          <%!-- Studio details --%>
+          <div class="card bg-base-100 border border-base-300 shadow shadow-black/30">
+            <div class="card-body gap-4">
+              <h3 class="font-semibold">{gettext("Studiodetails")}</h3>
+              <.form
+                for={@form}
+                phx-change="validate"
+                phx-submit="save"
+                class="flex flex-col gap-4"
+              >
+                <.input field={@form[:name]} type="text" label={gettext("Studioname")} />
 
-        <div class="mt-12 border-t border-error/20 pt-6">
-          <.button phx-click="request_delete" class="btn btn-outline btn-error btn-sm">
-            {gettext("Archive studio")}
-          </.button>
+                <div class="divider my-0 text-xs text-base-content/40">{gettext("Adresse")}</div>
+
+                <div class="grid grid-cols-3 gap-3">
+                  <div class="col-span-2">
+                    <.input field={@form[:street]} type="text" label={gettext("Strasse")} />
+                  </div>
+                  <.input field={@form[:house_number]} type="text" label={gettext("Nr.")} />
+                </div>
+
+                <.live_component
+                  module={LokaWeb.AddressInputComponent}
+                  id="address-input"
+                  postal_code_field={@form[:postal_code]}
+                  city_field={@form[:city]}
+                />
+
+                <.button type="submit" class={["btn btn-primary btn-sm self-end", @saved && "btn-success"]}>
+                  <.icon :if={@saved} name="hero-check" class="size-4" />
+                  {if @saved, do: gettext("Gespeichert!"), else: gettext("Speichern")}
+                </.button>
+              </.form>
+            </div>
+          </div>
+
+          <%!-- Danger zone --%>
+          <div class="card bg-base-100 border border-error/20 shadow shadow-black/30">
+            <div class="card-body gap-2">
+              <h3 class="font-semibold text-error/80">{gettext("Gefahrenzone")}</h3>
+              <p class="text-sm text-base-content/50">
+                {gettext("Archivierte Studios sind für Kunden nicht mehr sichtbar.")}
+              </p>
+              <div class="mt-2">
+                <.button phx-click="request_delete" class="btn btn-outline btn-error btn-sm">
+                  {gettext("Studio archivieren")}
+                </.button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       <dialog class={["modal", @show_confirm && "modal-open"]}>
         <div class="modal-box">
-          <h3 class="text-lg font-bold">{gettext("Archive your studio?")}</h3>
+          <h3 class="text-lg font-bold">{gettext("Studio archivieren?")}</h3>
           <p class="py-4 text-base-content/70">
             {gettext(
-              "Your studio will be archived and no longer visible to you or customers. Your data is retained and can be restored by contacting support."
+              "Dein Studio wird archiviert und ist weder für dich noch für Kunden sichtbar. Deine Daten bleiben erhalten und können über den Support wiederhergestellt werden."
             )}
           </p>
           <div class="modal-action">
             <.button phx-click="cancel_delete" class="btn btn-ghost">
-              {gettext("Cancel")}
+              {gettext("Abbrechen")}
             </.button>
             <.button phx-click="delete" class="btn btn-error">
-              {gettext("Yes, archive")}
+              {gettext("Ja, archivieren")}
             </.button>
           </div>
         </div>

@@ -6,7 +6,6 @@ defmodule LokaWeb.Features.UserStudioTest do
   @password "password123"
 
   setup %{conn: conn} do
-    # |> Ash.load!(:studio)
     user = UserHelpers.create_user(%{password: @password})
     logged_in_conn = UserHelpers.sign_in(conn, user.email, @password)
     %{user: user, conn: logged_in_conn}
@@ -24,47 +23,48 @@ defmodule LokaWeb.Features.UserStudioTest do
     test "renders empty state", %{conn: conn} do
       conn
       |> visit(~p"/me/studio")
-      |> assert_has("h2", text: "Your studio awaits")
-      |> assert_has("button", text: "Open your studio")
+      |> assert_has("h2", text: "Dein Studio wartet")
+      |> assert_has("button", text: "Studio eröffnen")
     end
 
-    test "clicking 'Open your studio' shows the create form", %{conn: conn} do
+    test "clicking 'Studio eröffnen' shows the create form", %{conn: conn} do
       conn
       |> visit(~p"/me/studio")
-      |> click_button("Open your studio")
-      |> assert_has("h1", text: "Name your studio")
+      |> click_button("Studio eröffnen")
+      |> assert_has("h1", text: "Studio eröffnen")
       |> assert_has("input[name='studio[name]']")
-      |> assert_has("button", text: "Create studio")
+      |> assert_has("button", text: "Studio erstellen")
     end
 
-    test "submitting empty form shows validation error", %{conn: conn} do
+    test "submitting without city shows validation error", %{conn: conn} do
       conn
       |> visit(~p"/me/studio")
-      |> click_button("Open your studio")
-      |> click_button("Create studio")
+      |> click_button("Studio eröffnen")
+      |> fill_in("Studioname", with: "My Test Studio")
+      |> click_button("Studio erstellen")
       |> assert_has("p.text-error")
     end
 
-    test "submitting valid name creates studio and shows it", %{conn: conn} do
+    test "submitting valid name and city creates studio and shows it", %{conn: conn} do
       conn
       |> visit(~p"/me/studio")
-      |> click_button("Open your studio")
-      |> fill_in("Studio name", with: "My Test Studio")
-      |> click_button("Create studio")
-      |> assert_has("h1", text: "My Test Studio")
-      |> assert_has("p", text: "Your studio is live.")
+      |> click_button("Studio eröffnen")
+      |> fill_in("Studioname", with: "My Test Studio")
+      |> fill_in("PLZ", with: "6000")
+      |> fill_in("Ort", with: "Luzern")
+      |> click_button("Studio erstellen")
+      |> assert_has("p", text: "My Test Studio")
+      |> assert_has("p", text: "Aktiv")
     end
   end
 
   describe "studio page with existing studio" do
     setup %{user: user} do
       studio =
-        Loka.Studios.Studio
-        |> Ash.Changeset.for_create(:create_studio, %{name: "Existing Studio"},
-          actor: user,
-          authorize?: false
+        Loka.Studios.create_studio!(
+          %{name: "Existing Studio", city: "Genf", postal_code: "1200"},
+          actor: user
         )
-        |> Ash.create!()
 
       %{studio: studio}
     end
@@ -72,8 +72,8 @@ defmodule LokaWeb.Features.UserStudioTest do
     test "renders studio name", %{conn: conn, studio: studio} do
       conn
       |> visit(~p"/me/studio")
-      |> assert_has("h1", text: studio.name)
-      |> assert_has("p", text: "Your studio is live.")
+      |> assert_has("p", text: studio.name)
+      |> assert_has("p", text: "Aktiv")
     end
   end
 end

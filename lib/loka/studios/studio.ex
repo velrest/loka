@@ -30,13 +30,12 @@ defmodule Loka.Studios.Studio do
     end
 
     create :create_studio do
-      accept [:name]
-
+      accept [:name, :street, :house_number, :city, :postal_code]
       change relate_actor(:owner)
     end
 
     update :update_studio do
-      accept [:name]
+      accept [:name, :street, :house_number, :city, :postal_code]
     end
 
     destroy :archive_studio
@@ -71,6 +70,19 @@ defmodule Loka.Studios.Studio do
     attribute :name, :string do
       allow_nil? false
       public? true
+    end
+
+    attribute :street, :string
+
+    attribute :house_number, :string
+
+    attribute :city, :string do
+      allow_nil? false
+    end
+
+    attribute :postal_code, :string do
+      allow_nil? false
+      constraints min_length: 4, max_length: 4, match: ~r/^\d{4}$/
     end
 
     timestamps()
