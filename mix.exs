@@ -5,6 +5,7 @@ defmodule Loka.MixProject do
     [
       app: :loka,
       version: "0.1.0",
+      licenses: ["AGPL-3.0-or-later"],
       elixir: "~> 1.15",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
