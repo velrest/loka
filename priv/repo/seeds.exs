@@ -48,10 +48,10 @@ studio2_user =
 
 # Studios
 studio1 =
-  Loka.Studios.create_studio!(%{name: "Studio 1", city: "Zürich"}, actor: studio1_user, authorize?: false)
+  Loka.Studios.create_studio!(%{name: "Studio 1", city: "Zürich", postal_code: "8001"}, actor: studio1_user, authorize?: false)
 
 studio2 =
-  Loka.Studios.create_studio!(%{name: "Studio 2", city: "Bern"}, actor: studio2_user, authorize?: false)
+  Loka.Studios.create_studio!(%{name: "Studio 2", city: "Bern", postal_code: "3004"}, actor: studio2_user, authorize?: false)
 
 # Stock for Studio 1 (items created inline via manage_relationship)
 Loka.Inventory.create_stock!(

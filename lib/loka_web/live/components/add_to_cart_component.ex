@@ -1,4 +1,4 @@
-defmodule LokaWeb.Shop.AddToCartLiveComponent do
+defmodule LokaWeb.AddToCartComponent do
   alias Loka.Commerce
   use LokaWeb, :live_component
 

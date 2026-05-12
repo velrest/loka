@@ -9,12 +9,6 @@ defmodule LokaWeb.User.SettingsLive do
   end
 
   @impl true
-  def handle_params(_params, uri, socket) do
-    path = URI.parse(uri).path
-    {:noreply, assign(socket, current_path: path)}
-  end
-
-  @impl true
   def render(assigns) do
     ~H"""
     <Layouts.app current_user={@current_user} flash={@flash} socket={@socket}>

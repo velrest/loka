@@ -21,7 +21,7 @@ defmodule LokaWeb.Features.Inventory.StudioTest do
 
   describe "inventory studio page with an existing studio" do
     setup %{user: user} do
-      {:ok, studio} = Loka.Studios.create_studio(%{name: "My Studio", city: "Bern", postal_code: "3000"}, actor: user)
+      {:ok, studio} = Loka.Studios.create_studio(%{name: "My Studio", city: "Bern", postal_code: "3004"}, actor: user)
       %{studio: studio}
     end
 
@@ -39,6 +39,27 @@ defmodule LokaWeb.Features.Inventory.StudioTest do
       |> fill_in("Studioname", with: "Renamed Studio")
       |> click_button("Speichern")
       |> assert_has("input[name='studio[name]'][value='Renamed Studio']")
+    end
+
+    test "renders description field", %{conn: conn} do
+      conn
+      |> visit(~p"/inventory/studio")
+      |> assert_has("textarea[name='studio[description]']")
+    end
+
+    test "updating description saves and re-renders", %{conn: conn} do
+      conn
+      |> visit(~p"/inventory/studio")
+      |> fill_in("Beschreibung", with: "Handgemachte Keramik aus Bern")
+      |> click_button("Speichern")
+      |> assert_has("textarea[name='studio[description]']", text: "Handgemachte Keramik aus Bern")
+    end
+
+    test "renders location card with map", %{conn: conn, studio: studio} do
+      conn
+      |> visit(~p"/inventory/studio")
+      |> assert_has("h3", text: "Standort")
+      |> assert_has("[data-lat='#{studio.latitude}']")
     end
 
     test "shows archive button", %{conn: conn} do

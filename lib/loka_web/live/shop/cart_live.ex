@@ -54,20 +54,12 @@ defmodule LokaWeb.Shop.CartLive do
   def handle_event("decrease_quantity", %{"stock_id" => stock_id}, socket) do
     cart = socket.assigns.cart
     user = socket.assigns.current_user
-    anonymous = is_nil(cart.user_id)
 
     cart.cart_stocks
-    |> Enum.find(&(to_string(&1.stock_id) == stock_id))
+    |> Enum.find(&(&1.stock_id == stock_id))
     |> case do
-      nil ->
-        :ok
-
-      cart_stock ->
-        if anonymous do
-          Ash.destroy!(cart_stock, authorize?: false, domain: Loka.Commerce)
-        else
-          Ash.destroy!(cart_stock, actor: user, domain: Loka.Commerce)
-        end
+      nil -> :ok
+      cart_stock -> Commerce.remove_from_cart!(cart_stock, actor: user)
     end
 
     Phoenix.PubSub.broadcast(Loka.PubSub, "cart:#{cart.id}", :cart_updated)
@@ -150,7 +142,7 @@ defmodule LokaWeb.Shop.CartLive do
                 <div class="shrink-0 size-20 rounded-lg overflow-hidden bg-base-200">
                   <%= if stock.item.images != [] do %>
                     <img
-                      src={hd(stock.item.images).path}
+                      src={List.first(stock.item.images).path}
                       alt={stock.item.name}
                       class="w-full h-full object-cover"
                     />
@@ -251,8 +243,8 @@ defmodule LokaWeb.Shop.CartLive do
   defp cart_line_items(%{cart_stocks: cart_stocks}) do
     cart_stocks
     |> Enum.group_by(& &1.stock_id)
-    |> Enum.map(fn {_stock_id, entries} ->
-      {hd(entries).stock, length(entries), entries}
+    |> Enum.map(fn {_stock_id, [first | _] = entries} ->
+      {first.stock, length(entries), entries}
     end)
   end
 

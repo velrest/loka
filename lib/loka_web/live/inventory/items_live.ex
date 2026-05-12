@@ -7,7 +7,13 @@ defmodule LokaWeb.Inventory.ItemsLive do
   @impl true
   def mount(_params, _session, socket) do
     user = socket.assigns.current_user
-    stock = Inventory.list_studio_stock!(load: [item: :images], actor: user)
+
+    stock =
+      case Loka.Studios.get_own_studio(actor: user) do
+        {:ok, %{id: studio_id}} -> Inventory.list_studio_stock!(studio_id, actor: user)
+        _ -> []
+      end
+
     {:ok, assign(socket, stock: stock)}
   end
 
@@ -49,7 +55,7 @@ defmodule LokaWeb.Inventory.ItemsLive do
                 <%!-- Thumbnail --%>
                 <div class="shrink-0 size-16 rounded-lg overflow-hidden bg-base-200">
                   <%= if s.item.images != [] do %>
-                    <img src={hd(s.item.images).path} alt={s.item.name} class="w-full h-full object-cover" />
+                    <img src={List.first(s.item.images).path} alt={s.item.name} class="w-full h-full object-cover" />
                   <% else %>
                     <img src="/images/placeholder-pot.svg" alt="" class="w-full h-full object-cover" />
                   <% end %>

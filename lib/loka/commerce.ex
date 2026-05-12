@@ -22,6 +22,7 @@ defmodule Loka.Commerce do
 
     resource Loka.Commerce.CartStock do
       define :add_to_cart, action: :create, args: [:cart_id, :stock_id]
+      define :remove_from_cart, action: :destroy
       define :list_cart_stocks, action: :for_cart, args: [:cart_id]
     end
 
