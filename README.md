@@ -49,6 +49,14 @@ Four Ash domains backed by PostgreSQL. All resources use UUIDv7 primary keys and
 - `/shop/studio/:id` — Studio page: logo, name, description, all stock from that studio
 - `/shop/cart` — Cart with line items and summary
 
+## Payments
+
+Stripe + [`stripity_stripe`](https://hex.pm/packages/stripity_stripe) is the planned payment integration. TWINT is supported as a native Stripe payment method in Switzerland — it uses the standard Payment Intents API (`payment_method_types: ["twint"]`) alongside Visa/Mastercard, so no separate library or PSP contract is needed.
+
+Constraints: CHF only, max 5,000 CHF per transaction, no manual capture.
+
+Pricing: 1.9% + CHF 0.30 per transaction (same rate for cards and TWINT).
+
 ## Key libraries
 
 - **Ash Framework** + AshPostgres, AshAuthentication, AshPhoenix, AshAdmin, AshOban, AshPaperTrail, AshArchival, AshMoney
