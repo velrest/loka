@@ -29,7 +29,7 @@ Four Ash domains backed by PostgreSQL. All resources use UUIDv7 primary keys and
   - `User`: Buyers and studio owners. Auth via password + magic link (AshAuthentication). Tracks `email`, `hashed_password`, `confirmed_at`. Exposes `has_studio?` calculation and a `studio` relationship.
 
 - **Studios** — Ceramic studios on the platform.
-  - `Studio`: Belongs to a `User` (owner). Fields: `name`. Soft-deleted via AshArchival; mutations audited via AshPaperTrail.
+  - `Studio`: Belongs to a `User` (owner, unique — one studio per user). Fields: `name`, `description`, `logo_path`, `street`, `house_number`, `city`, `postal_code`, `latitude`, `longitude`. Address is geocoded automatically from the postal code on create/update using the Swiss official locality index (`priv/data/localities.csv`). Soft-deleted via AshArchival; mutations audited via AshPaperTrail.
 
 - **Inventory** — Products that studios sell.
   - `Item`: A product type with `name` and `description`. Has many `Stock` and `Image` records. Soft-deleted and audited.
@@ -42,16 +42,33 @@ Four Ash domains backed by PostgreSQL. All resources use UUIDv7 primary keys and
   - `Order`: A placed order. Status lifecycle: `pending → paid → fulfilled` (or `cancelled`). Belongs to a `User`.
   - `OrderLine`: One line per `Stock` entry in an order. Fields: `unit_price`, `quantity`.
 
+## Shop routes
+
+- `/` — Landing page: hero, interactive OSM map (viewport-filters stock list), stock grid
+- `/shop/item/:id` — Product detail: images, description, price, add-to-cart
+- `/shop/studio/:id` — Studio page: logo, name, description, all stock from that studio
+- `/shop/cart` — Cart with line items and summary
+
+## Key libraries
+
+- **Ash Framework** + AshPostgres, AshAuthentication, AshPhoenix, AshAdmin, AshOban, AshPaperTrail, AshArchival, AshMoney
+- **Phoenix LiveView** with colocated JS hooks (`ColocatedHook`)
+- **DaisyUI** (on top of Tailwind CSS v4) for UI components
+- **Leaflet.js** for studio map (loaded via `app.js`; `ImageSlider` is also a global hook in `assets/js/image_slider.js`)
+
+## Development
+
+```bash
+mix setup          # install deps + create + migrate DB + seed
+mix phx.server     # start dev server at localhost:4000
+mix test           # run test suite
+mix precommit      # format + compile + test (run before committing)
+mix ash.codegen <name>  # generate migrations after resource changes
+```
+
 ## Users
 Password is `password123` for all users
 - user@loka.com Normal user
 - studio1@loka.com Studio 1
 - studio2@loka.com Studio 2
 
-## Learn more
-
-* Official website: https://www.phoenixframework.org/
-* Guides: https://hexdocs.pm/phoenix/overview.html
-* Docs: https://hexdocs.pm/phoenix
-* Forum: https://elixirforum.com/c/phoenix-forum
-* Source: https://github.com/phoenixframework/phoenix

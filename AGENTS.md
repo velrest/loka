@@ -1,22 +1,44 @@
-This is a web application written using the Phoenix web framework.
+This is a web application written using the Phoenix web framework, Ash Framework, AshPostgres, and AshAuthentication.
 
 ## Project guidelines
 
 - Use `mix precommit` alias when you are done with all changes and fix any pending issues
 - Use the already included and available `:req` (`Req`) library for HTTP requests, **avoid** `:httpoison`, `:tesla`, and `:httpc`. Req is included by default and is the preferred HTTP client for Phoenix apps
 
+## Ash Framework guidelines
+
+- **Always** use domain functions for all resource operations — **never** call `Ash.*` modules (e.g. `Ash.read!`, `Ash.create!`, `Ash.destroy!`) directly in application code or tests. Go through the domain instead: `Commerce.*`, `Inventory.*`, `Studios.*`, `Accounts.*`
+- **Never** use `authorize?: false` in user-facing code (LiveViews, LiveComponents, controllers). If you need to authorize an operation without an actor, fix the resource policy instead (e.g. `authorize_if expr(is_nil(user_id))`)
+- **Always** use `mix ash.codegen <name>` to generate migrations — never `mix ash_postgres.generate_migrations`
+- **Omit** Ash attribute options that match the framework defaults — do not write `allow_nil? true`, `public? true`, `writable? true`, etc. unless you are overriding the default
+- LiveComponents belong in `lib/loka_web/live/components/`
+
+## UI guidelines
+
+- This project uses **DaisyUI** (on top of Tailwind CSS) — use DaisyUI component classes (`btn`, `card`, `input`, `badge`, etc.) as the primary styling approach
+- Card styling convention: always add `border border-base-300 shadow shadow-black/30` to cards for consistent contrast
+
 ### Phoenix v1.8 guidelines
 
-- **Always** begin your LiveView templates with `<Layouts.app flash={@flash} ...>` which wraps all inner content
-- The `MyAppWeb.Layouts` module is aliased in the `my_app_web.ex` file, so you can use it without needing to alias it again
-- Anytime you run into errors with no `current_scope` assign:
-  - You failed to follow the Authenticated Routes guidelines, or you failed to pass `current_scope` to `<Layouts.app>`
-  - **Always** fix the `current_scope` error by moving your routes to the proper `live_session` and ensure you pass `current_scope` as needed
+- **Always** begin your LiveView templates with `<Layouts.app current_user={@current_user} flash={@flash} socket={@socket}>` which wraps all inner content
+- The `LokaWeb.Layouts` module is aliased in `loka_web.ex`, so you can use it without needing to alias it again
+- This project uses **AshAuthentication** — the authenticated assign is `current_user`, not `current_scope`. Anytime you run into errors with a missing `current_user` assign, you failed to mount the correct `on_mount` hook or route the live view through the correct `live_session`
 - Phoenix v1.8 moved the `<.flash_group>` component to the `Layouts` module. You are **forbidden** from calling `<.flash_group>` outside of the `layouts.ex` module
 - Out of the box, `core_components.ex` imports an `<.icon name="hero-x-mark" class="w-5 h-5"/>` component for hero icons. **Always** use the `<.icon>` component for icons, **never** use `Heroicons` modules or similar
 - **Always** use the imported `<.input>` component for form inputs from `core_components.ex` when available. `<.input>` is imported and using it will save steps and prevent errors
 - If you override the default input classes (`<.input class="myclass px-2 py-1 rounded-lg">)`) class with your own values, no default classes are inherited, so your
 custom classes must fully style the input
+
+## Shared components and hooks
+
+- `<.stock_card stock={stock} current_user={@current_user} />` is defined in `LokaWeb.LokaComponents` and imported everywhere. Use it for shop item grids — **do not duplicate it**. Pass `show_studio={false}` when rendering on the studio's own page.
+- `ImageSlider` is a **global external hook** registered in `assets/js/image_slider.js`. Reference it as `phx-hook="ImageSlider"` (no dot prefix). **Do not add a colocated `.ImageSlider` script** — the global hook already handles all image sliders.
+
+## Swiss locality test data
+
+- When creating studios in tests, use real Swiss postal codes that exist in `priv/data/localities.csv`:
+  - Zürich: `city: "Zürich", postal_code: "8001"`
+  - Bern: `city: "Bern", postal_code: "3004"` (not "3000" — it's not in the CSV)
 
 ### JS and CSS guidelines
 
@@ -30,7 +52,7 @@ custom classes must fully style the input
 
 - **Always use and maintain this import syntax** in the app.css file for projects generated with `phx.new`
 - **Never** use `@apply` when writing raw css
-- **Always** manually write your own tailwind-based components instead of using daisyUI for a unique, world-class design
+- Use **DaisyUI** component classes for UI components — see the UI guidelines section above
 - Out of the box **only the app.js and app.css bundles are supported**
   - You cannot reference an external vendor'd script `src` or link `href` in the layouts
   - You must import the vendor deps into app.js and app.css to use them
