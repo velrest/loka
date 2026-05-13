@@ -12,7 +12,7 @@ end
 defmodule Loka.Changes.Image.UploadFile do
   use Ash.Resource.Change
 
-  def change(changeset, _opts, _context) do
+  def change(changeset, _opts, %{actor: actor}) do
     file = Ash.Changeset.get_argument(changeset, :file)
     item_id = Ash.Changeset.get_argument(changeset, :item_id)
 
@@ -27,7 +27,9 @@ defmodule Loka.Changes.Image.UploadFile do
       |> Ash.Changeset.change_attribute(:filename, filename)
       |> Ash.Changeset.change_attribute(
         :position,
-        length(Loka.Inventory.list_item_images!(item_id))
+        Loka.Inventory.Image
+        |> Ash.Query.for_read(:list_item_images, %{item_id: item_id})
+        |> Ash.count!(actor: actor)
       )
       |> Ash.Changeset.after_action(fn _changeset, record ->
         dest = Path.join([:code.priv_dir(:loka), "static", String.trim_leading(record.path, "/")])

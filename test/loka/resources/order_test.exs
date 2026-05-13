@@ -94,8 +94,8 @@ defmodule Loka.Resources.OrderTest do
       assert cancelled.status == :cancelled
     end
 
-    test "other user cannot cancel the order", %{other: other, order: order} do
-      order_loaded = Ash.get!(Loka.Commerce.Order, order.id, authorize?: false)
+    test "other user cannot cancel the order", %{buyer: buyer, other: other, order: order} do
+      {:ok, order_loaded} = Commerce.get_order(order.id, actor: buyer)
 
       assert {:error, _} =
                order_loaded
@@ -110,8 +110,8 @@ defmodule Loka.Resources.OrderTest do
       %{order: order}
     end
 
-    test "studio owner can mark order as paid", %{owner: owner, order: order} do
-      order_loaded = Ash.get!(Loka.Commerce.Order, order.id, authorize?: false)
+    test "studio owner can mark order as paid", %{buyer: buyer, owner: owner, order: order} do
+      {:ok, order_loaded} = Commerce.get_order(order.id, actor: buyer)
 
       assert {:ok, paid} =
                order_loaded
@@ -122,7 +122,7 @@ defmodule Loka.Resources.OrderTest do
     end
 
     test "buyer cannot mark own order as paid", %{buyer: buyer, order: order} do
-      order_loaded = Ash.get!(Loka.Commerce.Order, order.id, authorize?: false)
+      {:ok, order_loaded} = Commerce.get_order(order.id, actor: buyer)
 
       assert {:error, _} =
                order_loaded
@@ -134,7 +134,7 @@ defmodule Loka.Resources.OrderTest do
   describe "fulfil" do
     setup %{buyer: buyer, owner: owner, stock: stock} do
       {:ok, order} = Commerce.place_order(lines(stock), actor: buyer)
-      order_loaded = Ash.get!(Loka.Commerce.Order, order.id, authorize?: false)
+      {:ok, order_loaded} = Commerce.get_order(order.id, actor: buyer)
 
       {:ok, paid} =
         order_loaded |> Ash.Changeset.for_update(:mark_paid, %{}, actor: owner) |> Ash.update()

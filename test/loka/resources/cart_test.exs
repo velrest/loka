@@ -205,6 +205,7 @@ defmodule Loka.Resources.CartTest do
 
       {:ok, fresh_cart} = Commerce.create_cart()
 
+      # cleanup_anonymous is a system Oban job — no user actor exists in this context
       assert :ok = Commerce.cleanup_anonymous(authorize?: false)
 
       assert {:ok, nil} = Commerce.get_anonymous_cart(old_cart.id)
@@ -219,6 +220,7 @@ defmodule Loka.Resources.CartTest do
         [DateTime.add(DateTime.utc_now(), -31, :day), Ecto.UUID.dump!(user_cart.id)]
       )
 
+      # cleanup_anonymous is a system Oban job — no user actor exists in this context
       assert :ok = Commerce.cleanup_anonymous(authorize?: false)
 
       assert {:ok, cart} = Commerce.get_user_cart(actor: buyer)

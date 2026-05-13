@@ -22,6 +22,7 @@ defmodule Loka.Support.UserHelpers do
         password: params[:password] || "password123",
         password_confirmation: params[:password] || "password123"
       },
+      # no actor exists at registration time in test setup
       authorize?: false
     )
     |> Ash.create!()

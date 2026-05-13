@@ -8,7 +8,7 @@ This is a web application written using the Phoenix web framework, Ash Framework
 ## Ash Framework guidelines
 
 - **Always** use domain functions for all resource operations — **never** call `Ash.*` modules (e.g. `Ash.read!`, `Ash.create!`, `Ash.destroy!`) directly in application code or tests. Go through the domain instead: `Commerce.*`, `Inventory.*`, `Studios.*`, `Accounts.*`
-- **Never** use `authorize?: false` in user-facing code (LiveViews, LiveComponents, controllers). If you need to authorize an operation without an actor, fix the resource policy instead (e.g. `authorize_if expr(is_nil(user_id))`)
+- **Never** use `authorize?: false` without a code comment explaining exactly why it is necessary. The only legitimate uses are: (1) system-level background jobs that have no user actor by design (e.g. Oban cleanup jobs), and (2) test data setup helpers (e.g. `test/support/`). It is **never** acceptable in LiveViews, LiveComponents, or controllers — fix the resource policy instead (e.g. `authorize_if expr(is_nil(user_id))`). It is also **never** acceptable in resource tests as a shortcut to load records — use a domain function with the correct actor instead.
 - **Always** use `mix ash.codegen <name>` to generate migrations — never `mix ash_postgres.generate_migrations`
 - **Omit** Ash attribute options that match the framework defaults — do not write `allow_nil? true`, `public? true`, `writable? true`, etc. unless you are overriding the default
 - LiveComponents belong in `lib/loka_web/live/components/`
