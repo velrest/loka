@@ -34,8 +34,19 @@ defmodule LokaWeb.Inventory.ItemsLive do
         </div>
 
         <div :if={@stock == []} class="text-center py-24 text-base-content/40">
-          <svg xmlns="http://www.w3.org/2000/svg" class="size-12 mx-auto mb-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="size-12 mx-auto mb-4 opacity-30"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1"
+              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+            />
           </svg>
           <p class="text-lg mb-4">{gettext("Noch keine Artikel.")}</p>
           <.link navigate={~p"/inventory/items/new"} class="btn btn-primary btn-sm">
@@ -55,7 +66,11 @@ defmodule LokaWeb.Inventory.ItemsLive do
                 <%!-- Thumbnail --%>
                 <div class="shrink-0 size-16 rounded-lg overflow-hidden bg-base-200">
                   <%= if s.item.images != [] do %>
-                    <img src={List.first(s.item.images).path} alt={s.item.name} class="w-full h-full object-cover" />
+                    <img
+                      src={List.first(s.item.images).path}
+                      alt={s.item.name}
+                      class="w-full h-full object-cover"
+                    />
                   <% else %>
                     <img src="/images/placeholder-pot.svg" alt="" class="w-full h-full object-cover" />
                   <% end %>
@@ -70,18 +85,31 @@ defmodule LokaWeb.Inventory.ItemsLive do
                 <%!-- Stats --%>
                 <div class="hidden sm:flex items-center gap-6 text-sm shrink-0">
                   <div class="text-right">
-                    <p class="text-base-content/40 text-xs uppercase tracking-wide">{gettext("Preis")}</p>
+                    <p class="text-base-content/40 text-xs uppercase tracking-wide">
+                      {gettext("Preis")}
+                    </p>
                     <p class="font-semibold">{s.price}</p>
                   </div>
                   <div class="text-right">
-                    <p class="text-base-content/40 text-xs uppercase tracking-wide">{gettext("Menge")}</p>
+                    <p class="text-base-content/40 text-xs uppercase tracking-wide">
+                      {gettext("Menge")}
+                    </p>
                     <p class="font-semibold">{s.quantity}</p>
                   </div>
                 </div>
 
                 <%!-- Arrow --%>
-                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-base-content/30 shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="size-4 text-base-content/30 shrink-0"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                    clip-rule="evenodd"
+                  />
                 </svg>
               </div>
             </div>

@@ -48,10 +48,16 @@ studio2_user =
 
 # Studios
 studio1 =
-  Loka.Studios.create_studio!(%{name: "Studio 1", city: "Zürich", postal_code: "8001"}, actor: studio1_user, authorize?: false)
+  Loka.Studios.create_studio!(%{name: "Studio 1", city: "Zürich", postal_code: "8001"},
+    actor: studio1_user,
+    authorize?: false
+  )
 
 studio2 =
-  Loka.Studios.create_studio!(%{name: "Studio 2", city: "Bern", postal_code: "3004"}, actor: studio2_user, authorize?: false)
+  Loka.Studios.create_studio!(%{name: "Studio 2", city: "Bern", postal_code: "3004"},
+    actor: studio2_user,
+    authorize?: false
+  )
 
 # Stock for Studio 1 (items created inline via manage_relationship)
 Loka.Inventory.create_stock!(
@@ -116,7 +122,13 @@ priv = to_string(:code.priv_dir(:loka))
 seed_images = fn item_id, filenames ->
   for filename <- filenames do
     src = Path.join([priv, "static", "images", "seed", filename])
-    {:ok, ash_file} = Ash.Type.File.cast_input(%Plug.Upload{path: src, filename: filename, content_type: "image/svg+xml"}, [])
+
+    {:ok, ash_file} =
+      Ash.Type.File.cast_input(
+        %Plug.Upload{path: src, filename: filename, content_type: "image/svg+xml"},
+        []
+      )
+
     result = Loka.Inventory.create_image!(item_id, ash_file, authorize?: false)
     dest = Path.join([priv, "static", String.trim_leading(result.path, "/")])
     File.mkdir_p!(Path.dirname(dest))

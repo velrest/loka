@@ -113,7 +113,12 @@ defmodule LokaWeb.Shop.CartWidgetLiveTest do
       refute cart_widget_html(view) =~ "dropdown dropdown-end"
 
       {:ok, cart} = Commerce.create_cart(actor: user)
-      Phoenix.PubSub.broadcast(Loka.PubSub, "user:#{user.id}:cart_created", {:cart_created, cart.id})
+
+      Phoenix.PubSub.broadcast(
+        Loka.PubSub,
+        "user:#{user.id}:cart_created",
+        {:cart_created, cart.id}
+      )
 
       assert cart_widget_html(view) =~ "dropdown dropdown-end"
     end

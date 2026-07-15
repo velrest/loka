@@ -124,7 +124,10 @@ defmodule LokaWeb.User.StudioLive do
       </div>
 
       <%!-- Empty state --%>
-      <div :if={!@studio && !@show_form} class="flex flex-col items-center justify-center py-24 gap-6 text-center max-w-sm mx-auto">
+      <div
+        :if={!@studio && !@show_form}
+        class="flex flex-col items-center justify-center py-24 gap-6 text-center max-w-sm mx-auto"
+      >
         <div class="bg-primary/10 text-primary rounded-2xl p-6">
           <.icon name="hero-building-storefront" class="size-14" />
         </div>
@@ -132,7 +135,9 @@ defmodule LokaWeb.User.StudioLive do
         <div class="flex flex-col gap-2">
           <h2 class="text-3xl font-bold tracking-tight">{gettext("Dein Studio wartet")}</h2>
           <p class="text-base-content/60 text-sm leading-relaxed">
-            {gettext("Erreiche neue Kunden, zeige dein Handwerk und baue etwas, das Menschen begeistert.")}
+            {gettext(
+              "Erreiche neue Kunden, zeige dein Handwerk und baue etwas, das Menschen begeistert."
+            )}
           </p>
         </div>
 

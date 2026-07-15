@@ -32,33 +32,33 @@ defmodule LokaWeb.AddToCartComponent do
         {gettext("In den Warenkorb")}
       </button>
       <script :type={Phoenix.LiveView.ColocatedHook} name=".AddToCart">
-      export default {
-        mounted() {
-          const cartId = localStorage.getItem("cart-id")
-          this.pushEventTo(this.el, "ensure_cart", {cart_id: cartId || ""})
-          this.handleEvent("cart_assigned", ({cart_id, anonymous}) => {
-            if (anonymous && cart_id) {
-              const isNew = localStorage.getItem("cart-id") !== cart_id
-              localStorage.setItem("cart-id", cart_id)
-              if (isNew) {
-                window.dispatchEvent(new CustomEvent("cart-created", {detail: {cart_id}}))
+        export default {
+          mounted() {
+            const cartId = localStorage.getItem("cart-id")
+            this.pushEventTo(this.el, "ensure_cart", {cart_id: cartId || ""})
+            this.handleEvent("cart_assigned", ({cart_id, anonymous}) => {
+              if (anonymous && cart_id) {
+                const isNew = localStorage.getItem("cart-id") !== cart_id
+                localStorage.setItem("cart-id", cart_id)
+                if (isNew) {
+                  window.dispatchEvent(new CustomEvent("cart-created", {detail: {cart_id}}))
+                }
+              } else {
+                localStorage.removeItem("cart-id")
               }
-            } else {
-              localStorage.removeItem("cart-id")
+            })
+            this._cartCreatedHandler = ({detail: {cart_id}}) => {
+              if (this.el.isConnected) {
+                this.pushEventTo(this.el, "ensure_cart", {cart_id})
+              }
             }
-          })
-          this._cartCreatedHandler = ({detail: {cart_id}}) => {
-            if (this.el.isConnected) {
-              this.pushEventTo(this.el, "ensure_cart", {cart_id})
-            }
+            window.addEventListener("cart-created", this._cartCreatedHandler)
+          },
+          destroyed() {
+            window.removeEventListener("cart-created", this._cartCreatedHandler)
           }
-          window.addEventListener("cart-created", this._cartCreatedHandler)
-        },
-        destroyed() {
-          window.removeEventListener("cart-created", this._cartCreatedHandler)
         }
-      }
-    </script>
+      </script>
     </div>
     """
   end

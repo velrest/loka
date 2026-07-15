@@ -8,15 +8,21 @@ defmodule LokaWeb.Features.ShopTest do
 
     Inventory.create_stock!(
       %{name: "Cup", description: "A cup"},
-      %{quantity: 1, price: Money.new(:CHF, 100)}, actor: user)
+      %{quantity: 1, price: Money.new(:CHF, 100)},
+      actor: user
+    )
 
     Inventory.create_stock!(
       %{name: "Bowl", description: "A bowl"},
-      %{quantity: 2, price: Money.new(:CHF, 200)}, actor: user)
+      %{quantity: 2, price: Money.new(:CHF, 200)},
+      actor: user
+    )
 
     Inventory.create_stock!(
       %{name: "Plate", description: "A plate"},
-      %{quantity: 3, price: Money.new(:CHF, 300)}, actor: user)
+      %{quantity: 3, price: Money.new(:CHF, 300)},
+      actor: user
+    )
 
     %{user: user, conn: conn}
   end

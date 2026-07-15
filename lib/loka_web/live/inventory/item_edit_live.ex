@@ -258,7 +258,10 @@ defmodule LokaWeb.Inventory.ItemEditLive do
                   </button>
                 </div>
               </div>
-              <.live_file_input upload={@uploads.images} class="file-input file-input-bordered w-full" />
+              <.live_file_input
+                upload={@uploads.images}
+                class="file-input file-input-bordered w-full"
+              />
             </div>
 
             <.button type="submit" class="btn btn-primary" disabled={@uploads.images.entries == []}>
@@ -270,13 +273,20 @@ defmodule LokaWeb.Inventory.ItemEditLive do
         <%!-- Edit mode --%>
         <div :if={@mode == :edit} class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
           <%!-- Left: images --%>
-          <div id="image-upload-card" class="card bg-base-100 border border-base-300 shadow shadow-black/30">
+          <div
+            id="image-upload-card"
+            class="card bg-base-100 border border-base-300 shadow shadow-black/30"
+          >
             <div class="card-body gap-4">
               <h3 class="font-semibold">{gettext("Bilder")}</h3>
 
               <%!-- Image gallery --%>
               <div id="item-images" phx-update="stream" class="grid grid-cols-3 gap-2">
-                <div :for={{dom_id, image} <- @streams.images} id={dom_id} class="relative group aspect-square">
+                <div
+                  :for={{dom_id, image} <- @streams.images}
+                  id={dom_id}
+                  class="relative group aspect-square"
+                >
                   <img src={image.path} class="w-full h-full object-cover rounded-lg" />
                   <button
                     :if={@image_count > 1}
@@ -305,7 +315,10 @@ defmodule LokaWeb.Inventory.ItemEditLive do
                 </div>
               </div>
 
-              <.live_file_input upload={@uploads.images} class="file-input file-input-bordered w-full" />
+              <.live_file_input
+                upload={@uploads.images}
+                class="file-input file-input-bordered w-full"
+              />
             </div>
           </div>
 

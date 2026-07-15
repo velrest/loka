@@ -240,6 +240,7 @@ defmodule LokaWeb.Shop.CartLive do
 
   defp cart_line_items(nil), do: []
   defp cart_line_items(%{cart_stocks: []}), do: []
+
   defp cart_line_items(%{cart_stocks: cart_stocks}) do
     cart_stocks
     |> Enum.group_by(& &1.stock_id)

@@ -102,12 +102,12 @@ defmodule Loka.Studios.Studio do
     timestamps()
   end
 
-  identities do
-    identity :unique_owner, [:owner_id]
-  end
-
   relationships do
     belongs_to :owner, Loka.Accounts.User
     has_many :stock, Loka.Inventory.Stock
+  end
+
+  identities do
+    identity :unique_owner, [:owner_id]
   end
 end

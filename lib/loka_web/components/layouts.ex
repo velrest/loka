@@ -146,12 +146,21 @@ defmodule LokaWeb.Layouts do
 
   def nav_bar(assigns) do
     ~H"""
-    <div class="navbar bg-base-100 shadow-sm">
-      <div class="flex-1">
+    <div class="navbar bg-base-200 shadow-sm mt-1 rounded-box">
+      <div class="navbar-start">
         <.link class="btn btn-ghost text-xl" patch={~p"/"}>{gettext("keraloka")}</.link>
       </div>
-      <div class="flex-none">
-        <input type="text" placeholder={gettext("Suchen")} class="input input-bordered w-24 md:w-auto" />
+      <div class="navbar-center flex-none">
+        <input
+          type="text"
+          placeholder={gettext("Suchen")}
+          class="input input-bordered w-24 md:w-auto"
+        />
+      </div>
+      <div class="navbar-end">
+        <ul class="menu menu-horizontal px-1">
+          <li><.link navigate={~p"/about"}>{gettext("Über keraloka")}</.link></li>
+        </ul>
         {live_render(@socket, LokaWeb.Shop.CartWidgetLive, id: "cart-widget")}
         <div class="dropdown dropdown-end">
           <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">

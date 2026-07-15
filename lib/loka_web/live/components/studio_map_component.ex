@@ -6,15 +6,17 @@ defmodule LokaWeb.StudioMapComponent do
     markers =
       studios
       |> Enum.filter(&(&1.latitude && &1.longitude))
-      |> Enum.map(&%{
-        id: &1.id,
-        lat: &1.latitude,
-        lng: &1.longitude,
-        name: &1.name,
-        city: &1.city,
-        description: &1.description,
-        logo_path: &1.logo_path
-      })
+      |> Enum.map(
+        &%{
+          id: &1.id,
+          lat: &1.latitude,
+          lng: &1.longitude,
+          name: &1.name,
+          city: &1.city,
+          description: &1.description,
+          logo_path: &1.logo_path
+        }
+      )
 
     {:ok,
      socket

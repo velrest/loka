@@ -21,7 +21,11 @@ defmodule LokaWeb.Features.Inventory.StudioTest do
 
   describe "inventory studio page with an existing studio" do
     setup %{user: user} do
-      {:ok, studio} = Loka.Studios.create_studio(%{name: "My Studio", city: "Bern", postal_code: "3004"}, actor: user)
+      {:ok, studio} =
+        Loka.Studios.create_studio(%{name: "My Studio", city: "Bern", postal_code: "3004"},
+          actor: user
+        )
+
       %{studio: studio}
     end
 
@@ -97,7 +101,12 @@ defmodule LokaWeb.Features.Inventory.StudioTest do
   describe "archive authorization" do
     setup do
       other_user = UserHelpers.create_user(%{password: @password})
-      {:ok, studio} = Loka.Studios.create_studio(%{name: "Other Studio", city: "Basel", postal_code: "4000"}, actor: other_user)
+
+      {:ok, studio} =
+        Loka.Studios.create_studio(%{name: "Other Studio", city: "Basel", postal_code: "4000"},
+          actor: other_user
+        )
+
       %{studio: studio}
     end
 

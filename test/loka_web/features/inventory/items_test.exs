@@ -145,7 +145,11 @@ defmodule LokaWeb.Features.Inventory.ItemsTest do
       Loka.Inventory.create_image!(item_id, file, %{}, actor: actor)
     end
 
-    test "remove button is hidden when only one image exists", %{conn: conn, stock: stock, user: user} do
+    test "remove button is hidden when only one image exists", %{
+      conn: conn,
+      stock: stock,
+      user: user
+    } do
       create_test_image(stock.item_id, user)
 
       {:ok, view, _html} = live(conn, ~p"/inventory/items/#{stock.id}")
@@ -153,7 +157,11 @@ defmodule LokaWeb.Features.Inventory.ItemsTest do
       refute has_element?(view, "button[phx-click='remove_image']")
     end
 
-    test "remove button is shown when multiple images exist", %{conn: conn, stock: stock, user: user} do
+    test "remove button is shown when multiple images exist", %{
+      conn: conn,
+      stock: stock,
+      user: user
+    } do
       create_test_image(stock.item_id, user)
       create_test_image(stock.item_id, user)
 
@@ -162,7 +170,11 @@ defmodule LokaWeb.Features.Inventory.ItemsTest do
       assert has_element?(view, "button[phx-click='remove_image']")
     end
 
-    test "removing the last image via event returns an error flash", %{conn: conn, stock: stock, user: user} do
+    test "removing the last image via event returns an error flash", %{
+      conn: conn,
+      stock: stock,
+      user: user
+    } do
       image = create_test_image(stock.item_id, user)
 
       {:ok, view, _html} = live(conn, ~p"/inventory/items/#{stock.id}")
@@ -193,7 +205,10 @@ defmodule LokaWeb.Features.Inventory.ItemsTest do
 
     test "'Neuer Artikel' button navigates to /inventory/items/new", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/inventory/items")
-      {:error, {:live_redirect, %{to: path}}} = view |> element(".flex.justify-between a", "Neuer Artikel") |> render_click()
+
+      {:error, {:live_redirect, %{to: path}}} =
+        view |> element(".flex.justify-between a", "Neuer Artikel") |> render_click()
+
       assert path == ~p"/inventory/items/new"
     end
 

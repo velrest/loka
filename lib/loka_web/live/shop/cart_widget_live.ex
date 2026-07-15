@@ -41,7 +41,9 @@ defmodule LokaWeb.Shop.CartWidgetLive do
             <span class="text-lg font-bold">
               {@cart.item_count} {ngettext("Produkt", "Produkte", @cart.item_count)}
             </span>
-            <span :if={@cart.subtotal} class="text-info">{gettext("Zwischensumme")}: {@cart.subtotal}</span>
+            <span :if={@cart.subtotal} class="text-info">
+              {gettext("Zwischensumme")}: {@cart.subtotal}
+            </span>
             <div class="card-actions">
               <.link navigate={~p"/shop/cart"} class="btn btn-primary btn-block">
                 {gettext("Warenkorb anzeigen")}

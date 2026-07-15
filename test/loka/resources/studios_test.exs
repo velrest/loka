@@ -16,33 +16,50 @@ defmodule Loka.Resources.StudiosTest do
     end
 
     test "creates a studio and sets the owner", %{user: user} do
-      assert {:ok, studio} = Studios.create_studio(%{name: "My Studio", city: "Zürich", postal_code: "8001"}, actor: user)
+      assert {:ok, studio} =
+               Studios.create_studio(%{name: "My Studio", city: "Zürich", postal_code: "8001"},
+                 actor: user
+               )
+
       assert studio.name == "My Studio"
       assert studio.owner_id == user.id
     end
 
     test "requires a name", %{user: user} do
-      assert {:error, error} = Studios.create_studio(%{city: "Zürich", postal_code: "8001"}, actor: user)
+      assert {:error, error} =
+               Studios.create_studio(%{city: "Zürich", postal_code: "8001"}, actor: user)
+
       assert error.errors |> Enum.any?(&match?(%{field: :name}, &1))
     end
 
     test "requires a city", %{user: user} do
-      assert {:error, error} = Studios.create_studio(%{name: "My Studio", postal_code: "8001"}, actor: user)
+      assert {:error, error} =
+               Studios.create_studio(%{name: "My Studio", postal_code: "8001"}, actor: user)
+
       assert error.errors |> Enum.any?(&match?(%{field: :city}, &1))
     end
 
     test "requires a postal code", %{user: user} do
-      assert {:error, error} = Studios.create_studio(%{name: "My Studio", city: "Zürich"}, actor: user)
+      assert {:error, error} =
+               Studios.create_studio(%{name: "My Studio", city: "Zürich"}, actor: user)
+
       assert error.errors |> Enum.any?(&match?(%{field: :postal_code}, &1))
     end
 
     test "requires an actor" do
-      assert {:error, _} = Studios.create_studio(%{name: "My Studio", city: "Zürich", postal_code: "8001"})
+      assert {:error, _} =
+               Studios.create_studio(%{name: "My Studio", city: "Zürich", postal_code: "8001"})
     end
 
     test "cannot create a second studio", %{user: user} do
-      Studios.create_studio!(%{name: "First Studio", city: "Zürich", postal_code: "8001"}, actor: user)
-      assert {:error, _} = Studios.create_studio(%{name: "Second Studio", city: "Bern", postal_code: "3000"}, actor: user)
+      Studios.create_studio!(%{name: "First Studio", city: "Zürich", postal_code: "8001"},
+        actor: user
+      )
+
+      assert {:error, _} =
+               Studios.create_studio(%{name: "Second Studio", city: "Bern", postal_code: "3000"},
+                 actor: user
+               )
     end
   end
 
@@ -64,7 +81,11 @@ defmodule Loka.Resources.StudiosTest do
 
   describe "list_all_studios" do
     test "returns all studios", %{studio: studio, other: other} do
-      other_studio = Studios.create_studio!(%{name: "Studio B", city: "Bern", postal_code: "3000"}, actor: other)
+      other_studio =
+        Studios.create_studio!(%{name: "Studio B", city: "Bern", postal_code: "3000"},
+          actor: other
+        )
+
       studios = Studios.list_all_studios!()
       ids = Enum.map(studios, & &1.id)
       assert studio.id in ids
@@ -74,7 +95,9 @@ defmodule Loka.Resources.StudiosTest do
 
   describe "update_studio" do
     test "owner can update description", %{owner: owner, studio: studio} do
-      assert {:ok, updated} = Studios.update_studio(studio, %{description: "A great studio"}, actor: owner)
+      assert {:ok, updated} =
+               Studios.update_studio(studio, %{description: "A great studio"}, actor: owner)
+
       assert updated.description == "A great studio"
     end
 
@@ -83,7 +106,9 @@ defmodule Loka.Resources.StudiosTest do
     end
 
     test "geocodes coordinates when postal_code changes", %{owner: owner, studio: studio} do
-      assert {:ok, updated} = Studios.update_studio(studio, %{postal_code: "8001", city: "Zürich"}, actor: owner)
+      assert {:ok, updated} =
+               Studios.update_studio(studio, %{postal_code: "8001", city: "Zürich"}, actor: owner)
+
       assert updated.latitude != nil
       assert updated.longitude != nil
       assert_in_delta updated.latitude, 47.37, 0.1
@@ -92,7 +117,10 @@ defmodule Loka.Resources.StudiosTest do
 
     test "does not change coordinates for unknown postal code", %{owner: owner, studio: studio} do
       before_lat = studio.latitude
-      {:ok, updated} = Studios.update_studio(studio, %{postal_code: "0000", city: "Unknown"}, actor: owner)
+
+      {:ok, updated} =
+        Studios.update_studio(studio, %{postal_code: "0000", city: "Unknown"}, actor: owner)
+
       assert updated.latitude == before_lat
     end
   end

@@ -30,7 +30,10 @@ defmodule LokaWeb.Shop.StudioLive do
     ~H"""
     <Layouts.app current_user={@current_user} flash={@flash} socket={@socket}>
       <div class="mb-6">
-        <.link navigate={~p"/"} class="text-sm text-base-content/50 hover:text-base-content transition-colors">
+        <.link
+          navigate={~p"/"}
+          class="text-sm text-base-content/50 hover:text-base-content transition-colors"
+        >
           ← {gettext("Zurück zum Shop")}
         </.link>
       </div>

@@ -21,7 +21,9 @@ defmodule Loka.Studios.Studio.Changes.UploadLogo do
         File.cp!(src_path, dest)
 
         if old_path do
-          old_dest = Path.join([:code.priv_dir(:loka), "static", String.trim_leading(old_path, "/")])
+          old_dest =
+            Path.join([:code.priv_dir(:loka), "static", String.trim_leading(old_path, "/")])
+
           File.rm(old_dest)
         end
 
