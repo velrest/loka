@@ -27,7 +27,9 @@ defmodule Loka.Inventory.Stock do
     end
 
     read :list_studio_stock do
-      prepare build(load: [:item])
+      argument :studio_id, :uuid, allow_nil?: false
+      filter expr(studio_id == ^arg(:studio_id))
+      prepare build(load: [item: [:images]])
     end
 
     read :get_stock do
@@ -46,6 +48,7 @@ defmodule Loka.Inventory.Stock do
       argument :item, :map, allow_nil?: false
 
       change manage_relationship(:item, type: :create)
+
       change fn changeset, %{actor: actor} ->
         with actor when not is_nil(actor) <- actor,
              {:ok, %{studio: %{id: studio_id}}} <- Ash.load(actor, :studio) do

@@ -25,18 +25,26 @@ defmodule Loka.Studios.Studio do
 
     read :list_all_studios
 
+    read :get_studio do
+      get_by :id
+    end
+
     read :get_own_studio do
       get? true
     end
 
     create :create_studio do
-      accept [:name]
-
+      accept [:name, :street, :house_number, :city, :postal_code]
       change relate_actor(:owner)
+      change Loka.Studios.Studio.Changes.GeocodeAddress
     end
 
     update :update_studio do
-      accept [:name]
+      accept [:name, :street, :house_number, :city, :postal_code, :description]
+      argument :logo, :file
+      require_atomic? false
+      change Loka.Studios.Studio.Changes.GeocodeAddress
+      change Loka.Studios.Studio.Changes.UploadLogo
     end
 
     destroy :archive_studio
@@ -52,8 +60,8 @@ defmodule Loka.Studios.Studio do
     end
 
     policy action_type(:create) do
+      forbid_if actor_attribute_equals(:has_studio?, true)
       authorize_if actor_present()
-      authorize_if expr(not actor(:studio))
     end
 
     policy action_type(:destroy) do
@@ -73,11 +81,33 @@ defmodule Loka.Studios.Studio do
       public? true
     end
 
+    attribute :street, :string
+
+    attribute :house_number, :string
+
+    attribute :city, :string do
+      allow_nil? false
+    end
+
+    attribute :postal_code, :string do
+      allow_nil? false
+      constraints min_length: 4, max_length: 4, match: ~r/^\d{4}$/
+    end
+
+    attribute :description, :string
+    attribute :logo_path, :string
+    attribute :latitude, :float
+    attribute :longitude, :float
+
     timestamps()
   end
 
   relationships do
     belongs_to :owner, Loka.Accounts.User
     has_many :stock, Loka.Inventory.Stock
+  end
+
+  identities do
+    identity :unique_owner, [:owner_id]
   end
 end

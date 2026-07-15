@@ -38,6 +38,8 @@ defmodule LokaWeb.Router do
       # on_mount {LokaWeb.LiveUserAuth, :live_no_user}
       live "/", Shop.LandingPageLive
       live "/shop/item/:id", Shop.ItemLive
+      live "/shop/studio/:id", Shop.StudioLive
+      live "/shop/cart", Shop.CartLive
 
       live "/me/settings", User.SettingsLive
       live "/me/studio", User.StudioLive
@@ -47,6 +49,8 @@ defmodule LokaWeb.Router do
       live "/inventory/items", Inventory.ItemsLive
       live "/inventory/items/new", Inventory.ItemEditLive
       live "/inventory/items/:id", Inventory.ItemEditLive
+
+      live "/about/", Shop.AboutLive
     end
   end
 

@@ -6,7 +6,12 @@ defmodule Loka.Support.UserHelpers do
 
   def create_studio_owner() do
     owner = create_user()
-    studio = Loka.Studios.create_studio!(%{name: "My Studio"}, actor: owner)
+
+    studio =
+      Loka.Studios.create_studio!(%{name: "My Studio", city: "Zürich", postal_code: "8001"},
+        actor: owner
+      )
+
     owner = Ash.load!(owner, [:studio, :has_studio?])
     %{owner: owner, studio: studio}
   end
@@ -22,6 +27,7 @@ defmodule Loka.Support.UserHelpers do
         password: params[:password] || "password123",
         password_confirmation: params[:password] || "password123"
       },
+      # no actor exists at registration time in test setup
       authorize?: false
     )
     |> Ash.create!()
@@ -42,5 +48,9 @@ defmodule Loka.Support.UserHelpers do
   def sign_out(conn) do
     conn
     |> visit("/sign-out")
+  end
+
+  def log_in_user(conn, user, password \\ "password123") do
+    sign_in(conn, user.email, password).conn
   end
 end

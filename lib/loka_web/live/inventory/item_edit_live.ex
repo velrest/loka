@@ -1,8 +1,6 @@
 defmodule LokaWeb.Inventory.ItemEditLive do
   use LokaWeb, :live_view
   alias Loka.Inventory
-  # TODO
-  # Merge this so it's the same form ;)
 
   on_mount {LokaWeb.LiveUserAuth, :live_user_required}
 
@@ -35,7 +33,8 @@ defmodule LokaWeb.Inventory.ItemEditLive do
             stock: stock,
             stock_form: stock_form,
             item_form: item_form,
-            show_confirm: false
+            show_confirm: false,
+            image_count: length(images)
           )
           |> stream(:images, images)
           |> allow_upload(:images,
@@ -83,7 +82,7 @@ defmodule LokaWeb.Inventory.ItemEditLive do
 
         {:noreply,
          socket
-         |> put_flash(:info, gettext("Item created."))
+         |> put_flash(:info, gettext("Artikel erstellt."))
          |> push_navigate(to: ~p"/inventory/items")}
 
       {:error, form} ->
@@ -115,7 +114,7 @@ defmodule LokaWeb.Inventory.ItemEditLive do
 
         {:noreply,
          socket
-         |> put_flash(:info, gettext("Pricing and stock updated."))
+         |> put_flash(:info, gettext("Preis und Bestand aktualisiert."))
          |> assign(stock: stock, stock_form: stock_form)}
 
       {:error, form} ->
@@ -136,7 +135,7 @@ defmodule LokaWeb.Inventory.ItemEditLive do
         {:noreply,
          socket
          |> save_image(item.id)
-         |> put_flash(:info, gettext("Item details updated."))
+         |> put_flash(:info, gettext("Artikeldetails aktualisiert."))
          |> assign(item_form: item_form)}
 
       {:error, form} ->
@@ -158,19 +157,24 @@ defmodule LokaWeb.Inventory.ItemEditLive do
       {:ok, _} ->
         {:noreply,
          socket
-         |> put_flash(:info, gettext("Item archived."))
+         |> put_flash(:info, gettext("Artikel archiviert."))
          |> push_navigate(to: ~p"/inventory/items")}
 
       {:error, _} ->
         {:noreply,
          socket
-         |> put_flash(:error, gettext("Could not archive item."))
+         |> put_flash(:error, gettext("Artikel konnte nicht archiviert werden."))
          |> assign(show_confirm: false)}
     end
   end
 
   def handle_event("cancel_upload", %{"ref" => ref}, socket) do
     {:noreply, cancel_upload(socket, :images, ref)}
+  end
+
+  def handle_event("remove_image", _params, %{assigns: %{image_count: count}} = socket)
+      when count <= 1 do
+    {:noreply, put_flash(socket, :error, gettext("Mindestens ein Bild ist erforderlich."))}
   end
 
   def handle_event("remove_image", %{"id" => id}, socket) do
@@ -182,8 +186,14 @@ defmodule LokaWeb.Inventory.ItemEditLive do
 
       {:ok, image} ->
         case Inventory.delete_image(image, actor: user) do
-          :ok -> {:noreply, stream_delete(socket, :images, image)}
-          {:error, _} -> {:noreply, put_flash(socket, :error, gettext("Could not remove image."))}
+          :ok ->
+            {:noreply,
+             socket
+             |> stream_delete(:images, image)
+             |> update(:image_count, &(&1 - 1))}
+
+          {:error, _} ->
+            {:noreply, put_flash(socket, :error, gettext("Bild konnte nicht entfernt werden."))}
         end
 
       {:error, _} ->
@@ -194,40 +204,50 @@ defmodule LokaWeb.Inventory.ItemEditLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app current_user={@current_user} flash={@flash}>
+    <Layouts.app current_user={@current_user} flash={@flash} socket={@socket}>
       <:nav>
         <.inventory_tab_nav active={@current_path} partial_match?={true} />
       </:nav>
 
-      <div class="px-4 py-10 sm:px-6 lg:px-8 max-w-sm">
-        <.header>
-          {if @mode == :create, do: gettext("New item"), else: @stock.item.name}
-          <:subtitle>
-            <.link
-              navigate={~p"/inventory/items"}
-              class="text-sm text-base-content/60 hover:underline"
-            >
-              ← {gettext("Back to items")}
-            </.link>
-          </:subtitle>
-        </.header>
+      <div class="px-4 py-10 sm:px-6 lg:px-8">
+        <%!-- Header --%>
+        <div class="mb-8">
+          <.link
+            navigate={~p"/inventory/items"}
+            class="text-sm text-base-content/50 hover:text-base-content transition-colors"
+          >
+            ← {gettext("Zurück zu Artikeln")}
+          </.link>
+          <h1 class="text-2xl font-bold mt-3">
+            {if @mode == :create, do: gettext("Neuer Artikel"), else: @stock.item.name}
+          </h1>
+        </div>
 
-        <div :if={@mode == :create} class="mt-6">
-          <.form for={@form} phx-change="validate" phx-submit="save" class="flex flex-col gap-4">
+        <%!-- Create mode --%>
+        <div :if={@mode == :create} class="max-w-lg">
+          <.form for={@form} phx-change="validate" phx-submit="save" class="flex flex-col gap-5">
             <.inputs_for :let={item_form} field={@form[:item]}>
               <.input field={item_form[:name]} type="text" label={gettext("Name")} />
-              <.input field={item_form[:description]} type="text" label={gettext("Description")} />
+              <.input
+                field={item_form[:description]}
+                type="textarea"
+                label={gettext("Beschreibung")}
+                rows="3"
+              />
             </.inputs_for>
-            <.input field={@form[:price]} type="text" label={gettext("Price (e.g. CHF 100)")} />
-            <.input field={@form[:quantity]} type="number" label={gettext("Quantity")} />
+
+            <div class="grid grid-cols-2 gap-4">
+              <.input field={@form[:price]} type="text" label={gettext("Preis (z.B. CHF 100)")} />
+              <.input field={@form[:quantity]} type="number" label={gettext("Menge")} />
+            </div>
 
             <div>
               <p class="text-sm font-medium mb-2">
-                {gettext("Images")} <span class="text-error">*</span>
+                {gettext("Bilder")} <span class="text-error">*</span>
               </p>
-              <div class="flex flex-wrap gap-2 mb-2">
+              <div class="flex flex-wrap gap-2 mb-3">
                 <div :for={entry <- @uploads.images.entries} class="relative">
-                  <.live_img_preview entry={entry} class="w-20 h-20 object-cover rounded" />
+                  <.live_img_preview entry={entry} class="size-20 object-cover rounded-lg" />
                   <button
                     type="button"
                     phx-click="cancel_upload"
@@ -244,112 +264,143 @@ defmodule LokaWeb.Inventory.ItemEditLive do
               />
             </div>
 
-            <.button
-              type="submit"
-              class="btn btn-primary"
-              disabled={@uploads.images.entries == []}
-            >
-              {gettext("Create item")}
+            <.button type="submit" class="btn btn-primary" disabled={@uploads.images.entries == []}>
+              {gettext("Artikel erstellen")}
             </.button>
           </.form>
         </div>
 
-        <div :if={@mode == :edit} class="mt-6 flex flex-col gap-10">
-          <div>
-            <h3 class="font-semibold mb-4">{gettext("Item details")}</h3>
-            <.form
-              for={@item_form}
-              phx-change="validate_item"
-              phx-submit="save_item"
-              class="flex flex-col gap-4"
-            >
-              <.input field={@item_form[:name]} type="text" label={gettext("Name")} />
-              <.input field={@item_form[:description]} type="text" label={gettext("Description")} />
+        <%!-- Edit mode --%>
+        <div :if={@mode == :edit} class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+          <%!-- Left: images --%>
+          <div
+            id="image-upload-card"
+            class="card bg-base-100 border border-base-300 shadow shadow-black/30"
+          >
+            <div class="card-body gap-4">
+              <h3 class="font-semibold">{gettext("Bilder")}</h3>
 
-              <div>
-                <p class="text-sm font-medium mb-2">
-                  {gettext("Images")} <span class="text-error">*</span>
-                </p>
-                <div class="flex flex-wrap gap-2 mb-2">
-                  <div id="item-images" phx-update="stream" class="contents">
-                    <div :for={{dom_id, image} <- @streams.images} id={dom_id} class="relative">
-                      <img src={image.path} class="w-20 h-20 object-cover rounded" />
-                      <button
-                        type="button"
-                        phx-click="remove_image"
-                        phx-value-id={image.id}
-                        class="absolute -top-1 -right-1 btn btn-circle btn-xs btn-error"
-                      >
-                        {gettext("Remove")}
-                      </button>
-                    </div>
-                  </div>
-                  <div :for={entry <- @uploads.images.entries} class="relative">
-                    <.live_img_preview entry={entry} class="w-20 h-20 object-cover rounded" />
-                    <button
-                      type="button"
-                      phx-click="cancel_upload"
-                      phx-value-ref={entry.ref}
-                      class="absolute -top-1 -right-1 btn btn-circle btn-xs btn-error"
-                    >
-                      ×
-                    </button>
-                  </div>
+              <%!-- Image gallery --%>
+              <div id="item-images" phx-update="stream" class="grid grid-cols-3 gap-2">
+                <div
+                  :for={{dom_id, image} <- @streams.images}
+                  id={dom_id}
+                  class="relative group aspect-square"
+                >
+                  <img src={image.path} class="w-full h-full object-cover rounded-lg" />
+                  <button
+                    :if={@image_count > 1}
+                    type="button"
+                    phx-click="remove_image"
+                    phx-value-id={image.id}
+                    class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-medium"
+                  >
+                    {gettext("Entfernen")}
+                  </button>
                 </div>
-                <.live_file_input
-                  upload={@uploads.images}
-                  class="file-input file-input-bordered w-full"
-                />
               </div>
 
-              <.button
-                type="submit"
-                class="btn btn-primary"
-                disabled={@uploads.images.entries == []}
-              >
-                {gettext("Save item details")}
-              </.button>
-            </.form>
+              <%!-- Upload previews --%>
+              <div :if={@uploads.images.entries != []} class="grid grid-cols-3 gap-2">
+                <div :for={entry <- @uploads.images.entries} class="relative aspect-square">
+                  <.live_img_preview entry={entry} class="w-full h-full object-cover rounded-lg" />
+                  <button
+                    type="button"
+                    phx-click="cancel_upload"
+                    phx-value-ref={entry.ref}
+                    class="absolute -top-1 -right-1 btn btn-circle btn-xs btn-error"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+
+              <.live_file_input
+                upload={@uploads.images}
+                class="file-input file-input-bordered w-full"
+              />
+            </div>
           </div>
 
-          <div>
-            <h3 class="font-semibold mb-4">{gettext("Pricing & stock")}</h3>
-            <.form
-              for={@stock_form}
-              phx-change="validate_stock"
-              phx-submit="save_stock"
-              class="flex flex-col gap-4"
-            >
-              <.input field={@stock_form[:price]} type="text" label={gettext("Price")} />
-              <.input field={@stock_form[:quantity]} type="number" label={gettext("Quantity")} />
-              <.button type="submit" class="btn btn-primary">
-                {gettext("Save pricing & stock")}
-              </.button>
-            </.form>
-          </div>
-        </div>
+          <%!-- Right: forms --%>
+          <div class="flex flex-col gap-6">
+            <%!-- Item details --%>
+            <div class="card bg-base-100 border border-base-300 shadow shadow-black/30">
+              <div class="card-body gap-4">
+                <h3 class="font-semibold">{gettext("Artikeldetails")}</h3>
+                <.form
+                  for={@item_form}
+                  phx-change="validate_item"
+                  phx-submit="save_item"
+                  class="flex flex-col gap-4"
+                >
+                  <.input field={@item_form[:name]} type="text" label={gettext("Name")} />
+                  <.input
+                    field={@item_form[:description]}
+                    type="textarea"
+                    label={gettext("Beschreibung")}
+                    rows="4"
+                  />
+                  <.button type="submit" class="btn btn-primary btn-sm self-end">
+                    {gettext("Speichern")}
+                  </.button>
+                </.form>
+              </div>
+            </div>
 
-        <div :if={@mode == :edit} class="mt-12 border-t border-error/20 pt-6">
-          <.button phx-click="request_delete" class="btn btn-outline btn-error btn-sm">
-            {gettext("Archive item")}
-          </.button>
+            <%!-- Price & stock --%>
+            <div class="card bg-base-100 border border-base-300 shadow shadow-black/30">
+              <div class="card-body gap-4">
+                <h3 class="font-semibold">{gettext("Preis & Bestand")}</h3>
+                <.form
+                  for={@stock_form}
+                  phx-change="validate_stock"
+                  phx-submit="save_stock"
+                  class="flex flex-col gap-4"
+                >
+                  <div class="grid grid-cols-2 gap-4">
+                    <.input field={@stock_form[:price]} type="text" label={gettext("Preis")} />
+                    <.input field={@stock_form[:quantity]} type="number" label={gettext("Menge")} />
+                  </div>
+                  <.button type="submit" class="btn btn-primary btn-sm self-end">
+                    {gettext("Speichern")}
+                  </.button>
+                </.form>
+              </div>
+            </div>
+
+            <%!-- Danger zone --%>
+            <div class="card bg-base-100 border border-error/20 shadow shadow-black/30">
+              <div class="card-body gap-2">
+                <h3 class="font-semibold text-error/80">{gettext("Gefahrenzone")}</h3>
+                <p class="text-sm text-base-content/50">
+                  {gettext("Archivierte Artikel sind für Kunden nicht mehr sichtbar.")}
+                </p>
+                <div class="mt-2">
+                  <.button phx-click="request_delete" class="btn btn-outline btn-error btn-sm">
+                    {gettext("Artikel archivieren")}
+                  </.button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       <dialog :if={@mode == :edit} class={["modal", @show_confirm && "modal-open"]}>
         <div class="modal-box">
-          <h3 class="text-lg font-bold">{gettext("Archive this item?")}</h3>
+          <h3 class="text-lg font-bold">{gettext("Diesen Artikel archivieren?")}</h3>
           <p class="py-4 text-base-content/70">
             {gettext(
-              "This item will be archived and no longer visible to customers. Your data is retained and can be restored by contacting support."
+              "Dieser Artikel wird archiviert und ist für Kunden nicht mehr sichtbar. Deine Daten bleiben erhalten und können über den Support wiederhergestellt werden."
             )}
           </p>
           <div class="modal-action">
             <.button phx-click="cancel_delete" class="btn btn-ghost">
-              {gettext("Cancel")}
+              {gettext("Abbrechen")}
             </.button>
             <.button phx-click="delete" class="btn btn-error">
-              {gettext("Yes, archive")}
+              {gettext("Ja, archivieren")}
             </.button>
           </div>
         </div>
@@ -366,6 +417,14 @@ defmodule LokaWeb.Inventory.ItemEditLive do
         {:ok, Inventory.create_image!(item_id, file, %{}, actor: socket.assigns.current_user)}
       end)
 
-    stream(socket, :images, new_images, reset: false)
+    socket
+    |> stream(:images, new_images, reset: false)
+    |> then(fn s ->
+      if s.assigns[:image_count] != nil do
+        update(s, :image_count, &(&1 + length(new_images)))
+      else
+        s
+      end
+    end)
   end
 end

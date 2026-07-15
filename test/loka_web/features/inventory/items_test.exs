@@ -16,16 +16,16 @@ defmodule LokaWeb.Features.Inventory.ItemsTest do
   describe "/inventory/items/new (create mode)" do
     test "renders creation form with item and stock fields", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/inventory/items/new")
-      assert has_element?(view, "h1", "New item")
+      assert has_element?(view, "h1", "Neuer Artikel")
       assert has_element?(view, "input[name='form[item][name]']")
-      assert has_element?(view, "input[name='form[item][description]']")
+      assert has_element?(view, "textarea[name='form[item][description]']")
       assert has_element?(view, "input[name='form[price]']")
       assert has_element?(view, "input[name='form[quantity]']")
     end
 
     test "back link points to /inventory/items", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/inventory/items/new")
-      assert has_element?(view, "a", "← Back to items")
+      assert has_element?(view, "a", "← Zurück zu Artikeln")
     end
 
     test "submitting the form with an image creates an item for the user's studio",
@@ -95,7 +95,7 @@ defmodule LokaWeb.Features.Inventory.ItemsTest do
       {:ok, view, _html} = live(conn, ~p"/inventory/items/#{stock.id}")
 
       upload =
-        file_input(view, "form[phx-submit='save_item']", :images, [
+        file_input(view, "#image-upload-card", :images, [
           %{
             last_modified: 1_594_171_879_000,
             name: "bowl.jpg",
@@ -126,15 +126,89 @@ defmodule LokaWeb.Features.Inventory.ItemsTest do
     end
   end
 
+  describe "/inventory/items/:id image removal" do
+    setup %{user: user} do
+      {:ok, stock} =
+        Loka.Inventory.create_stock(
+          %{name: "Vase", description: "Glass vase"},
+          %{quantity: 1, price: Money.new(:CHF, 80)},
+          actor: user
+        )
+
+      %{stock: stock}
+    end
+
+    defp create_test_image(item_id, actor) do
+      {:ok, tmp} = Plug.Upload.random_file("test")
+      File.write!(tmp, "fake image")
+      file = %Plug.Upload{path: tmp, filename: "test.jpg", content_type: "image/jpeg"}
+      Loka.Inventory.create_image!(item_id, file, %{}, actor: actor)
+    end
+
+    test "remove button is hidden when only one image exists", %{
+      conn: conn,
+      stock: stock,
+      user: user
+    } do
+      create_test_image(stock.item_id, user)
+
+      {:ok, view, _html} = live(conn, ~p"/inventory/items/#{stock.id}")
+
+      refute has_element?(view, "button[phx-click='remove_image']")
+    end
+
+    test "remove button is shown when multiple images exist", %{
+      conn: conn,
+      stock: stock,
+      user: user
+    } do
+      create_test_image(stock.item_id, user)
+      create_test_image(stock.item_id, user)
+
+      {:ok, view, _html} = live(conn, ~p"/inventory/items/#{stock.id}")
+
+      assert has_element?(view, "button[phx-click='remove_image']")
+    end
+
+    test "removing the last image via event returns an error flash", %{
+      conn: conn,
+      stock: stock,
+      user: user
+    } do
+      image = create_test_image(stock.item_id, user)
+
+      {:ok, view, _html} = live(conn, ~p"/inventory/items/#{stock.id}")
+
+      render_click(view, "remove_image", %{"id" => image.id})
+
+      assert has_element?(view, "[role='alert']", "Mindestens ein Bild ist erforderlich.")
+    end
+
+    test "can remove an image when multiple images exist", %{conn: conn, stock: stock, user: user} do
+      image = create_test_image(stock.item_id, user)
+      create_test_image(stock.item_id, user)
+
+      {:ok, view, _html} = live(conn, ~p"/inventory/items/#{stock.id}")
+
+      render_click(view, "remove_image", %{"id" => image.id})
+
+      images = Loka.Inventory.list_item_images!(stock.item_id)
+      assert length(images) == 1
+    end
+  end
+
   describe "/inventory/items list" do
     test "renders the items table header", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/inventory/items")
-      assert has_element?(view, "h1", "Items")
+      assert has_element?(view, "h1", "Artikel")
     end
 
-    test "'New item' button navigates to /inventory/items/new", %{conn: conn} do
+    test "'Neuer Artikel' button navigates to /inventory/items/new", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/inventory/items")
-      {:error, {:live_redirect, %{to: path}}} = view |> element("a", "New item") |> render_click()
+
+      {:error, {:live_redirect, %{to: path}}} =
+        view |> element(".flex.justify-between a", "Neuer Artikel") |> render_click()
+
       assert path == ~p"/inventory/items/new"
     end
 

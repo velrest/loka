@@ -17,12 +17,12 @@ defmodule LokaWeb.Features.UserSettingsTest do
         conn
         |> visit(~p"/me/settings")
 
-      assert_has(session, "h1", text: "My Settings")
+      assert_has(session, "h1", text: "Einstellungen")
 
       if user.confirmed_at do
-        assert_has(session, "span", text: "Yes")
+        assert_has(session, "span", text: "Bestätigt")
       else
-        assert_has(session, "span", text: "No")
+        assert_has(session, "span", text: "Nicht bestätigt")
       end
     end
   end

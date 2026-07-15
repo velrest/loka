@@ -14,6 +14,7 @@ defmodule Loka.Studios do
   resources do
     resource Loka.Studios.Studio do
       define :list_all_studios
+      define :get_studio, args: [:id], not_found_error?: false
       define :get_own_studio, not_found_error?: false
       define :create_studio
       define :update_studio

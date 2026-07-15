@@ -9,33 +9,41 @@ defmodule LokaWeb.User.SettingsLive do
   end
 
   @impl true
-  def handle_params(_params, uri, socket) do
-    path = URI.parse(uri).path
-    {:noreply, assign(socket, current_path: path)}
-  end
-
-  @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app current_user={@current_user} flash={@flash}>
+    <Layouts.app current_user={@current_user} flash={@flash} socket={@socket}>
       <:nav>
         <.profile_tab_nav active={@current_path} />
       </:nav>
 
-      <.header>
-        {gettext("My Settings")}
-        <:subtitle>{gettext("Change account settings like passwords or email")}</:subtitle>
-      </.header>
+      <div class="px-4 py-10 sm:px-6 lg:px-8 max-w-lg">
+        <div class="mb-8">
+          <h1 class="text-2xl font-bold">{gettext("Einstellungen")}</h1>
+        </div>
 
-      <.list>
-        <:item title={gettext("Account Confirmed")}>
-          <%= if @current_user.confirmed_at do %>
-            <span class="text-success">{gettext("Yes")}</span>
-          <% else %>
-            <span class="text-warning">{gettext("No")}</span>
-          <% end %>
-        </:item>
-      </.list>
+        <div class="card bg-base-100 border border-base-300 shadow shadow-black/30">
+          <div class="card-body gap-0">
+            <h3 class="font-semibold mb-4">{gettext("Konto")}</h3>
+
+            <div class="flex justify-between items-center py-3 border-b border-base-200">
+              <div>
+                <p class="text-sm font-medium">{gettext("E-Mail-Adresse")}</p>
+                <p class="text-xs text-base-content/50 mt-0.5">{@current_user.email}</p>
+              </div>
+              <%= if @current_user.confirmed_at do %>
+                <span class="badge badge-success badge-sm">{gettext("Bestätigt")}</span>
+              <% else %>
+                <span class="badge badge-warning badge-sm">{gettext("Nicht bestätigt")}</span>
+              <% end %>
+            </div>
+
+            <div class="flex justify-between items-center py-3">
+              <p class="text-sm font-medium">{gettext("Passwort")}</p>
+              <button class="btn btn-ghost btn-sm" disabled>{gettext("Ändern")}</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </Layouts.app>
     """
   end

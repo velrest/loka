@@ -13,7 +13,7 @@ config :ash_oban, pro?: false
 config :loka, Oban,
   engine: Oban.Engines.Basic,
   notifier: Oban.Notifiers.Postgres,
-  queues: [default: 10],
+  queues: [default: 10, cart_cleanup_anonymous_carts: 1],
   repo: Loka.Repo,
   plugins: [{Oban.Plugins.Cron, []}]
 

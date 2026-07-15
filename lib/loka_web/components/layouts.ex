@@ -20,13 +20,14 @@ defmodule LokaWeb.Layouts do
 
   ## Examples
 
-      <Layouts.app flash={@flash}>
+      <Layouts.app flash={@flash} socket={@socket}>
         <h1>Content</h1>
       </Layouts.app>
 
   """
   attr :flash, :map, required: true, doc: "the map of flash messages"
   attr :current_user, Loka.Accounts.User, required: false
+  attr :socket, Phoenix.LiveView.Socket, required: true
 
   attr :current_scope, :map,
     default: nil,
@@ -38,15 +39,15 @@ defmodule LokaWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
-      <.nav_bar current_user={@current_user} />
+    <header class="navbar px-4 sm:px-6 lg:px-8 sticky top-0 z-50">
+      <.nav_bar current_user={@current_user} socket={@socket} />
     </header>
 
     <%= if @nav != [] do %>
       {render_slot(@nav)}
     <% end %>
 
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
+    <main class="px-4 py-5 sm:px-6 lg:px-8">
       {render_slot(@inner_block)}
     </main>
 
@@ -73,24 +74,24 @@ defmodule LokaWeb.Layouts do
       <.flash
         id="client-error"
         kind={:error}
-        title={gettext("We can't find the internet")}
+        title={gettext("Keine Internetverbindung")}
         phx-disconnected={show(".phx-client-error #client-error") |> JS.remove_attribute("hidden")}
         phx-connected={hide("#client-error") |> JS.set_attribute({"hidden", ""})}
         hidden
       >
-        {gettext("Attempting to reconnect")}
+        {gettext("Verbindung wird hergestellt…")}
         <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" />
       </.flash>
 
       <.flash
         id="server-error"
         kind={:error}
-        title={gettext("Something went wrong!")}
+        title={gettext("Etwas ist schiefgelaufen!")}
         phx-disconnected={show(".phx-server-error #server-error") |> JS.remove_attribute("hidden")}
         phx-connected={hide("#server-error") |> JS.set_attribute({"hidden", ""})}
         hidden
       >
-        {gettext("Attempting to reconnect")}
+        {gettext("Verbindung wird hergestellt…")}
         <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" />
       </.flash>
     </div>
@@ -141,48 +142,26 @@ defmodule LokaWeb.Layouts do
       <.nav_bar current_user={@current_user} />
   """
   attr :current_user, Loka.Accounts.User, required: false
+  attr :socket, Phoenix.LiveView.Socket, required: true
 
   def nav_bar(assigns) do
     ~H"""
-    <div class="navbar bg-base-100 shadow-sm">
-      <div class="flex-1">
+    <div class="navbar bg-base-200 shadow-sm mt-1 rounded-box">
+      <div class="navbar-start">
         <.link class="btn btn-ghost text-xl" patch={~p"/"}>{gettext("keraloka")}</.link>
       </div>
-      <div class="flex-none">
-        <input type="text" placeholder="Search" class="input input-bordered w-24 md:w-auto" />
-        <div class="dropdown dropdown-end">
-          <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
-            <div class="indicator">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-              <span class="badge badge-sm indicator-item">8</span>
-            </div>
-          </div>
-          <div
-            tabindex="0"
-            class="card card-compact dropdown-content bg-base-100 z-1 mt-3 w-52 shadow"
-          >
-            <div class="card-body">
-              <span class="text-lg font-bold">8 Items</span>
-              <span class="text-info">Subtotal: $999</span>
-              <div class="card-actions">
-                <button class="btn btn-primary btn-block">View cart</button>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div class="navbar-center flex-none">
+        <input
+          type="text"
+          placeholder={gettext("Suchen")}
+          class="input input-bordered w-24 md:w-auto"
+        />
+      </div>
+      <div class="navbar-end">
+        <ul class="menu menu-horizontal px-1">
+          <li><.link navigate={~p"/about"}>{gettext("Über keraloka")}</.link></li>
+        </ul>
+        {live_render(@socket, LokaWeb.Shop.CartWidgetLive, id: "cart-widget")}
         <div class="dropdown dropdown-end">
           <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
             <div class="w-10 rounded-full">
@@ -195,12 +174,12 @@ defmodule LokaWeb.Layouts do
           >
             <ul>
               <%= if @current_user do %>
-                <li><.link navigate={~p"/me"}>{gettext("Profile")}</.link></li>
-                <li><.link navigate={~p"/inventory/studio"}>{gettext("Manage Studio")}</.link></li>
-                <li><.link patch={~p"/sign-out"}>{gettext("Sign Out")}</.link></li>
+                <li><.link navigate={~p"/me"}>{gettext("Profil")}</.link></li>
+                <li><.link navigate={~p"/inventory/studio"}>{gettext("Studio verwalten")}</.link></li>
+                <li><.link patch={~p"/sign-out"}>{gettext("Abmelden")}</.link></li>
               <% else %>
-                <li><.link patch={~p"/sign-in"}>{gettext("Sign In")}</.link></li>
-                <li><.link patch={~p"/register"}>{gettext("Register")}</.link></li>
+                <li><.link patch={~p"/sign-in"}>{gettext("Anmelden")}</.link></li>
+                <li><.link patch={~p"/register"}>{gettext("Registrieren")}</.link></li>
               <% end %>
             </ul>
             <.theme_toggle />
