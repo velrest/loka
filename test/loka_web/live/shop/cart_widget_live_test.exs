@@ -13,7 +13,7 @@ defmodule LokaWeb.Shop.CartWidgetLiveTest do
   end
 
   describe "anonymous user" do
-    test "landing page loads without redirect", %{conn: conn} do
+    test "market page loads without redirect", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/")
       assert html =~ "keraloka"
     end
@@ -71,7 +71,7 @@ defmodule LokaWeb.Shop.CartWidgetLiveTest do
       %{user: user, conn: authed_conn}
     end
 
-    test "landing page loads without redirect", %{conn: conn} do
+    test "market page loads without redirect", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/")
       assert html =~ "keraloka"
     end

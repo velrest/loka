@@ -36,7 +36,7 @@ defmodule LokaWeb.Router do
       #
       # If an authenticated user must *not* be present:
       # on_mount {LokaWeb.LiveUserAuth, :live_no_user}
-      live "/", Shop.LandingPageLive
+      live "/", Shop.MarketLive
       live "/shop/item/:id", Shop.ItemLive
       live "/shop/studio/:id", Shop.StudioLive
       live "/shop/cart", Shop.CartLive

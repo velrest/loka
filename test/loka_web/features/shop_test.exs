@@ -27,7 +27,7 @@ defmodule LokaWeb.Features.ShopTest do
     %{user: user, conn: conn}
   end
 
-  describe "landing page" do
+  describe "market page" do
     test "renders all stock entries", %{conn: conn} do
       conn
       |> visit(~p"/")

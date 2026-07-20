@@ -1,4 +1,4 @@
-defmodule LokaWeb.Shop.LandingPageLive do
+defmodule LokaWeb.Shop.MarketLive do
   alias Loka.Inventory
   use LokaWeb, :live_view
 
