@@ -95,36 +95,40 @@ defmodule LokaWeb.Router do
   #   pipe_through :api
   # end
 
-  # Enable LiveDashboard and Swoosh mailbox preview in development
-  if Application.compile_env(:loka, :dev_routes) do
-    # If you want to use the LiveDashboard in production, you should put
-    # it behind authentication and allow only admins to access it.
-    # If your application does not have an admins-only section yet,
-    # you can use Plug.BasicAuth to set up some basic authentication
-    # as long as you are also using SSL (which you should anyway).
-    import Phoenix.LiveDashboard.Router
-
-    scope "/dev" do
-      pipe_through :browser
-
-      live_dashboard "/dashboard", metrics: LokaWeb.Telemetry
-      forward "/mailbox", Plug.Swoosh.MailboxPreview
-    end
-
-    scope "/" do
-      pipe_through :browser
-
-      oban_dashboard("/oban")
-    end
+  # Admin tooling. Available in every environment, including production, but
+  # only to users with the `admin?` flag.
+  #
+  # Two layers of enforcement, because these are LiveViews: `RequireAdmin`
+  # guards the initial HTTP request, and the `:live_admin_required` on_mount
+  # hook guards the LiveView websocket, which plugs never see.
+  pipeline :admin do
+    plug LokaWeb.Plugs.RequireAdmin
   end
 
-  if Application.compile_env(:loka, :dev_routes) do
+  @admin_on_mount [{LokaWeb.LiveUserAuth, :live_admin_required}]
+
+  scope "/" do
+    pipe_through [:browser, :admin]
+
+    import Phoenix.LiveDashboard.Router
     import AshAdmin.Router
 
-    scope "/admin" do
-      pipe_through :browser
+    live_dashboard "/dashboard",
+      metrics: LokaWeb.Telemetry,
+      on_mount: @admin_on_mount
 
-      ash_admin "/"
+    oban_dashboard("/oban", on_mount: @admin_on_mount)
+
+    ash_admin("/admin", on_mount: @admin_on_mount)
+  end
+
+  # Mailbox preview is a plain plug (no LiveView), and only makes sense where
+  # mail is captured locally rather than actually delivered.
+  if Application.compile_env(:loka, :dev_routes) do
+    scope "/dev" do
+      pipe_through [:browser, :admin]
+
+      forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
 end

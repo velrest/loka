@@ -29,6 +29,18 @@ defmodule LokaWeb.LiveUserAuth do
     end
   end
 
+  # Guards the admin tooling live_sessions (LiveDashboard, Oban Web, AshAdmin).
+  # Those dashboards define their own `live_session`, so `current_user` is not
+  # assigned for us — we have to resolve it from the session ourselves.
+  def on_mount(:live_admin_required, _params, session, socket) do
+    socket = AshAuthentication.Phoenix.LiveSession.assign_new_resources(socket, session)
+
+    case socket.assigns[:current_user] do
+      %{admin?: true} -> {:cont, socket}
+      _ -> {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/")}
+    end
+  end
+
   def on_mount(:live_no_user, _params, _session, socket) do
     if socket.assigns[:current_user] do
       {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/")}

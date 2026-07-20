@@ -34,6 +34,20 @@ defmodule Loka.Support.UserHelpers do
     |> Ash.load!(:has_studio?)
   end
 
+  @doc """
+  Creates a user with the `admin?` flag set.
+
+  `admin?` is intentionally not writable through any action, so this uses
+  `Ash.Seed` to write it directly — the same out-of-band path an operator
+  would use to grant admin in a console.
+  """
+  def create_admin(params \\ %{}) do
+    params
+    |> create_user()
+    |> Ash.Seed.update!(%{admin?: true})
+    |> Ash.load!(:has_studio?)
+  end
+
   def sign_in(conn, email, password) do
     conn
     |> visit("/sign-in")

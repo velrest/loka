@@ -292,7 +292,13 @@ defmodule Loka.Accounts.User do
 
     attribute :confirmed_at, :utc_datetime_usec
 
-    attribute :admin?, :boolean
+    # Deliberately not `public?` and not accepted by any action, so it can
+    # never be set through a form, the JSON API, or AshAdmin. Grant it out of
+    # band (console/SQL).
+    attribute :admin?, :boolean do
+      allow_nil? false
+      default false
+    end
   end
 
   relationships do
