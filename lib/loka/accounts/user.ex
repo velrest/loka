@@ -291,6 +291,8 @@ defmodule Loka.Accounts.User do
     end
 
     attribute :confirmed_at, :utc_datetime_usec
+
+    attribute :admin?, :boolean
   end
 
   relationships do
