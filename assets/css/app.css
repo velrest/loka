@@ -247,4 +247,31 @@
 
 :focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 
+/* Repeated Schamotte type patterns, extracted only where the exact same
+   size/tracking combination appears verbatim in multiple templates — not a
+   general type-scale system. Values are inline utilities everywhere else. */
+
+/* "← Zurück zum Markt" — the back-link above item/studio/cart pages. */
+.link-back {
+  font-size: 13px;
+  color: var(--color-secondary);
+  transition: color 150ms;
+}
+.link-back:hover {
+  color: var(--color-base-content);
+}
+
+/* The 52px product/studio page title (item_live.ex, studio_live.ex). */
+.page-title {
+  font-size: 40px;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  font-weight: 500;
+}
+@media (min-width: 640px) {
+  .page-title {
+    font-size: 52px;
+  }
+}
+
 /* This file is for your main application CSS */

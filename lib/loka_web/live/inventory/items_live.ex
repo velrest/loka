@@ -33,26 +33,29 @@ defmodule LokaWeb.Inventory.ItemsLive do
           </.link>
         </div>
 
-        <div :if={@stock == []} class="text-center py-24 text-base-content/40">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="size-12 mx-auto mb-4 opacity-30"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="1"
-              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-            />
-          </svg>
-          <p class="text-lg mb-4">{gettext("Noch keine Artikel.")}</p>
-          <.link navigate={~p"/inventory/items/new"} class="btn btn-primary btn-sm">
-            {gettext("Neuer Artikel")}
-          </.link>
-        </div>
+        <.empty_state :if={@stock == []} message={gettext("Noch keine Artikel.")}>
+          <:icon>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="size-12 mx-auto mb-4 opacity-30"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1"
+                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+              />
+            </svg>
+          </:icon>
+          <:action>
+            <.link navigate={~p"/inventory/items/new"} class="btn btn-primary btn-sm">
+              {gettext("Neuer Artikel")}
+            </.link>
+          </:action>
+        </.empty_state>
 
         <div class="flex flex-col gap-3">
           <.link
@@ -64,17 +67,11 @@ defmodule LokaWeb.Inventory.ItemsLive do
             <div class="card-body p-4">
               <div class="flex items-center gap-4">
                 <%!-- Thumbnail --%>
-                <div class="shrink-0 size-16 rounded-lg overflow-hidden bg-base-200">
-                  <%= if s.item.images != [] do %>
-                    <img
-                      src={List.first(s.item.images).path}
-                      alt={s.item.name}
-                      class="w-full h-full object-cover"
-                    />
-                  <% else %>
-                    <img src="/images/placeholder-pot.svg" alt="" class="w-full h-full object-cover" />
-                  <% end %>
-                </div>
+                <.item_thumbnail
+                  images={s.item.images}
+                  alt={s.item.name}
+                  class="shrink-0 size-16 rounded-lg bg-base-200"
+                />
 
                 <%!-- Info --%>
                 <div class="flex-1 min-w-0">

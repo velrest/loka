@@ -127,7 +127,7 @@ defmodule Loka.Resources.StudiosTest do
 
   describe "archive_studio" do
     test "owner can archive their studio", %{owner: owner, studio: studio} do
-      assert {:ok, _} = Studios.archive_studio(studio, actor: owner)
+      assert :ok = Studios.archive_studio(studio, actor: owner)
     end
 
     test "non-owner cannot archive a studio", %{studio: studio, other: other} do

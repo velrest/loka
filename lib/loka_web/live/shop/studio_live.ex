@@ -29,12 +29,7 @@ defmodule LokaWeb.Shop.StudioLive do
   def render(assigns) do
     ~H"""
     <Layouts.app current_user={@current_user} flash={@flash} socket={@socket}>
-      <.link
-        navigate={~p"/"}
-        class="text-[13px] text-secondary hover:text-base-content transition-colors duration-150"
-      >
-        ← {gettext("Zurück zum Markt")}
-      </.link>
+      <.back_link navigate={~p"/"}>{gettext("Zurück zum Markt")}</.back_link>
 
       <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_420px] gap-10 items-end mt-5 mb-11">
         <div class="flex gap-5.5 items-end">
@@ -49,7 +44,7 @@ defmodule LokaWeb.Shop.StudioLive do
             <span class="inline-flex items-center text-[11px] px-2.5 py-1 rounded-field border border-primary text-primary">
               {@studio.city} · {@studio.postal_code}
             </span>
-            <h1 class="text-[40px] sm:text-[52px] leading-[1.02] tracking-[-0.035em] font-medium mt-2.5 mb-2">
+            <h1 class="page-title mt-2.5 mb-2">
               {@studio.name}
             </h1>
             <p :if={@studio.description} class="text-sm leading-[1.6] text-secondary max-w-[52ch]">
@@ -73,9 +68,7 @@ defmodule LokaWeb.Shop.StudioLive do
         count={"#{length(@stock)} #{ngettext("Stück", "Stücke", length(@stock))}"}
       />
 
-      <div :if={@stock == []} class="text-center py-24 text-base-content/40">
-        <p class="text-lg">{gettext("Noch keine Artikel verfügbar.")}</p>
-      </div>
+      <.empty_state :if={@stock == []} message={gettext("Noch keine Artikel verfügbar.")} />
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-7 pb-16">
         <.stock_card :for={s <- @stock} stock={s} current_user={@current_user} show_studio={false} />

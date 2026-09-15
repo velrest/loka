@@ -62,7 +62,7 @@ defmodule LokaWeb.Inventory.StudioLive do
 
   def handle_event("delete", _params, socket) do
     case Loka.Studios.archive_studio(socket.assigns.studio, actor: socket.assigns.current_user) do
-      {:ok, _} ->
+      :ok ->
         {:noreply,
          socket
          |> put_flash(:info, gettext("Studio gelöscht."))

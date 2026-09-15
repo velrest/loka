@@ -54,9 +54,7 @@ defmodule LokaWeb.Shop.MarketLive do
         }
       />
 
-      <div :if={@filtered == []} class="text-center py-24 text-base-content/40">
-        <p class="text-lg">{gettext("Noch keine Artikel verfügbar.")}</p>
-      </div>
+      <.empty_state :if={@filtered == []} message={gettext("Noch keine Artikel verfügbar.")} />
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-7 py-7 pb-13">
         <.stock_card :for={stock <- @filtered} stock={stock} current_user={@current_user} />

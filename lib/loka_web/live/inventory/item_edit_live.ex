@@ -154,7 +154,7 @@ defmodule LokaWeb.Inventory.ItemEditLive do
 
   def handle_event("delete", _params, socket) do
     case Inventory.archive_stock(socket.assigns.stock, actor: socket.assigns.current_user) do
-      {:ok, _} ->
+      :ok ->
         {:noreply,
          socket
          |> put_flash(:info, gettext("Artikel archiviert."))

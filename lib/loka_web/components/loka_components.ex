@@ -112,6 +112,210 @@ defmodule LokaWeb.LokaComponents do
     """
   end
 
+  @doc """
+  Renders the "← Zurück zum ..." link used above shop detail pages.
+
+  ## Examples
+
+      <.back_link navigate={~p"/"}>{gettext("Zurück zum Markt")}</.back_link>
+  """
+  attr :navigate, :string, required: true
+  slot :inner_block, required: true
+
+  def back_link(assigns) do
+    ~H"""
+    <.link navigate={@navigate} class="link-back">
+      ← {render_slot(@inner_block)}
+    </.link>
+    """
+  end
+
+  @doc """
+  Renders a centered empty-state message, optionally with an icon and an
+  action link/button below it.
+
+  ## Examples
+
+      <.empty_state message={gettext("Noch keine Artikel verfügbar.")} />
+
+      <.empty_state message={gettext("Dein Warenkorb ist leer.")}>
+        <:icon><svg>...</svg></:icon>
+        <:action>
+          <.link navigate={~p"/"} class="btn btn-primary btn-sm">{gettext("Zum Shop")}</.link>
+        </:action>
+      </.empty_state>
+  """
+  attr :message, :string, required: true
+  slot :icon
+  slot :action
+
+  def empty_state(assigns) do
+    ~H"""
+    <div class="text-center py-24 text-base-content/40">
+      {render_slot(@icon)}
+      <p class={["text-lg", @action != [] && "mb-4"]}>{@message}</p>
+      {render_slot(@action)}
+    </div>
+    """
+  end
+
+  @doc """
+  Renders the first product image, or the placeholder artwork if there are
+  none. `class` controls the outer box (size, radius, background).
+
+  ## Examples
+
+      <.item_thumbnail images={stock.item.images} alt={stock.item.name} class="size-16 rounded-lg bg-base-200" />
+  """
+  attr :images, :list, required: true
+  attr :alt, :string, default: ""
+  attr :class, :any, default: nil
+
+  def item_thumbnail(assigns) do
+    ~H"""
+    <div class={["overflow-hidden", @class]}>
+      <img
+        :if={@images != []}
+        src={List.first(@images).path}
+        alt={@alt}
+        class="w-full h-full object-cover"
+      />
+      <img
+        :if={@images == []}
+        src="/images/placeholder-pot.svg"
+        alt=""
+        class="w-full h-full object-cover"
+      />
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a stock's photo, as an `ImageSlider`-hooked slider with prev/next
+  arrows and dot indicators when there is more than one image.
+  """
+  attr :stock, Inventory.Stock, required: true
+
+  def stock_photo_slider(assigns) do
+    ~H"""
+    <div class="relative aspect-square rounded-field overflow-hidden bg-base-300">
+      <img
+        :if={@stock.item.images == []}
+        src="/images/placeholder-pot.svg"
+        alt=""
+        class="w-full h-full object-cover"
+      />
+
+      <div
+        :if={@stock.item.images != []}
+        id={"slider-#{@stock.id}"}
+        phx-hook="ImageSlider"
+        class="relative w-full h-full overflow-hidden"
+      >
+        <div
+          :for={{image, idx} <- Enum.with_index(@stock.item.images)}
+          data-slide={idx}
+          class={[
+            "absolute inset-0 transition-opacity duration-150",
+            if(idx == 0, do: "opacity-100", else: "opacity-0")
+          ]}
+        >
+          <img src={image.path} alt={@stock.item.name} class="w-full h-full object-cover" />
+        </div>
+
+        <div
+          :if={length(@stock.item.images) > 1}
+          class="absolute inset-x-2 top-1/2 -translate-y-1/2 flex justify-between z-10"
+        >
+          <button
+            data-action="prev"
+            class="btn btn-circle bg-base-100/80 backdrop-blur-sm border-0 shadow"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 20 20" fill="currentColor">
+              <path
+                fill-rule="evenodd"
+                d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </button>
+          <button
+            data-action="next"
+            class="btn btn-circle bg-base-100/80 backdrop-blur-sm border-0 shadow"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 20 20" fill="currentColor">
+              <path
+                fill-rule="evenodd"
+                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <div
+          :if={length(@stock.item.images) > 1}
+          class="absolute bottom-2 inset-x-0 flex justify-center gap-1 z-10"
+        >
+          <div
+            :for={{_, idx} <- Enum.with_index(@stock.item.images)}
+            data-dot={idx}
+            class={[
+              "size-1.5 rounded-full transition-all duration-150",
+              if(idx == 0, do: "bg-white scale-125", else: "bg-white/40")
+            ]}
+          />
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders the item detail page's photo gallery: a thumbnail rail plus the
+  main photo, wired to the `ImageSlider` hook. Rendered as siblings inside
+  the caller's own grid (it does not own the grid layout).
+  """
+  attr :images, :list, required: true
+  attr :name, :string, required: true
+
+  def item_photos(assigns) do
+    ~H"""
+    <div :if={@images != []} class="flex lg:flex-col gap-2.5 order-2 lg:order-1">
+      <button
+        :for={{image, idx} <- Enum.with_index(@images)}
+        type="button"
+        data-thumb={idx}
+        class={[
+          "relative aspect-square w-16 lg:w-auto rounded-field overflow-hidden bg-base-300 shrink-0",
+          if(idx == 0, do: "shadow-[inset_0_0_0_1px_var(--clay-accent-700)]")
+        ]}
+      >
+        <img src={image.path} alt="" class="w-full h-full object-cover" />
+      </button>
+    </div>
+
+    <div class="relative aspect-square rounded-box overflow-hidden bg-base-300 order-1 lg:order-2">
+      <img
+        :if={@images == []}
+        src="/images/placeholder-pot.svg"
+        alt=""
+        class="w-full h-full object-cover"
+      />
+      <div
+        :for={{image, idx} <- Enum.with_index(@images)}
+        data-slide={idx}
+        class={[
+          "absolute inset-0 transition-opacity duration-150",
+          if(idx == 0, do: "opacity-100", else: "opacity-0")
+        ]}
+      >
+        <img src={image.path} alt={@name} class="w-full h-full object-cover" />
+      </div>
+    </div>
+    """
+  end
+
   attr :stock, Inventory.Stock, required: true
   attr :current_user, :any, default: nil
   attr :show_studio, :boolean, default: true
@@ -119,86 +323,7 @@ defmodule LokaWeb.LokaComponents do
   def stock_card(assigns) do
     ~H"""
     <div class="flex flex-col gap-2.5" data-item={@stock.id}>
-      <div class="relative aspect-square rounded-field overflow-hidden bg-base-300">
-        <img
-          :if={@stock.item.images == []}
-          src="/images/placeholder-pot.svg"
-          alt=""
-          class="w-full h-full object-cover"
-        />
-
-        <div
-          :if={@stock.item.images != []}
-          id={"slider-#{@stock.id}"}
-          phx-hook="ImageSlider"
-          class="relative w-full h-full overflow-hidden"
-        >
-          <div
-            :for={{image, idx} <- Enum.with_index(@stock.item.images)}
-            data-slide={idx}
-            class={[
-              "absolute inset-0 transition-opacity duration-150",
-              if(idx == 0, do: "opacity-100", else: "opacity-0")
-            ]}
-          >
-            <img src={image.path} alt={@stock.item.name} class="w-full h-full object-cover" />
-          </div>
-
-          <div
-            :if={length(@stock.item.images) > 1}
-            class="absolute inset-x-2 top-1/2 -translate-y-1/2 flex justify-between z-10"
-          >
-            <button
-              data-action="prev"
-              class="btn btn-circle bg-base-100/80 backdrop-blur-sm border-0 shadow"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="size-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </button>
-            <button
-              data-action="next"
-              class="btn btn-circle bg-base-100/80 backdrop-blur-sm border-0 shadow"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="size-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </button>
-          </div>
-
-          <div
-            :if={length(@stock.item.images) > 1}
-            class="absolute bottom-2 inset-x-0 flex justify-center gap-1 z-10"
-          >
-            <div
-              :for={{_, idx} <- Enum.with_index(@stock.item.images)}
-              data-dot={idx}
-              class={[
-                "size-1.5 rounded-full transition-all duration-150",
-                if(idx == 0, do: "bg-white scale-125", else: "bg-white/40")
-              ]}
-            />
-          </div>
-        </div>
-      </div>
+      <.stock_photo_slider stock={@stock} />
 
       <div class="flex items-baseline justify-between gap-2.5">
         <.link
@@ -238,12 +363,6 @@ defmodule LokaWeb.LokaComponents do
       />
     </div>
     """
-  end
-
-  @low_stock_threshold 5
-
-  defp stock_line(%{quantity: quantity}) when quantity <= @low_stock_threshold do
-    gettext("nur noch %{count}", count: quantity)
   end
 
   defp stock_line(%{quantity: quantity}) do

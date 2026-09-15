@@ -89,12 +89,7 @@ defmodule LokaWeb.Shop.CartLive do
     ~H"""
     <Layouts.app current_user={@current_user} flash={@flash} socket={@socket}>
       <div id="cart-page" phx-hook=".CartPage">
-        <.link
-          navigate={~p"/"}
-          class="text-[13px] text-secondary hover:text-base-content transition-colors duration-150"
-        >
-          ← {gettext("Zurück zum Markt")}
-        </.link>
+        <.back_link navigate={~p"/"}>{gettext("Zurück zum Markt")}</.back_link>
 
         <h1 class="text-[36px] sm:text-[44px] leading-[1.05] tracking-[-0.03em] font-medium mt-3.5 mb-6">
           {gettext("Warenkorb")}
@@ -107,26 +102,29 @@ defmodule LokaWeb.Shop.CartLive do
         </h1>
 
         <%!-- Empty state --%>
-        <div :if={@line_items == []} class="text-center py-24 text-base-content/40">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="size-12 mx-auto mb-4 opacity-30"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="1"
-              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-            />
-          </svg>
-          <p class="text-lg mb-4">{gettext("Dein Warenkorb ist leer.")}</p>
-          <.link navigate={~p"/"} class="btn btn-primary btn-sm">
-            {gettext("Zum Shop")}
-          </.link>
-        </div>
+        <.empty_state :if={@line_items == []} message={gettext("Dein Warenkorb ist leer.")}>
+          <:icon>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="size-12 mx-auto mb-4 opacity-30"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1"
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+              />
+            </svg>
+          </:icon>
+          <:action>
+            <.link navigate={~p"/"} class="btn btn-primary btn-sm">
+              {gettext("Zum Shop")}
+            </.link>
+          </:action>
+        </.empty_state>
 
         <%!-- Cart content --%>
         <div
@@ -139,17 +137,11 @@ defmodule LokaWeb.Shop.CartLive do
               class="flex items-center gap-4.5 py-4.5 rule-fade-bottom"
             >
               <%!-- Thumbnail --%>
-              <div class="shrink-0 size-[84px] rounded-field overflow-hidden bg-base-300">
-                <%= if stock.item.images != [] do %>
-                  <img
-                    src={List.first(stock.item.images).path}
-                    alt={stock.item.name}
-                    class="w-full h-full object-cover"
-                  />
-                <% else %>
-                  <img src="/images/placeholder-pot.svg" alt="" class="w-full h-full object-cover" />
-                <% end %>
-              </div>
+              <.item_thumbnail
+                images={stock.item.images}
+                alt={stock.item.name}
+                class="shrink-0 size-[84px] rounded-field bg-base-300"
+              />
 
               <%!-- Info --%>
               <div class="flex-1 min-w-0">
@@ -269,15 +261,15 @@ defmodule LokaWeb.Shop.CartLive do
   end
 
   defp shipping_note(line_items) do
-    studios =
+    studio_count =
       line_items
-      |> Enum.map(fn {stock, _quantity, _entries} -> stock.studio end)
+      |> Enum.map(fn {stock, _quantity, _entries} -> stock.studio && stock.studio.id end)
       |> Enum.reject(&is_nil/1)
-      |> Enum.uniq_by(& &1.id)
+      |> Enum.uniq()
+      |> length()
 
-    if length(studios) > 1 do
-      names = Enum.map_join(studios, " und ", &"#{&1.name} (#{&1.city})")
-      gettext("Versand pro Studio getrennt — %{names} senden separat.", names: names)
+    if studio_count > 1 do
+      gettext("Versand pro Studio getrennt")
     end
   end
 end

@@ -8,57 +8,21 @@ defmodule LokaWeb.Shop.ItemLive do
   def render(assigns) do
     ~H"""
     <Layouts.app current_user={@current_user} flash={@flash} socket={@socket}>
-      <.link
-        navigate={~p"/"}
-        class="text-[13px] text-secondary hover:text-base-content transition-colors duration-150"
-      >
-        ← {gettext("Zurück zum Markt")}
-      </.link>
+      <.back_link navigate={~p"/"}>{gettext("Zurück zum Markt")}</.back_link>
 
       <div
         id="item-slider"
         phx-hook={if @item.images != [], do: "ImageSlider"}
         class="grid grid-cols-1 lg:grid-cols-[96px_minmax(0,1fr)_minmax(0,440px)] gap-7 items-start mt-5 pb-14"
       >
-        <div :if={@item.images != []} class="flex lg:flex-col gap-2.5 order-2 lg:order-1">
-          <button
-            :for={{image, idx} <- Enum.with_index(@item.images)}
-            type="button"
-            data-thumb={idx}
-            class={[
-              "relative aspect-square w-16 lg:w-auto rounded-field overflow-hidden bg-base-300 shrink-0",
-              if(idx == 0, do: "shadow-[inset_0_0_0_1px_var(--clay-accent-700)]")
-            ]}
-          >
-            <img src={image.path} alt="" class="w-full h-full object-cover" />
-          </button>
-        </div>
-
-        <div class="relative aspect-square rounded-box overflow-hidden bg-base-300 order-1 lg:order-2">
-          <img
-            :if={@item.images == []}
-            src="/images/placeholder-pot.svg"
-            alt=""
-            class="w-full h-full object-cover"
-          />
-          <div
-            :for={{image, idx} <- Enum.with_index(@item.images)}
-            data-slide={idx}
-            class={[
-              "absolute inset-0 transition-opacity duration-150",
-              if(idx == 0, do: "opacity-100", else: "opacity-0")
-            ]}
-          >
-            <img src={image.path} alt={@item.name} class="w-full h-full object-cover" />
-          </div>
-        </div>
+        <.item_photos images={@item.images} name={@item.name} />
 
         <div :for={stock <- @item.stock} class="order-3">
           <h6 class="m-0 mb-2.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-accent">
             {gettext("Steinzeug · Unikat")}
           </h6>
 
-          <h1 class="text-[40px] sm:text-[52px] leading-[1.02] tracking-[-0.035em] font-medium m-0 mb-1.5">
+          <h1 class="page-title m-0 mb-1.5">
             {@item.name}
           </h1>
 
