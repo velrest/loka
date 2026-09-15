@@ -35,6 +35,7 @@ Move the finished tasks to Done
 - TWINT only works in CHF, max CHF 5000, no manual capture
 
 ## TODO
+- **Per-studio carts:** `Cart`/`CartStock` currently hold stock from any studio in one cart. Since each studio ships separately (see `shipping_note/1` in `cart_live.ex`), carts should be refactored to be scoped per studio.
 - **Pre-launch refactor:** Switch anonymous cart from localStorage/JS-hook to server-side `CartPlug` + Phoenix session. Eliminates flash of empty cart on first render. `EnsureForSession` + `MergeFrom` logic stays; refactor `AddToCartComponent` (remove `ensure_cart` JS flow), update `CartLive`, add `CartPlug`, handle merge in auth controller. Do after Stripe checkout is working.
 - Map still not zooming to user location in firefox and chrome after permission is granted, remove all the console.logs in the leaflet compoenent again
 - At some point, we well need to add some logic so stock is reserved for a user for some time after adding it to cart and the display of remaining items need to take this into consideration.

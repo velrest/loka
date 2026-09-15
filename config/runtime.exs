@@ -1,4 +1,10 @@
 import Config
+import Dotenvy
+
+# Load local secrets from .env (git-ignored) — real env vars always win.
+source!([Path.absname(".env"), System.get_env()])
+
+config :loka, :thunderforest_api_key, env!("THUNDERFOREST_API_KEY", :string, nil)
 
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the

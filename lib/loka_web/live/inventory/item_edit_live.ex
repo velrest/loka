@@ -154,7 +154,7 @@ defmodule LokaWeb.Inventory.ItemEditLive do
 
   def handle_event("delete", _params, socket) do
     case Inventory.archive_stock(socket.assigns.stock, actor: socket.assigns.current_user) do
-      {:ok, _} ->
+      :ok ->
         {:noreply,
          socket
          |> put_flash(:info, gettext("Artikel archiviert."))
@@ -204,7 +204,7 @@ defmodule LokaWeb.Inventory.ItemEditLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app current_user={@current_user} flash={@flash} socket={@socket}>
+    <Layouts.app current_user={@current_user} flash={@flash} socket={@socket} locale={@locale}>
       <:nav>
         <.inventory_tab_nav active={@current_path} partial_match?={true} />
       </:nav>

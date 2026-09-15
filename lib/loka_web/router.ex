@@ -9,6 +9,7 @@ defmodule LokaWeb.Router do
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
+    plug LokaWeb.Plugs.SetLocale
     plug :fetch_live_flash
     plug :put_root_layout, html: {LokaWeb.Layouts, :root}
     plug :protect_from_forgery
@@ -25,7 +26,7 @@ defmodule LokaWeb.Router do
   scope "/", LokaWeb do
     pipe_through :browser
 
-    ash_authentication_live_session :authenticated_routes do
+    ash_authentication_live_session :authenticated_routes, on_mount_prepend: LokaWeb.LiveLocale do
       # in each liveview, add one of the following at the top of the module:
       #
       # If an authenticated user must be present:
