@@ -321,17 +321,16 @@
   box-shadow: 0 0 0 1px var(--color-base-300);
 }
 
-/* The DE/EN nav toggle: a checked `input.btn` radio (daisyUI's own
-   segmented-control pattern via .join) defaults to a filled/active look —
-   Schamotte wants a quiet accent ring instead, matching .seg-opt elsewhere. */
+/* The DE/EN nav toggle: plain links styled with daisyUI's .join + .btn, with
+   the active locale marked server-side (.seg-toggle-active) rather than via
+   :checked, since these are <a> tags, not radio inputs. */
 .seg-toggle {
   font-size: var(--text-13);
   background: transparent;
   border-color: var(--color-base-300);
   color: var(--color-base-content);
 }
-.seg-toggle:checked {
-  background: transparent;
+.seg-toggle-active {
   color: var(--color-accent);
   box-shadow: inset 0 0 0 1px var(--color-accent);
 }

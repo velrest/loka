@@ -1,0 +1,677 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: lib/loka_web/live/shop/market_live.ex:48
+#, elixir-autogen, elixir-format
+msgid "%{count} %{stock_word} · %{studio_count} %{studio_word} im Kartenausschnitt"
+msgstr "%{count} %{stock_word} · %{studio_count} %{studio_word} in view"
+
+#: lib/loka_web/live/shop/item_live.ex:46
+#, elixir-autogen, elixir-format
+msgid "%{count} Stück verfügbar"
+msgid_plural "%{count} Stücke verfügbar"
+msgstr[0] "%{count} piece available"
+msgstr[1] "%{count} pieces available"
+
+#: lib/loka_web/components/loka_components.ex:369
+#, elixir-autogen, elixir-format
+msgid "%{count} verfügbar"
+msgstr "%{count} available"
+
+#: lib/loka_web/live/shop/item_live.ex:91
+#, elixir-autogen, elixir-format
+msgid "%{count} weiteres Stück"
+msgid_plural "%{count} weitere Stücke"
+msgstr[0] "%{count} more piece"
+msgstr[1] "%{count} more pieces"
+
+#: lib/loka_web/live/shop/cart_live.ex:162
+#: lib/loka_web/live/shop/item_live.ex:43
+#, elixir-autogen, elixir-format
+msgid "/ Stück"
+msgstr "/ piece"
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:400
+#: lib/loka_web/live/inventory/studio_live.ex:256
+#, elixir-autogen, elixir-format
+msgid "Abbrechen"
+msgstr "Cancel"
+
+#: lib/loka_web/components/layouts.ex:224
+#, elixir-autogen, elixir-format
+msgid "Abmelden"
+msgstr "Sign out"
+
+#: lib/loka_web/components/core_components.ex:368
+#, elixir-autogen, elixir-format
+msgid "Actions"
+msgstr "Actions"
+
+#: lib/loka_web/live/user/studio_live.ex:102
+#, elixir-autogen, elixir-format
+msgid "Adresse"
+msgstr "Address"
+
+#: lib/loka_web/live/user/studio_live.ex:77
+#, elixir-autogen, elixir-format
+msgid "Aktiv"
+msgstr "Active"
+
+#: lib/loka_web/live/shop/studio_live.ex:67
+#, elixir-autogen, elixir-format
+msgid "Alle Artikel"
+msgstr "All items"
+
+#: lib/loka_web/live/shop/market_live.ex:29
+#, elixir-autogen, elixir-format
+msgid "Alle Stücke"
+msgstr "All pieces"
+
+#: lib/loka_web/components/layouts.ex:226
+#, elixir-autogen, elixir-format
+msgid "Anmelden"
+msgstr "Sign in"
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:377
+#, elixir-autogen, elixir-format
+msgid "Archivierte Artikel sind für Kunden nicht mehr sichtbar."
+msgstr "Archived items are no longer visible to customers."
+
+#: lib/loka_web/live/inventory/studio_live.ex:235
+#, elixir-autogen, elixir-format
+msgid "Archivierte Studios sind für Kunden nicht mehr sichtbar."
+msgstr "Archived studios are no longer visible to customers."
+
+#: lib/loka_web/components/loka_components.ex:85
+#: lib/loka_web/live/inventory/items_live.ex:30
+#: lib/loka_web/live/shop/cart_live.ex:100
+#, elixir-autogen, elixir-format
+msgid "Artikel"
+msgid_plural "Artikel"
+msgstr[0] "Item"
+msgstr[1] "Items"
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:381
+#, elixir-autogen, elixir-format
+msgid "Artikel archivieren"
+msgstr "Archive item"
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:160
+#, elixir-autogen, elixir-format
+msgid "Artikel archiviert."
+msgstr "Item archived."
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:268
+#, elixir-autogen, elixir-format
+msgid "Artikel erstellen"
+msgstr "Create item"
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:85
+#, elixir-autogen, elixir-format
+msgid "Artikel erstellt."
+msgstr "Item created."
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:166
+#, elixir-autogen, elixir-format
+msgid "Artikel konnte nicht archiviert werden."
+msgstr "Item could not be archived."
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:330
+#, elixir-autogen, elixir-format
+msgid "Artikeldetails"
+msgstr "Item details"
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:138
+#, elixir-autogen, elixir-format
+msgid "Artikeldetails aktualisiert."
+msgstr "Item details updated."
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:234
+#: lib/loka_web/live/inventory/item_edit_live.ex:341
+#: lib/loka_web/live/inventory/studio_live.ex:180
+#, elixir-autogen, elixir-format
+msgid "Beschreibung"
+msgstr "Description"
+
+#: lib/loka_web/live/user/settings_live.ex:34
+#, elixir-autogen, elixir-format
+msgid "Bestätigt"
+msgstr "Confirmed"
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:196
+#, elixir-autogen, elixir-format
+msgid "Bild konnte nicht entfernt werden."
+msgstr "Image could not be removed."
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:246
+#: lib/loka_web/live/inventory/item_edit_live.ex:281
+#, elixir-autogen, elixir-format
+msgid "Bilder"
+msgstr "Images"
+
+#: lib/loka_web/live/user/studio_live.ex:136
+#, elixir-autogen, elixir-format
+msgid "Dein Studio wartet"
+msgstr "Your studio awaits"
+
+#: lib/loka_web/live/inventory/studio_live.ex:250
+#, elixir-autogen, elixir-format
+msgid "Dein Studio wird archiviert und ist weder für dich noch für Kunden sichtbar. Deine Daten bleiben erhalten und können über den Support wiederhergestellt werden."
+msgstr "Your studio will be archived and won't be visible to you or to customers. Your data is preserved and can be restored via support."
+
+#: lib/loka_web/live/shop/cart_live.ex:105
+#, elixir-autogen, elixir-format
+msgid "Dein Warenkorb ist leer."
+msgstr "Your cart is empty."
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:392
+#, elixir-autogen, elixir-format
+msgid "Diesen Artikel archivieren?"
+msgstr "Archive this item?"
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:394
+#, elixir-autogen, elixir-format
+msgid "Dieser Artikel wird archiviert und ist für Kunden nicht mehr sichtbar. Deine Daten bleiben erhalten und können über den Support wiederhergestellt werden."
+msgstr "This item will be archived and will no longer be visible to customers. Your data is preserved and can be restored via support."
+
+#: lib/loka_web/live/user/profile_live.ex:29
+#, elixir-autogen, elixir-format
+msgid "E-Mail"
+msgstr "Email"
+
+#: lib/loka_web/live/user/settings_live.ex:30
+#, elixir-autogen, elixir-format
+msgid "E-Mail-Adresse"
+msgstr "Email address"
+
+#: lib/loka_web/components/loka_components.ex:65
+#: lib/loka_web/live/user/settings_live.ex:21
+#, elixir-autogen, elixir-format
+msgid "Einstellungen"
+msgstr "Settings"
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:298
+#, elixir-autogen, elixir-format
+msgid "Entfernen"
+msgstr "Remove"
+
+#: lib/loka_web/live/user/studio_live.ex:138
+#, elixir-autogen, elixir-format
+msgid "Erreiche neue Kunden, zeige dein Handwerk und baue etwas, das Menschen begeistert."
+msgstr "Reach new customers, showcase your craft, and build something people love."
+
+#: lib/loka_web/components/layouts.ex:111
+#, elixir-autogen, elixir-format
+msgid "Etwas ist schiefgelaufen!"
+msgstr "Something went wrong!"
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:375
+#: lib/loka_web/live/inventory/studio_live.ex:233
+#, elixir-autogen, elixir-format
+msgid "Gefahrenzone"
+msgstr "Danger zone"
+
+#: lib/loka_web/live/shop/cart_live.ex:218
+#, elixir-autogen, elixir-format
+msgid "Gesamt"
+msgstr "Total"
+
+#: lib/loka_web/live/inventory/studio_live.ex:225
+#, elixir-autogen, elixir-format
+msgid "Gespeichert!"
+msgstr "Saved!"
+
+#: lib/loka_web/live/shop/about_live.ex:13
+#, elixir-autogen, elixir-format
+msgid "Handgefertigte Keramik"
+msgstr "Handcrafted ceramics"
+
+#: lib/loka_web/live/components/add_to_cart_component.ex:34
+#, elixir-autogen, elixir-format
+msgid "In den Warenkorb"
+msgstr "Add to cart"
+
+#: lib/loka_web/live/shop/item_live.ex:118
+#: lib/loka_web/live/shop/item_live.ex:124
+#, elixir-autogen, elixir-format
+msgid "Item not found."
+msgstr "Item not found."
+
+#: lib/loka_web/live/inventory/studio_live.ex:170
+#, elixir-autogen, elixir-format
+msgid "JPG, PNG oder WEBP"
+msgstr "JPG, PNG or WEBP"
+
+#: lib/loka_web/live/user/profile_live.ex:36
+#, elixir-autogen, elixir-format
+msgid "Ja"
+msgstr "Yes"
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:403
+#: lib/loka_web/live/inventory/studio_live.ex:259
+#, elixir-autogen, elixir-format
+msgid "Ja, archivieren"
+msgstr "Yes, archive"
+
+#: lib/loka_web/live/shop/about_live.ex:19
+#, elixir-autogen, elixir-format
+msgid "Jedes Stück ein Unikat."
+msgstr "Every piece is one of a kind."
+
+#: lib/loka_web/live/shop/market_live.ex:46
+#, elixir-autogen, elixir-format
+msgid "Jetzt verfügbar"
+msgstr "Available now"
+
+#: lib/loka_web/live/user/studio_live.ex:98
+#, elixir-autogen, elixir-format
+msgid "Kann jederzeit geändert werden."
+msgstr "Can be changed anytime."
+
+#: lib/loka_web/components/layouts.ex:99
+#, elixir-autogen, elixir-format
+msgid "Keine Internetverbindung"
+msgstr "No internet connection"
+
+#: lib/loka_web/live/inventory/studio_live.ex:216
+#, elixir-autogen, elixir-format
+msgid "Keine Koordinaten verfügbar."
+msgstr "No coordinates available."
+
+#: lib/loka_web/live/shop/market_live.ex:23
+#, elixir-autogen, elixir-format
+msgid "Kleinserien-Töpferei von unabhängigen Studios in der Schweiz. Jedes Stück ein Unikat."
+msgstr "Small-batch pottery from independent studios across Switzerland. Every piece is one of a kind."
+
+#: lib/loka_web/live/shop/about_live.ex:19
+#, elixir-autogen, elixir-format
+msgid "Kleinserien-Töpferei von unabhängigen Studios."
+msgstr "Small-batch pottery from independent studios."
+
+#: lib/loka_web/live/user/settings_live.ex:26
+#, elixir-autogen, elixir-format
+msgid "Konto"
+msgstr "Account"
+
+#: lib/loka_web/live/user/profile_live.ex:34
+#, elixir-autogen, elixir-format
+msgid "Konto bestätigt"
+msgstr "Account confirmed"
+
+#: lib/loka_web/live/user/profile_live.ex:26
+#, elixir-autogen, elixir-format
+msgid "Kontodaten"
+msgstr "Account details"
+
+#: lib/loka_web/live/inventory/studio_live.ex:164
+#, elixir-autogen, elixir-format
+msgid "Logo"
+msgstr "Logo"
+
+#: lib/loka_web/components/layouts.ex:174
+#, elixir-autogen, elixir-format
+msgid "Loka"
+msgstr "Loka"
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:241
+#: lib/loka_web/live/inventory/item_edit_live.ex:363
+#: lib/loka_web/live/inventory/items_live.ex:92
+#, elixir-autogen, elixir-format
+msgid "Menge"
+msgstr "Quantity"
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:177
+#, elixir-autogen, elixir-format
+msgid "Mindestens ein Bild ist erforderlich."
+msgstr "At least one image is required."
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:230
+#: lib/loka_web/live/inventory/item_edit_live.ex:337
+#, elixir-autogen, elixir-format
+msgid "Name"
+msgstr "Name"
+
+#: lib/loka_web/live/user/profile_live.ex:38
+#, elixir-autogen, elixir-format
+msgid "Nein"
+msgstr "No"
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:222
+#: lib/loka_web/live/inventory/items_live.ex:32
+#: lib/loka_web/live/inventory/items_live.ex:55
+#, elixir-autogen, elixir-format
+msgid "Neuer Artikel"
+msgstr "New item"
+
+#: lib/loka_web/live/user/settings_live.ex:36
+#, elixir-autogen, elixir-format
+msgid "Nicht bestätigt"
+msgstr "Not confirmed"
+
+#: lib/loka_web/live/shop/market_live.ex:57
+#: lib/loka_web/live/shop/studio_live.ex:71
+#, elixir-autogen, elixir-format
+msgid "Noch keine Artikel verfügbar."
+msgstr "No items available yet."
+
+#: lib/loka_web/live/inventory/items_live.ex:36
+#, elixir-autogen, elixir-format
+msgid "Noch keine Artikel."
+msgstr "No items yet."
+
+#: lib/loka_web/live/inventory/studio_live.ex:195
+#: lib/loka_web/live/user/studio_live.ex:108
+#, elixir-autogen, elixir-format
+msgid "Nr."
+msgstr "No."
+
+#: lib/loka_web/live/components/address_input_component.ex:17
+#, elixir-autogen, elixir-format
+msgid "Ort"
+msgstr "City"
+
+#: lib/loka_web/live/components/address_input_component.ex:13
+#, elixir-autogen, elixir-format
+msgid "PLZ"
+msgstr "Postal code"
+
+#: lib/loka_web/live/user/settings_live.ex:41
+#, elixir-autogen, elixir-format
+msgid "Passwort"
+msgstr "Password"
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:362
+#: lib/loka_web/live/inventory/items_live.ex:86
+#, elixir-autogen, elixir-format
+msgid "Preis"
+msgstr "Price"
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:354
+#, elixir-autogen, elixir-format
+msgid "Preis & Bestand"
+msgstr "Price & stock"
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:240
+#, elixir-autogen, elixir-format
+msgid "Preis (z.B. CHF 100)"
+msgstr "Price (e.g. CHF 100)"
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:117
+#, elixir-autogen, elixir-format
+msgid "Preis und Bestand aktualisiert."
+msgstr "Price and stock updated."
+
+#: lib/loka_web/live/shop/cart_widget_live.ex:27
+#, elixir-autogen, elixir-format
+msgid "Produkt"
+msgid_plural "Produkte"
+msgstr[0] "Product"
+msgstr[1] "Products"
+
+#: lib/loka_web/components/layouts.ex:222
+#: lib/loka_web/components/loka_components.ex:64
+#: lib/loka_web/live/user/profile_live.ex:21
+#, elixir-autogen, elixir-format
+msgid "Profil"
+msgstr "Profile"
+
+#: lib/loka_web/components/layouts.ex:227
+#, elixir-autogen, elixir-format
+msgid "Registrieren"
+msgstr "Register"
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:345
+#: lib/loka_web/live/inventory/item_edit_live.ex:366
+#: lib/loka_web/live/inventory/studio_live.ex:225
+#, elixir-autogen, elixir-format
+msgid "Speichern"
+msgstr "Save"
+
+#: lib/loka_web/live/inventory/studio_live.ex:189
+#, elixir-autogen, elixir-format
+msgid "Standort"
+msgstr "Location"
+
+#: lib/loka_web/live/shop/item_live.ex:22
+#, elixir-autogen, elixir-format
+msgid "Steinzeug · Unikat"
+msgstr "Stoneware · One of a kind"
+
+#: lib/loka_web/live/inventory/studio_live.ex:193
+#: lib/loka_web/live/user/studio_live.ex:106
+#, elixir-autogen, elixir-format
+msgid "Strasse"
+msgstr "Street"
+
+#: lib/loka_web/components/loka_components.ex:66
+#: lib/loka_web/components/loka_components.ex:84
+#: lib/loka_web/live/shop/market_live.ex:52
+#: lib/loka_web/live/user/studio_live.ex:66
+#, elixir-autogen, elixir-format
+msgid "Studio"
+msgid_plural "Studios"
+msgstr[0] "Studio"
+msgstr[1] "Studios"
+
+#: lib/loka_web/live/shop/item_live.ex:103
+#, elixir-autogen, elixir-format
+msgid "Studio ansehen"
+msgstr "View studio"
+
+#: lib/loka_web/live/inventory/studio_live.ex:239
+#, elixir-autogen, elixir-format
+msgid "Studio archivieren"
+msgstr "Archive studio"
+
+#: lib/loka_web/live/inventory/studio_live.ex:248
+#, elixir-autogen, elixir-format
+msgid "Studio archivieren?"
+msgstr "Archive studio?"
+
+#: lib/loka_web/live/user/studio_live.ex:119
+#, elixir-autogen, elixir-format
+msgid "Studio erstellen"
+msgstr "Create studio"
+
+#: lib/loka_web/live/user/studio_live.ex:92
+#: lib/loka_web/live/user/studio_live.ex:145
+#, elixir-autogen, elixir-format
+msgid "Studio eröffnen"
+msgstr "Open a studio"
+
+#: lib/loka_web/live/inventory/studio_live.ex:68
+#, elixir-autogen, elixir-format
+msgid "Studio gelöscht."
+msgstr "Studio deleted."
+
+#: lib/loka_web/live/inventory/studio_live.ex:108
+#, elixir-autogen, elixir-format
+msgid "Studio gespeichert."
+msgstr "Studio saved."
+
+#: lib/loka_web/live/inventory/studio_live.ex:74
+#, elixir-autogen, elixir-format
+msgid "Studio konnte nicht gelöscht werden."
+msgstr "Studio could not be deleted."
+
+#: lib/loka_web/live/shop/studio_live.ex:13
+#: lib/loka_web/live/shop/studio_live.ex:23
+#, elixir-autogen, elixir-format
+msgid "Studio nicht gefunden."
+msgstr "Studio not found."
+
+#: lib/loka_web/components/layouts.ex:223
+#: lib/loka_web/live/inventory/studio_live.ex:141
+#: lib/loka_web/live/user/studio_live.ex:82
+#, elixir-autogen, elixir-format
+msgid "Studio verwalten"
+msgstr "Manage studio"
+
+#: lib/loka_web/live/inventory/studio_live.ex:148
+#, elixir-autogen, elixir-format
+msgid "Studiodetails"
+msgstr "Studio details"
+
+#: lib/loka_web/live/inventory/studio_live.ex:175
+#: lib/loka_web/live/user/studio_live.ex:100
+#, elixir-autogen, elixir-format
+msgid "Studioname"
+msgstr "Studio name"
+
+#: lib/loka_web/live/user/studio_live.ex:97
+#, elixir-autogen, elixir-format
+msgid "Studioname wählen"
+msgstr "Choose a studio name"
+
+#: lib/loka_web/components/layouts.ex:205
+#, elixir-autogen, elixir-format
+msgid "Studios"
+msgstr "Studios"
+
+#: lib/loka_web/live/shop/market_live.ex:28
+#, elixir-autogen, elixir-format
+msgid "Studios in der Nähe"
+msgstr "Studios nearby"
+
+#: lib/loka_web/live/shop/market_live.ex:50
+#: lib/loka_web/live/shop/studio_live.ex:68
+#, elixir-autogen, elixir-format
+msgid "Stück"
+msgid_plural "Stücke"
+msgstr[0] "Piece"
+msgstr[1] "Pieces"
+
+#: lib/loka_web/components/layouts.ex:191
+#, elixir-autogen, elixir-format
+msgid "Suchen"
+msgstr "Search"
+
+#: lib/loka_web/live/shop/cart_live.ex:226
+#, elixir-autogen, elixir-format
+msgid "TWINT · Visa · Mastercard — CHF"
+msgstr "TWINT · Visa · Mastercard — CHF"
+
+#: lib/loka_web/components/layouts.ex:104
+#: lib/loka_web/components/layouts.ex:116
+#, elixir-autogen, elixir-format
+msgid "Verbindung wird hergestellt…"
+msgstr "Connecting…"
+
+#: lib/loka_web/live/shop/cart_live.ex:211
+#, elixir-autogen, elixir-format
+msgid "Versand"
+msgstr "Shipping"
+
+#: lib/loka_web/live/shop/item_live.ex:53
+#, elixir-autogen, elixir-format
+msgid "Versand ab Studio %{city}"
+msgstr "Ships from studio in %{city}"
+
+#: lib/loka_web/live/shop/cart_live.ex:272
+#, elixir-autogen, elixir-format
+msgid "Versand pro Studio getrennt"
+msgstr "Shipped separately per studio"
+
+#: lib/loka_web/live/shop/market_live.ex:19
+#, elixir-autogen, elixir-format
+msgid "Von Hand"
+msgstr "Made"
+
+#: lib/loka_web/live/shop/about_live.ex:16
+#, elixir-autogen, elixir-format
+msgid "Von Hand gemacht,"
+msgstr "Made by hand,"
+
+#: lib/loka_web/live/shop/cart_live.ex:95
+#: lib/loka_web/live/shop/cart_widget_live.ex:16
+#, elixir-autogen, elixir-format
+msgid "Warenkorb"
+msgstr "Cart"
+
+#: lib/loka_web/live/shop/cart_widget_live.ex:34
+#, elixir-autogen, elixir-format
+msgid "Warenkorb anzeigen"
+msgstr "View cart"
+
+#: lib/loka_web/live/shop/cart_live.ex:124
+#, elixir-autogen, elixir-format
+msgid "Zum Shop"
+msgstr "To the shop"
+
+#: lib/loka_web/live/shop/cart_live.ex:223
+#, elixir-autogen, elixir-format
+msgid "Zur Kasse"
+msgstr "Checkout"
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:219
+#, elixir-autogen, elixir-format
+msgid "Zurück zu Artikeln"
+msgstr "Back to items"
+
+#: lib/loka_web/live/shop/cart_live.ex:92
+#: lib/loka_web/live/shop/item_live.ex:11
+#: lib/loka_web/live/shop/studio_live.ex:32
+#, elixir-autogen, elixir-format
+msgid "Zurück zum Markt"
+msgstr "Back to market"
+
+#: lib/loka_web/live/shop/cart_live.ex:203
+#, elixir-autogen, elixir-format
+msgid "Zusammenfassung"
+msgstr "Summary"
+
+#: lib/loka_web/live/shop/cart_live.ex:206
+#: lib/loka_web/live/shop/cart_widget_live.ex:30
+#, elixir-autogen, elixir-format
+msgid "Zwischensumme"
+msgstr "Subtotal"
+
+#: lib/loka_web/components/core_components.ex:74
+#, elixir-autogen, elixir-format
+msgid "close"
+msgstr "close"
+
+#: lib/loka_web/live/shop/market_live.ex:20
+#, elixir-autogen, elixir-format
+msgid "für immer"
+msgstr "forever"
+
+#: lib/loka_web/live/shop/about_live.ex:16
+#, elixir-autogen, elixir-format
+msgid "für immer geliebt"
+msgstr "forever loved"
+
+#: lib/loka_web/live/shop/market_live.ex:20
+#, elixir-autogen, elixir-format
+msgid "geliebt"
+msgstr "loved"
+
+#: lib/loka_web/live/shop/market_live.ex:19
+#, elixir-autogen, elixir-format
+msgid "gemacht,"
+msgstr "by hand,"
+
+#: lib/loka_web/live/shop/cart_live.ex:212
+#, elixir-autogen, elixir-format
+msgid "wird berechnet"
+msgstr "calculated at checkout"
+
+#: lib/loka_web/live/user/settings_live.ex:42
+#, elixir-autogen, elixir-format
+msgid "Ändern"
+msgstr "Change"
+
+#: lib/loka_web/components/layouts.ex:199
+#, elixir-autogen, elixir-format
+msgid "Über Loka"
+msgstr "About Loka"

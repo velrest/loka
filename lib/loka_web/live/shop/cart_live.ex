@@ -87,7 +87,7 @@ defmodule LokaWeb.Shop.CartLive do
     assigns = assign(assigns, line_items: line_items, shipping_note: shipping_note(line_items))
 
     ~H"""
-    <Layouts.app current_user={@current_user} flash={@flash} socket={@socket}>
+    <Layouts.app current_user={@current_user} flash={@flash} socket={@socket} locale={@locale}>
       <div id="cart-page" phx-hook=".CartPage">
         <.back_link navigate={~p"/"}>{gettext("Zurück zum Markt")}</.back_link>
 

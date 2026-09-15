@@ -28,7 +28,7 @@ defmodule LokaWeb.Shop.StudioLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app current_user={@current_user} flash={@flash} socket={@socket}>
+    <Layouts.app current_user={@current_user} flash={@flash} socket={@socket} locale={@locale}>
       <.back_link navigate={~p"/"}>{gettext("Zurück zum Markt")}</.back_link>
 
       <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_420px] gap-10 items-end mt-5 mb-11">

@@ -12,7 +12,7 @@ defmodule LokaWeb.Shop.MarketLive do
     assigns = assign(assigns, filtered: filtered, studio_count: studio_count)
 
     ~H"""
-    <Layouts.app current_user={@current_user} flash={@flash} socket={@socket}>
+    <Layouts.app current_user={@current_user} flash={@flash} socket={@socket} locale={@locale}>
       <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] gap-10 items-end pb-11">
         <div class="order-2 lg:order-1 pb-0 lg:pb-9">
           <h1 class="hero-title m-0 mb-3.5">

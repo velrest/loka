@@ -6,7 +6,7 @@ defmodule LokaWeb.Shop.AboutLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app current_user={@current_user} flash={@flash} socket={@socket}>
+    <Layouts.app current_user={@current_user} flash={@flash} socket={@socket} locale={@locale}>
       <section class="rounded-box bg-base-200 mb-12 px-8 py-16 text-center">
         <div class="max-w-lg mx-auto">
           <span class="badge badge-primary badge-outline mb-4 tracking-widest uppercase text-xs px-3">

@@ -131,7 +131,7 @@ defmodule LokaWeb.Inventory.StudioLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app current_user={@current_user} flash={@flash} socket={@socket}>
+    <Layouts.app current_user={@current_user} flash={@flash} socket={@socket} locale={@locale}>
       <:nav>
         <.inventory_tab_nav active={@current_path} />
       </:nav>

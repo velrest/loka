@@ -7,7 +7,7 @@ defmodule LokaWeb.Shop.ItemLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app current_user={@current_user} flash={@flash} socket={@socket}>
+    <Layouts.app current_user={@current_user} flash={@flash} socket={@socket} locale={@locale}>
       <.back_link navigate={~p"/"}>{gettext("Zurück zum Markt")}</.back_link>
 
       <div

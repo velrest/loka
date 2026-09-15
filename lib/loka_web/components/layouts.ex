@@ -28,6 +28,7 @@ defmodule LokaWeb.Layouts do
   attr :flash, :map, required: true, doc: "the map of flash messages"
   attr :current_user, Loka.Accounts.User, required: false
   attr :socket, Phoenix.LiveView.Socket, required: true
+  attr :locale, :string, default: LokaWeb.Locale.default()
 
   attr :current_scope, :map,
     default: nil,
@@ -45,7 +46,7 @@ defmodule LokaWeb.Layouts do
       phx-hook=".StickyHeader"
       class="navbar sticky top-0 z-50"
     >
-      <.nav_bar current_user={@current_user} socket={@socket} />
+      <.nav_bar current_user={@current_user} socket={@socket} locale={@locale} />
       <script :type={Phoenix.LiveView.ColocatedHook} name=".StickyHeader">
         export default {
           mounted() {
@@ -164,6 +165,7 @@ defmodule LokaWeb.Layouts do
   """
   attr :current_user, Loka.Accounts.User, required: false
   attr :socket, Phoenix.LiveView.Socket, required: true
+  attr :locale, :string, default: LokaWeb.Locale.default()
 
   def nav_bar(assigns) do
     ~H"""
@@ -172,9 +174,16 @@ defmodule LokaWeb.Layouts do
         {gettext("Loka")}
       </.link>
 
+      <%!-- A real browser navigation (not a LiveView patch/navigate): switching
+      locale goes through LokaWeb.Plugs.SetLocale so the choice is actually
+      persisted to the session, not just reflected in this one socket. --%>
       <div class="hidden lg:join shrink-0">
-        <input class="join-item btn btn-sm seg-toggle" type="radio" name="locale" aria-label="DE" checked />
-        <input class="join-item btn btn-sm seg-toggle" type="radio" name="locale" aria-label="EN" />
+        <a href="?locale=de" class={["join-item btn btn-sm seg-toggle", @locale == "de" && "seg-toggle-active"]}>
+          DE
+        </a>
+        <a href="?locale=en" class={["join-item btn btn-sm seg-toggle", @locale == "en" && "seg-toggle-active"]}>
+          EN
+        </a>
       </div>
 
       <input
