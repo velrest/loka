@@ -42,8 +42,7 @@ defmodule Loka.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:ex_money_sql, "~> 1.0"},
-      {:ex_cldr, "~> 2.0"},
+      {:ex_money_sql, "~> 2.0"},
       {:bcrypt_elixir, "~> 3.0"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:picosat_elixir, "~> 0.2"},
@@ -53,11 +52,12 @@ defmodule Loka.MixProject do
       {:ash_cloak, "~> 0.2"},
       {:cloak, "~> 1.0"},
       {:ash_paper_trail, "~> 0.5"},
-      {:live_debugger, "~> 0.6", only: [:dev]},
+      {:live_debugger, "~> 1.0", only: [:dev]},
+      {:dotenvy, "~> 1.1"},
       {:ash_archival, "~> 2.0"},
       {:oban_web, "~> 2.0"},
       {:ash_oban, "~> 0.7"},
-      {:ash_admin, "~> 0.14"},
+      {:ash_admin, "~> 1.0"},
       {:ash_authentication_phoenix, "~> 2.0"},
       {:ash_authentication, "~> 4.0"},
       {:ash_postgres, "~> 2.0"},
@@ -70,9 +70,9 @@ defmodule Loka.MixProject do
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 4.1"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 1.1.0"},
+      {:phoenix_live_view, "~> 1.2"},
       {:lazy_html, ">= 0.1.0", only: :test},
-      {:phoenix_live_dashboard, "~> 0.8.3"},
+      {:phoenix_live_dashboard, "~> 0.9"},
       {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.3", runtime: Mix.env() == :dev},
       {:heroicons,
@@ -88,10 +88,10 @@ defmodule Loka.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 1.0"},
       {:jason, "~> 1.2"},
-      {:dns_cluster, "~> 0.2.0"},
+      {:dns_cluster, "~> 0.3"},
       {:bandit, "~> 1.5"},
       {:mix_test_interactive, "~> 5.0", only: :dev, runtime: false},
-      {:phoenix_test, "~> 0.8.2", only: :test, runtime: false}
+      {:phoenix_test, "~> 0.12", only: :test, runtime: false}
     ]
   end
 

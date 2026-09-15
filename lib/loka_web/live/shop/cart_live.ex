@@ -83,142 +83,147 @@ defmodule LokaWeb.Shop.CartLive do
 
   @impl true
   def render(assigns) do
-    assigns = assign(assigns, :line_items, cart_line_items(assigns.cart))
+    line_items = cart_line_items(assigns.cart)
+    assigns = assign(assigns, line_items: line_items, shipping_note: shipping_note(line_items))
 
     ~H"""
-    <Layouts.app current_user={@current_user} flash={@flash} socket={@socket}>
-      <div id="cart-page" phx-hook=".CartPage" class="px-4 py-10 sm:px-6 lg:px-8">
-        <%!-- Header --%>
-        <div class="mb-8">
-          <.link
-            navigate={~p"/"}
-            class="text-sm text-base-content/50 hover:text-base-content transition-colors"
+    <Layouts.app current_user={@current_user} flash={@flash} socket={@socket} locale={@locale}>
+      <div id="cart-page" phx-hook=".CartPage">
+        <.back_link navigate={~p"/"}>{gettext("Zurück zum Markt")}</.back_link>
+
+        <h1 class="cart-title mt-3.5 mb-6">
+          {gettext("Warenkorb")}
+          <span
+            :if={@cart && @cart.item_count > 0}
+            class="text-lg font-normal text-secondary tracking-normal ml-2"
           >
-            ← {gettext("Zurück zum Shop")}
-          </.link>
-          <h1 class="text-2xl font-bold mt-3">
-            {gettext("Warenkorb")}
-            <span
-              :if={@cart && @cart.item_count > 0}
-              class="text-base font-normal text-base-content/50 ml-2"
-            >
-              ({@cart.item_count} {ngettext("Artikel", "Artikel", @cart.item_count)})
-            </span>
-          </h1>
-        </div>
+            {@cart.item_count} {ngettext("Artikel", "Artikel", @cart.item_count)}
+          </span>
+        </h1>
 
         <%!-- Empty state --%>
-        <div :if={@line_items == []} class="text-center py-24 text-base-content/40">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="size-12 mx-auto mb-4 opacity-30"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="1"
-              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-            />
-          </svg>
-          <p class="text-lg mb-4">{gettext("Dein Warenkorb ist leer.")}</p>
-          <.link navigate={~p"/"} class="btn btn-primary btn-sm">
-            {gettext("Zum Shop")}
-          </.link>
-        </div>
+        <.empty_state :if={@line_items == []} message={gettext("Dein Warenkorb ist leer.")}>
+          <:icon>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="size-12 mx-auto mb-4 opacity-30"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1"
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+              />
+            </svg>
+          </:icon>
+          <:action>
+            <.link navigate={~p"/"} class="btn btn-primary btn-sm">
+              {gettext("Zum Shop")}
+            </.link>
+          </:action>
+        </.empty_state>
 
         <%!-- Cart content --%>
-        <div :if={@line_items != []} class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          <%!-- Items --%>
-          <div class="lg:col-span-2 card bg-base-100 border border-base-300 shadow shadow-black/30">
-            <div class="card-body p-0 gap-0">
-              <div
-                :for={{stock, quantity, entries} <- @line_items}
-                class="flex items-center gap-4 p-4 border-b border-base-200 last:border-0"
-              >
-                <%!-- Thumbnail --%>
-                <div class="shrink-0 size-20 rounded-lg overflow-hidden bg-base-200">
-                  <%= if stock.item.images != [] do %>
-                    <img
-                      src={List.first(stock.item.images).path}
-                      alt={stock.item.name}
-                      class="w-full h-full object-cover"
-                    />
-                  <% else %>
-                    <img src="/images/placeholder-pot.svg" alt="" class="w-full h-full object-cover" />
-                  <% end %>
-                </div>
+        <div
+          :if={@line_items != []}
+          class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-8 items-start pb-16"
+        >
+          <div>
+            <div
+              :for={{stock, quantity, entries} <- @line_items}
+              class="flex items-center gap-4.5 py-4.5 rule-fade-bottom"
+            >
+              <%!-- Thumbnail --%>
+              <.item_thumbnail
+                images={stock.item.images}
+                alt={stock.item.name}
+                class="shrink-0 size-[84px] rounded-field bg-base-300"
+              />
 
-                <%!-- Info --%>
-                <div class="flex-1 min-w-0">
-                  <p class="text-xs font-medium text-primary uppercase tracking-widest opacity-70">
-                    {stock.studio.name}
-                  </p>
-                  <.link
-                    navigate={~p"/shop/item/#{stock.item.id}"}
-                    class="font-semibold hover:text-primary transition-colors"
-                  >
-                    {stock.item.name}
-                  </.link>
-                  <p class="text-sm text-base-content/50 mt-0.5">
-                    {stock.price} {gettext("/ Stück")}
-                  </p>
-                </div>
-
-                <%!-- Qty & line total --%>
-                <div class="flex flex-col items-end gap-3 shrink-0">
-                  <span class="font-semibold">{line_total(entries)}</span>
-                  <div class="flex items-center gap-1">
-                    <button
-                      phx-click="decrease_quantity"
-                      phx-value-stock_id={stock.id}
-                      class="btn btn-ghost btn-xs btn-square"
-                    >
-                      <%= if quantity == 1 do %>
-                        <.icon name="hero-trash" class="size-4 text-error" />
-                      <% else %>
-                        −
-                      <% end %>
-                    </button>
-                    <span class="w-7 text-center text-sm font-medium tabular-nums">{quantity}</span>
-                    <button
-                      phx-click="increase_quantity"
-                      phx-value-stock_id={stock.id}
-                      class="btn btn-ghost btn-xs btn-square"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
+              <%!-- Info --%>
+              <div class="flex-1 min-w-0">
+                <.link
+                  navigate={~p"/shop/item/#{stock.item.id}"}
+                  class="text-lg tracking-snug hover:text-primary transition-colors duration-150"
+                >
+                  {stock.item.name}
+                </.link>
+                <.link
+                  :if={stock.studio}
+                  navigate={~p"/shop/studio/#{stock.studio.id}"}
+                  class="block text-13 text-accent hover:opacity-80 transition-opacity duration-150"
+                >
+                  {stock.studio.name} · {stock.studio.city}
+                </.link>
+                <p class="text-xs text-secondary mt-0.5">
+                  {stock.price} {gettext("/ Stück")}
+                </p>
               </div>
+
+              <%!-- Qty stepper --%>
+              <div class="join shrink-0">
+                <button
+                  phx-click="decrease_quantity"
+                  phx-value-stock_id={stock.id}
+                  class="join-item px-3 border border-base-300 hover:bg-base-content/7 transition-colors duration-150"
+                >
+                  <%= if quantity == 1 do %>
+                    <.icon name="hero-trash" class="size-4 text-error" />
+                  <% else %>
+                    −
+                  <% end %>
+                </button>
+                <span class="join-item grid place-items-center w-9 text-sm tabular-nums border border-base-300">
+                  {quantity}
+                </span>
+                <button
+                  phx-click="increase_quantity"
+                  phx-value-stock_id={stock.id}
+                  class="join-item px-3 border border-base-300 hover:bg-base-content/7 transition-colors duration-150"
+                >
+                  +
+                </button>
+              </div>
+
+              <span class="w-[120px] text-right text-base whitespace-nowrap">
+                {line_total(entries)}
+              </span>
             </div>
+
+            <p :if={@shipping_note} class="text-xs text-secondary mt-4.5">
+              {@shipping_note}
+            </p>
           </div>
 
           <%!-- Summary --%>
-          <div class="card bg-base-100 border border-base-300 shadow shadow-black/30">
-            <div class="card-body gap-4">
-              <h3 class="font-semibold">{gettext("Zusammenfassung")}</h3>
+          <div class="flex flex-col gap-3 p-5 rounded-field bg-base-100 card-hairline">
+            <h4 class="text-lg m-0">{gettext("Zusammenfassung")}</h4>
 
-              <div class="flex justify-between text-sm">
-                <span class="text-base-content/50">{gettext("Zwischensumme")}</span>
-                <span>{@cart.subtotal}</span>
-              </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-secondary">{gettext("Zwischensumme")}</span>
+              <span>{@cart.subtotal}</span>
+            </div>
 
-              <div class="flex justify-between text-sm">
-                <span class="text-base-content/50">{gettext("Versand")}</span>
-                <span class="text-base-content/40">{gettext("wird berechnet")}</span>
-              </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-secondary">{gettext("Versand")}</span>
+              <span class="text-secondary">{gettext("wird berechnet")}</span>
+            </div>
 
-              <div class="border-t border-base-200 pt-3 flex justify-between font-bold">
-                <span>{gettext("Gesamt")}</span>
-                <span>{@cart.subtotal}</span>
-              </div>
+            <div class="h-px bg-base-300 my-1"></div>
 
-              <.button class="btn btn-primary btn-block mt-2" disabled>
-                {gettext("Zur Kasse")}
-              </.button>
+            <div class="flex justify-between text-lg">
+              <span>{gettext("Gesamt")}</span>
+              <span>{@cart.subtotal}</span>
+            </div>
+
+            <.button class="btn btn-primary btn-block" disabled>
+              {gettext("Zur Kasse")}
+            </.button>
+            <div class="text-center text-2xs text-secondary">
+              {gettext("TWINT · Visa · Mastercard — CHF")}
             </div>
           </div>
         </div>
@@ -253,5 +258,18 @@ defmodule LokaWeb.Shop.CartLive do
     entries
     |> Enum.map(& &1.stock.price)
     |> Money.sum!()
+  end
+
+  defp shipping_note(line_items) do
+    studio_count =
+      line_items
+      |> Enum.map(fn {stock, _quantity, _entries} -> stock.studio && stock.studio.id end)
+      |> Enum.reject(&is_nil/1)
+      |> Enum.uniq()
+      |> length()
+
+    if studio_count > 1 do
+      gettext("Versand pro Studio getrennt")
+    end
   end
 end

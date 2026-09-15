@@ -7,7 +7,6 @@
 # General application configuration
 import Config
 
-config :ex_cldr, default_locale: "de-CH", default_backend: Loka.Cldr
 config :ash_oban, pro?: false
 
 config :loka, Oban,
@@ -18,6 +17,7 @@ config :loka, Oban,
   plugins: [{Oban.Plugins.Cron, []}]
 
 config :ash,
+  default_string_length_count: :codepoints,
   allow_forbidden_field_for_relationships_by_default?: true,
   include_embedded_source_by_default?: false,
   show_keysets_for_all_actions?: false,

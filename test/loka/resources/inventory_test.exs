@@ -81,7 +81,7 @@ defmodule Loka.Resources.Inventory.InventoryTest do
 
   describe "archive_item" do
     test "studio owner with stock can archive an item", %{owner: owner, item: item} do
-      assert {:ok, _} = Inventory.archive_item(item, actor: owner)
+      assert :ok = Inventory.archive_item(item, actor: owner)
     end
 
     test "actor without stock for the item cannot archive it", %{other: other, item: item} do

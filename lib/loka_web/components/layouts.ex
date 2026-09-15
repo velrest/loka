@@ -28,6 +28,7 @@ defmodule LokaWeb.Layouts do
   attr :flash, :map, required: true, doc: "the map of flash messages"
   attr :current_user, Loka.Accounts.User, required: false
   attr :socket, Phoenix.LiveView.Socket, required: true
+  attr :locale, :string, default: LokaWeb.Locale.default()
 
   attr :current_scope, :map,
     default: nil,
@@ -39,8 +40,29 @@ defmodule LokaWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8 sticky top-0 z-50">
-      <.nav_bar current_user={@current_user} socket={@socket} />
+    <div id="header-sentinel" aria-hidden="true"></div>
+    <header
+      id="app-header"
+      phx-hook=".StickyHeader"
+      class="navbar sticky top-0 z-50"
+    >
+      <.nav_bar current_user={@current_user} socket={@socket} locale={@locale} />
+      <script :type={Phoenix.LiveView.ColocatedHook} name=".StickyHeader">
+        export default {
+          mounted() {
+            const sentinel = document.getElementById("header-sentinel")
+            if (!sentinel) return
+            this._observer = new IntersectionObserver(
+              ([entry]) => this.el.classList.toggle("is-scrolled", !entry.isIntersecting),
+              {threshold: 0}
+            )
+            this._observer.observe(sentinel)
+          },
+          destroyed() {
+            this._observer?.disconnect()
+          }
+        }
+      </script>
     </header>
 
     <%= if @nav != [] do %>
@@ -143,47 +165,69 @@ defmodule LokaWeb.Layouts do
   """
   attr :current_user, Loka.Accounts.User, required: false
   attr :socket, Phoenix.LiveView.Socket, required: true
+  attr :locale, :string, default: LokaWeb.Locale.default()
 
   def nav_bar(assigns) do
     ~H"""
-    <div class="navbar bg-base-200 shadow-sm mt-1 rounded-box">
-      <div class="navbar-start">
-        <.link class="btn btn-ghost text-xl" patch={~p"/"}>{gettext("keraloka")}</.link>
+    <div class="navbar gap-5 py-3.5 px-4 sm:px-6 lg:px-7 bg-base-200 transition-[background-color,box-shadow] duration-200 scrolled:bg-base-100! scrolled:rounded-box scrolled:shadow-md">
+      <.link class="text-xl tracking-snug mr-auto shrink-0" patch={~p"/"}>
+        {gettext("Loka")}
+      </.link>
+
+      <%!-- A real browser navigation (not a LiveView patch/navigate): switching
+      locale goes through LokaWeb.Plugs.SetLocale so the choice is actually
+      persisted to the session, not just reflected in this one socket. --%>
+      <div class="hidden lg:join shrink-0">
+        <a href="?locale=de" class={["join-item btn btn-sm seg-toggle", @locale == "de" && "seg-toggle-active"]}>
+          DE
+        </a>
+        <a href="?locale=en" class={["join-item btn btn-sm seg-toggle", @locale == "en" && "seg-toggle-active"]}>
+          EN
+        </a>
       </div>
-      <div class="navbar-center flex-none">
-        <input
-          type="text"
-          placeholder={gettext("Suchen")}
-          class="input input-bordered w-24 md:w-auto"
-        />
-      </div>
-      <div class="navbar-end">
-        <ul class="menu menu-horizontal px-1">
-          <li><.link navigate={~p"/about"}>{gettext("Über keraloka")}</.link></li>
-        </ul>
-        {live_render(@socket, LokaWeb.Shop.CartWidgetLive, id: "cart-widget")}
-        <div class="dropdown dropdown-end">
-          <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-            <div class="w-10 rounded-full">
-              <.icon name="hero-user-circle" class="size-8" />
-            </div>
+
+      <input
+        type="text"
+        placeholder={gettext("Suchen")}
+        class="input input-bordered hidden md:inline-flex md:w-[220px] shrink-0"
+      />
+
+      <.link
+        navigate={~p"/about"}
+        class="hidden md:inline text-sm hover:text-accent transition-colors"
+      >
+        {gettext("Über Loka")}
+      </.link>
+      <.link
+        href={~p"/#studio-map"}
+        class="hidden md:inline text-sm hover:text-accent transition-colors"
+      >
+        {gettext("Studios")}
+      </.link>
+
+      {live_render(@socket, LokaWeb.Shop.CartWidgetLive, id: "cart-widget")}
+
+      <div class="dropdown dropdown-end">
+        <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+          <div class="w-10 rounded-full">
+            <.icon name="hero-user-circle" class="size-8" />
           </div>
-          <div
-            tabindex="-1"
-            class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
-          >
-            <ul>
-              <%= if @current_user do %>
-                <li><.link navigate={~p"/me"}>{gettext("Profil")}</.link></li>
-                <li><.link navigate={~p"/inventory/studio"}>{gettext("Studio verwalten")}</.link></li>
-                <li><.link patch={~p"/sign-out"}>{gettext("Abmelden")}</.link></li>
-              <% else %>
-                <li><.link patch={~p"/sign-in"}>{gettext("Anmelden")}</.link></li>
-                <li><.link patch={~p"/register"}>{gettext("Registrieren")}</.link></li>
-              <% end %>
-            </ul>
-            <.theme_toggle />
-          </div>
+        </div>
+        <div
+          tabindex="-1"
+          class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
+        >
+          <ul>
+            <%= if @current_user do %>
+              <li><.link navigate={~p"/me"}>{gettext("Profil")}</.link></li>
+              <li><.link navigate={~p"/inventory/studio"}>{gettext("Studio verwalten")}</.link></li>
+              <li><.link patch={~p"/sign-out"}>{gettext("Abmelden")}</.link></li>
+            <% else %>
+              <li><.link patch={~p"/sign-in"}>{gettext("Anmelden")}</.link></li>
+              <li><.link patch={~p"/register"}>{gettext("Registrieren")}</.link></li>
+            <% end %>
+          </ul>
+          <.theme_toggle />
         </div>
       </div>
     </div>
