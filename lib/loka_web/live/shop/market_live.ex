@@ -15,11 +15,11 @@ defmodule LokaWeb.Shop.MarketLive do
     <Layouts.app current_user={@current_user} flash={@flash} socket={@socket}>
       <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] gap-10 items-end pb-11">
         <div class="order-2 lg:order-1 pb-0 lg:pb-9">
-          <h1 class="text-[44px] sm:text-[60px] leading-[0.98] tracking-[-0.035em] font-medium m-0 mb-3.5">
+          <h1 class="hero-title m-0 mb-3.5">
             {gettext("Von Hand")}<br />{gettext("gemacht,")}<br />
             <span class="text-primary" phx-click={JS.dispatch("loka:toggle-pioneer")}>{gettext("für immer")}</span> <br />{gettext("geliebt")}
           </h1>
-          <p class="text-[15px] max-w-[34ch] text-secondary mb-5">
+          <p class="text-15 max-w-[34ch] text-secondary mb-5">
             {gettext(
               "Kleinserien-Töpferei von unabhängigen Studios in der Schweiz. Jedes Stück ein Unikat."
             )}

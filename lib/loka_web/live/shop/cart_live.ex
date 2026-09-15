@@ -91,7 +91,7 @@ defmodule LokaWeb.Shop.CartLive do
       <div id="cart-page" phx-hook=".CartPage">
         <.back_link navigate={~p"/"}>{gettext("Zurück zum Markt")}</.back_link>
 
-        <h1 class="text-[36px] sm:text-[44px] leading-[1.05] tracking-[-0.03em] font-medium mt-3.5 mb-6">
+        <h1 class="cart-title mt-3.5 mb-6">
           {gettext("Warenkorb")}
           <span
             :if={@cart && @cart.item_count > 0}
@@ -147,14 +147,14 @@ defmodule LokaWeb.Shop.CartLive do
               <div class="flex-1 min-w-0">
                 <.link
                   navigate={~p"/shop/item/#{stock.item.id}"}
-                  class="text-lg tracking-[-0.02em] hover:text-primary transition-colors duration-150"
+                  class="text-lg tracking-snug hover:text-primary transition-colors duration-150"
                 >
                   {stock.item.name}
                 </.link>
                 <.link
                   :if={stock.studio}
                   navigate={~p"/shop/studio/#{stock.studio.id}"}
-                  class="block text-[13px] text-accent hover:opacity-80 transition-opacity duration-150"
+                  class="block text-13 text-accent hover:opacity-80 transition-opacity duration-150"
                 >
                   {stock.studio.name} · {stock.studio.city}
                 </.link>
@@ -164,11 +164,11 @@ defmodule LokaWeb.Shop.CartLive do
               </div>
 
               <%!-- Qty stepper --%>
-              <div class="inline-flex items-stretch overflow-hidden rounded-field border border-base-300 shrink-0">
+              <div class="join shrink-0">
                 <button
                   phx-click="decrease_quantity"
                   phx-value-stock_id={stock.id}
-                  class="px-3 hover:bg-base-content/7 transition-colors duration-150"
+                  class="join-item px-3 border border-base-300 hover:bg-base-content/7 transition-colors duration-150"
                 >
                   <%= if quantity == 1 do %>
                     <.icon name="hero-trash" class="size-4 text-error" />
@@ -176,13 +176,13 @@ defmodule LokaWeb.Shop.CartLive do
                     −
                   <% end %>
                 </button>
-                <span class="grid place-items-center w-9 text-sm tabular-nums border-x border-base-300">
+                <span class="join-item grid place-items-center w-9 text-sm tabular-nums border border-base-300">
                   {quantity}
                 </span>
                 <button
                   phx-click="increase_quantity"
                   phx-value-stock_id={stock.id}
-                  class="px-3 hover:bg-base-content/7 transition-colors duration-150"
+                  class="join-item px-3 border border-base-300 hover:bg-base-content/7 transition-colors duration-150"
                 >
                   +
                 </button>
@@ -199,7 +199,7 @@ defmodule LokaWeb.Shop.CartLive do
           </div>
 
           <%!-- Summary --%>
-          <div class="flex flex-col gap-3 p-5 rounded-field bg-base-100 shadow-[0_0_0_1px_var(--color-base-300)]">
+          <div class="flex flex-col gap-3 p-5 rounded-field bg-base-100 card-hairline">
             <h4 class="text-lg m-0">{gettext("Zusammenfassung")}</h4>
 
             <div class="flex justify-between text-sm">
@@ -222,7 +222,7 @@ defmodule LokaWeb.Shop.CartLive do
             <.button class="btn btn-primary btn-block" disabled>
               {gettext("Zur Kasse")}
             </.button>
-            <div class="text-center text-[11px] text-secondary">
+            <div class="text-center text-2xs text-secondary">
               {gettext("TWINT · Visa · Mastercard — CHF")}
             </div>
           </div>

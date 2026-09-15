@@ -14,10 +14,7 @@ defmodule LokaWeb.Shop.CartWidgetLive do
       >
         <div tabindex="0" role="button" class="btn btn-secondary gap-2">
           {gettext("Warenkorb")}
-          <span
-            :if={@cart.item_count > 0}
-            class="inline-flex items-center bg-primary/15 text-primary px-2 py-0.5 rounded-md text-[11px]"
-          >
+          <span :if={@cart.item_count > 0} class="badge badge-primary badge-soft badge-sm">
             {@cart.item_count}
           </span>
         </div>

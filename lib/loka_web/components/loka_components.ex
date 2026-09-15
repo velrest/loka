@@ -103,7 +103,7 @@ defmodule LokaWeb.LokaComponents do
   def section_header(assigns) do
     ~H"""
     <div id={@id} class={["flex items-baseline gap-4", @class]}>
-      <h6 class="m-0 text-[11px] font-semibold uppercase tracking-[0.1em] text-secondary whitespace-nowrap">
+      <h6 class="m-0 text-2xs font-semibold uppercase tracking-widest text-secondary whitespace-nowrap">
         {@label}
       </h6>
       <div class="rule-fade flex-1"></div>
@@ -328,11 +328,11 @@ defmodule LokaWeb.LokaComponents do
       <div class="flex items-baseline justify-between gap-2.5">
         <.link
           navigate={~p"/shop/item/#{@stock.item.id}"}
-          class="text-xl tracking-[-0.02em] hover:text-primary transition-colors duration-150"
+          class="text-xl tracking-snug hover:text-primary transition-colors duration-150"
         >
           {@stock.item.name}
         </.link>
-        <span class="text-[15px] whitespace-nowrap text-[color:var(--clay-neutral-200)]">
+        <span class="text-15 whitespace-nowrap text-[color:var(--clay-neutral-200)]">
           {@stock.price}
         </span>
       </div>
@@ -341,16 +341,16 @@ defmodule LokaWeb.LokaComponents do
         <.link
           :if={@show_studio}
           navigate={~p"/shop/studio/#{@stock.studio.id}"}
-          class="text-[13px] text-accent hover:opacity-80 transition-opacity duration-150"
+          class="text-13 text-accent hover:opacity-80 transition-opacity duration-150"
         >
           {@stock.studio.name} · {@stock.studio.city}
         </.link>
-        <span class="text-[11px] whitespace-nowrap text-secondary ml-auto">
+        <span class="text-2xs whitespace-nowrap text-secondary ml-auto">
           {stock_line(@stock)}
         </span>
       </div>
 
-      <p class="mt-0.5 mb-2 text-[13px] leading-[1.5] text-secondary line-clamp-2">
+      <p class="mt-0.5 mb-2 text-13 leading-normal text-secondary line-clamp-2">
         {@stock.item.description}
       </p>
 

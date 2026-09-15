@@ -168,17 +168,13 @@ defmodule LokaWeb.Layouts do
   def nav_bar(assigns) do
     ~H"""
     <div class="navbar gap-5 py-3.5 px-4 sm:px-6 lg:px-7 bg-base-200 transition-[background-color,box-shadow] duration-200 scrolled:bg-base-100! scrolled:rounded-box scrolled:shadow-md">
-      <.link class="text-xl tracking-[-0.02em] mr-auto shrink-0" patch={~p"/"}>
+      <.link class="text-xl tracking-snug mr-auto shrink-0" patch={~p"/"}>
         {gettext("Loka")}
       </.link>
 
-      <div class="hidden lg:inline-flex overflow-hidden rounded-field border border-base-300 shrink-0">
-        <label class="flex items-center gap-1.5 px-3 py-1.5 text-[13px] cursor-pointer rounded-l-field has-checked:text-accent has-checked:shadow-[inset_0_0_0_1px_var(--color-accent)]">
-          <input type="radio" name="locale" checked class="sr-only" /> DE
-        </label>
-        <label class="flex items-center gap-1.5 px-3 py-1.5 text-[13px] cursor-pointer rounded-r-field border-l border-base-300 has-checked:text-accent has-checked:shadow-[inset_0_0_0_1px_var(--color-accent)]">
-          <input type="radio" name="locale" class="sr-only" /> EN
-        </label>
+      <div class="hidden lg:join shrink-0">
+        <input class="join-item btn btn-sm seg-toggle" type="radio" name="locale" aria-label="DE" checked />
+        <input class="join-item btn btn-sm seg-toggle" type="radio" name="locale" aria-label="EN" />
       </div>
 
       <input

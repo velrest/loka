@@ -41,7 +41,7 @@ defmodule LokaWeb.Shop.StudioLive do
             <% end %>
           </div>
           <div class="min-w-0">
-            <span class="inline-flex items-center text-[11px] px-2.5 py-1 rounded-field border border-primary text-primary">
+            <span class="badge badge-sm badge-outline badge-primary">
               {@studio.city} · {@studio.postal_code}
             </span>
             <h1 class="page-title mt-2.5 mb-2">

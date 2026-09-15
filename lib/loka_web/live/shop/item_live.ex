@@ -18,7 +18,7 @@ defmodule LokaWeb.Shop.ItemLive do
         <.item_photos images={@item.images} name={@item.name} />
 
         <div :for={stock <- @item.stock} class="order-3">
-          <h6 class="m-0 mb-2.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-accent">
+          <h6 class="m-0 mb-2.5 text-2xs font-semibold uppercase tracking-widest text-accent">
             {gettext("Steinzeug · Unikat")}
           </h6>
 
@@ -29,7 +29,7 @@ defmodule LokaWeb.Shop.ItemLive do
           <.link
             :if={stock.studio}
             navigate={~p"/shop/studio/#{stock.studio.id}"}
-            class="text-[16px] text-accent hover:opacity-80 transition-opacity duration-150"
+            class="text-base text-accent hover:opacity-80 transition-opacity duration-150"
           >
             {stock.studio.name} · {stock.studio.city}
           </.link>
@@ -38,7 +38,7 @@ defmodule LokaWeb.Shop.ItemLive do
 
           <div class="flex items-end justify-between gap-4">
             <div data-testid="item-price">
-              <div class="text-[30px] tracking-[-0.02em]">
+              <div class="text-3xl tracking-snug">
                 {stock.price}
                 <span class="text-sm text-secondary">{gettext("/ Stück")}</span>
               </div>
@@ -65,14 +65,14 @@ defmodule LokaWeb.Shop.ItemLive do
 
           <p
             data-testid="item-description"
-            class="text-[14px] leading-[1.65] text-secondary mt-6"
+            class="text-sm leading-[1.65] text-secondary mt-6"
           >
             {@item.description}
           </p>
 
           <div
             :if={stock.studio}
-            class="flex items-center gap-3.5 mt-6 p-3.5 rounded-field bg-base-100 shadow-[0_0_0_1px_var(--color-base-300)]"
+            class="flex items-center gap-3.5 mt-6 p-3.5 rounded-field bg-base-100 card-hairline"
           >
             <div class="shrink-0 size-14 rounded-field overflow-hidden bg-base-300 flex items-center justify-center">
               <%= if stock.studio.logo_path do %>
@@ -86,8 +86,8 @@ defmodule LokaWeb.Shop.ItemLive do
               <% end %>
             </div>
             <div class="flex-1 min-w-0">
-              <div class="text-[15px]">{stock.studio.name}</div>
-              <div class="text-[11px] text-secondary">
+              <div class="text-15">{stock.studio.name}</div>
+              <div class="text-2xs text-secondary">
                 {stock.studio.city} · {ngettext(
                   "%{count} weiteres Stück",
                   "%{count} weitere Stücke",
