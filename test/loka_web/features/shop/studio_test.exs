@@ -19,7 +19,7 @@ defmodule LokaWeb.Features.Shop.StudioTest do
     test "shows back link to shop", %{conn: conn, studio: studio} do
       conn
       |> visit(~p"/shop/studio/#{studio.id}")
-      |> assert_has("a", text: "← Zurück zum Shop")
+      |> assert_has("a", text: "← Zurück zum Markt")
     end
 
     test "shows empty state when no stock", %{conn: conn, studio: studio} do

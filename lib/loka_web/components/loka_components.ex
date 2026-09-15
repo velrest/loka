@@ -87,17 +87,39 @@ defmodule LokaWeb.LokaComponents do
     """
   end
 
+  @doc """
+  Renders an 11px uppercase section label followed by a rule that fades out
+  over its last 48px, with an optional right-aligned count.
+
+  ## Examples
+
+      <.section_header label={gettext("Jetzt verfügbar")} count="5 Stücke" />
+  """
+  attr :id, :string, default: nil
+  attr :label, :string, required: true
+  attr :count, :string, default: nil
+  attr :class, :any, default: nil
+
+  def section_header(assigns) do
+    ~H"""
+    <div id={@id} class={["flex items-baseline gap-4", @class]}>
+      <h6 class="m-0 text-[11px] font-semibold uppercase tracking-[0.1em] text-secondary whitespace-nowrap">
+        {@label}
+      </h6>
+      <div class="rule-fade flex-1"></div>
+      <span :if={@count} class="text-xs text-secondary whitespace-nowrap">{@count}</span>
+    </div>
+    """
+  end
+
   attr :stock, Inventory.Stock, required: true
   attr :current_user, :any, default: nil
   attr :show_studio, :boolean, default: true
 
   def stock_card(assigns) do
     ~H"""
-    <div
-      class="card bg-base-100 shadow-sm hover:shadow-lg transition-all duration-300 group overflow-hidden"
-      data-item={@stock.id}
-    >
-      <div class="relative aspect-square bg-base-200">
+    <div class="flex flex-col gap-2.5" data-item={@stock.id}>
+      <div class="relative aspect-square rounded-field overflow-hidden bg-base-300">
         <img
           :if={@stock.item.images == []}
           src="/images/placeholder-pot.svg"
@@ -115,15 +137,11 @@ defmodule LokaWeb.LokaComponents do
             :for={{image, idx} <- Enum.with_index(@stock.item.images)}
             data-slide={idx}
             class={[
-              "absolute inset-0 transition-opacity duration-300",
+              "absolute inset-0 transition-opacity duration-150",
               if(idx == 0, do: "opacity-100", else: "opacity-0")
             ]}
           >
-            <img
-              src={image.path}
-              alt={@stock.item.name}
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
+            <img src={image.path} alt={@stock.item.name} class="w-full h-full object-cover" />
           </div>
 
           <div
@@ -174,7 +192,7 @@ defmodule LokaWeb.LokaComponents do
               :for={{_, idx} <- Enum.with_index(@stock.item.images)}
               data-dot={idx}
               class={[
-                "size-1.5 rounded-full transition-all duration-300",
+                "size-1.5 rounded-full transition-all duration-150",
                 if(idx == 0, do: "bg-white scale-125", else: "bg-white/40")
               ]}
             />
@@ -182,37 +200,53 @@ defmodule LokaWeb.LokaComponents do
         </div>
       </div>
 
-      <div class="card-body p-4 gap-1">
-        <.link
-          :if={@show_studio}
-          navigate={~p"/shop/studio/#{@stock.studio.id}"}
-          class="text-xs font-medium text-primary uppercase tracking-widest truncate opacity-70 hover:opacity-100 transition-opacity"
-        >
-          {@stock.studio.name}
-        </.link>
+      <div class="flex items-baseline justify-between gap-2.5">
         <.link
           navigate={~p"/shop/item/#{@stock.item.id}"}
-          class="font-semibold text-base leading-snug hover:text-primary transition-colors"
+          class="text-xl tracking-[-0.02em] hover:text-primary transition-colors duration-150"
         >
           {@stock.item.name}
         </.link>
-        <p class="text-sm text-base-content/50 line-clamp-2 leading-relaxed">
-          {@stock.item.description}
-        </p>
-        <div class="flex items-center justify-between mt-4 pt-3 border-t border-base-200">
-          <div>
-            <span class="font-bold">{@stock.price}</span>
-            <span class="text-xs text-base-content/40 ml-1">{gettext("/ Stück")}</span>
-          </div>
-          <.live_component
-            module={LokaWeb.AddToCartComponent}
-            id={"add-to-cart-#{@stock.id}"}
-            stock={@stock}
-            current_user={@current_user}
-          />
-        </div>
+        <span class="text-[15px] whitespace-nowrap text-[color:var(--clay-neutral-200)]">
+          {@stock.price}
+        </span>
       </div>
+
+      <div class="flex items-baseline justify-between gap-2.5 -mt-1">
+        <.link
+          :if={@show_studio}
+          navigate={~p"/shop/studio/#{@stock.studio.id}"}
+          class="text-[13px] text-accent hover:opacity-80 transition-opacity duration-150"
+        >
+          {@stock.studio.name} · {@stock.studio.city}
+        </.link>
+        <span class="text-[11px] whitespace-nowrap text-secondary ml-auto">
+          {stock_line(@stock)}
+        </span>
+      </div>
+
+      <p class="mt-0.5 mb-2 text-[13px] leading-[1.5] text-secondary line-clamp-2">
+        {@stock.item.description}
+      </p>
+
+      <.live_component
+        module={LokaWeb.AddToCartComponent}
+        id={"add-to-cart-#{@stock.id}"}
+        stock={@stock}
+        current_user={@current_user}
+        class="btn-primary btn-block mt-auto"
+      />
     </div>
     """
+  end
+
+  @low_stock_threshold 5
+
+  defp stock_line(%{quantity: quantity}) when quantity <= @low_stock_threshold do
+    gettext("nur noch %{count}", count: quantity)
+  end
+
+  defp stock_line(%{quantity: quantity}) do
+    gettext("%{count} verfügbar", count: quantity)
   end
 end

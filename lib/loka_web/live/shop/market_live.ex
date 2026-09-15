@@ -6,28 +6,59 @@ defmodule LokaWeb.Shop.MarketLive do
 
   @impl true
   def render(assigns) do
-    assigns =
-      assign(assigns, :filtered, filtered_stock(assigns.stock, assigns.visible_studio_ids))
+    filtered = filtered_stock(assigns.stock, assigns.visible_studio_ids)
+    studio_count = filtered |> Enum.map(& &1.studio.id) |> Enum.uniq() |> length()
+
+    assigns = assign(assigns, filtered: filtered, studio_count: studio_count)
 
     ~H"""
     <Layouts.app current_user={@current_user} flash={@flash} socket={@socket}>
-      <.live_component module={LokaWeb.StudioMapComponent} id="studio-map" studios={@all_studios} />
+      <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] gap-10 items-end pb-11">
+        <div class="order-2 lg:order-1 pb-0 lg:pb-9">
+          <h1 class="text-[44px] sm:text-[60px] leading-[0.98] tracking-[-0.035em] font-medium m-0 mb-3.5">
+            {gettext("Von Hand")}<br />{gettext("gemacht,")}<br />
+            <span class="text-primary" phx-click={JS.dispatch("loka:toggle-pioneer")}>{gettext("für immer")}</span> <br />{gettext("geliebt")}
+          </h1>
+          <p class="text-[15px] max-w-[34ch] text-secondary mb-5">
+            {gettext(
+              "Kleinserien-Töpferei von unabhängigen Studios in der Schweiz. Jedes Stück ein Unikat."
+            )}
+          </p>
+          <div class="flex flex-wrap gap-2.5">
+            <a href="#studio-map" class="btn btn-primary">{gettext("Studios in der Nähe")}</a>
+            <a href="#available" class="btn btn-secondary">{gettext("Alle Stücke")}</a>
+          </div>
+        </div>
 
-      <div class="flex items-center gap-3 mb-8">
-        <h2 class="text-xs font-semibold uppercase tracking-widest text-base-content/50 whitespace-nowrap">
-          {gettext("Jetzt verfügbar")}
-        </h2>
-        <div class="flex-1 border-t border-base-300"></div>
-        <span class="text-xs text-base-content/40 whitespace-nowrap">
-          {length(@filtered)} {ngettext("Stück", "Stücke", length(@filtered))}
-        </span>
+        <div class="order-1 lg:order-2">
+          <.live_component
+            module={LokaWeb.StudioMapComponent}
+            id="studio-map"
+            studios={@all_studios}
+            thunderforest_key={Application.get_env(:loka, :thunderforest_api_key)}
+          />
+        </div>
       </div>
+
+      <.section_header
+        id="available"
+        class="scroll-mt-24"
+        label={gettext("Jetzt verfügbar")}
+        count={
+          gettext("%{count} %{stock_word} · %{studio_count} %{studio_word} im Kartenausschnitt",
+            count: length(@filtered),
+            stock_word: ngettext("Stück", "Stücke", length(@filtered)),
+            studio_count: @studio_count,
+            studio_word: ngettext("Studio", "Studios", @studio_count)
+          )
+        }
+      />
 
       <div :if={@filtered == []} class="text-center py-24 text-base-content/40">
         <p class="text-lg">{gettext("Noch keine Artikel verfügbar.")}</p>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-16">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-7 py-7 pb-13">
         <.stock_card :for={stock <- @filtered} stock={stock} current_user={@current_user} />
       </div>
     </Layouts.app>

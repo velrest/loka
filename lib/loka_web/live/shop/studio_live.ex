@@ -29,51 +29,55 @@ defmodule LokaWeb.Shop.StudioLive do
   def render(assigns) do
     ~H"""
     <Layouts.app current_user={@current_user} flash={@flash} socket={@socket}>
-      <div class="mb-6">
-        <.link
-          navigate={~p"/"}
-          class="text-sm text-base-content/50 hover:text-base-content transition-colors"
-        >
-          ← {gettext("Zurück zum Shop")}
-        </.link>
-      </div>
+      <.link
+        navigate={~p"/"}
+        class="text-[13px] text-secondary hover:text-base-content transition-colors duration-150"
+      >
+        ← {gettext("Zurück zum Markt")}
+      </.link>
 
-      <%!-- Studio header --%>
-      <div class="flex items-start gap-6 mb-10 pb-10 border-b border-base-300">
-        <div class="shrink-0 size-24 rounded-xl overflow-hidden bg-base-200 flex items-center justify-center">
-          <%= if @studio.logo_path do %>
-            <img src={@studio.logo_path} alt={@studio.name} class="w-full h-full object-cover" />
-          <% else %>
-            <.icon name="hero-building-storefront" class="size-10 text-base-content/30" />
-          <% end %>
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="mb-1">
-            <span class="badge badge-outline badge-sm text-base-content/40">{@studio.city}</span>
+      <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_420px] gap-10 items-end mt-5 mb-11">
+        <div class="flex gap-5.5 items-end">
+          <div class="shrink-0 size-[120px] rounded-box overflow-hidden bg-base-300 flex items-center justify-center">
+            <%= if @studio.logo_path do %>
+              <img src={@studio.logo_path} alt={@studio.name} class="w-full h-full object-cover" />
+            <% else %>
+              <.icon name="hero-building-storefront" class="size-10 text-secondary" />
+            <% end %>
           </div>
-          <h1 class="text-3xl font-bold mb-2">{@studio.name}</h1>
-          <p :if={@studio.description} class="text-base-content/60 leading-relaxed">
-            {@studio.description}
-          </p>
+          <div class="min-w-0">
+            <span class="inline-flex items-center text-[11px] px-2.5 py-1 rounded-field border border-primary text-primary">
+              {@studio.city} · {@studio.postal_code}
+            </span>
+            <h1 class="text-[40px] sm:text-[52px] leading-[1.02] tracking-[-0.035em] font-medium mt-2.5 mb-2">
+              {@studio.name}
+            </h1>
+            <p :if={@studio.description} class="text-sm leading-[1.6] text-secondary max-w-[52ch]">
+              {@studio.description}
+            </p>
+          </div>
         </div>
+
+        <.live_component
+          :if={@studio.latitude && @studio.longitude}
+          module={LokaWeb.StudioMapComponent}
+          id="studio-location"
+          studios={[@studio]}
+          snapshot={true}
+        />
       </div>
 
-      <%!-- Stock section --%>
-      <div class="flex items-center gap-3 mb-8">
-        <h2 class="text-xs font-semibold uppercase tracking-widest text-base-content/50 whitespace-nowrap">
-          {gettext("Alle Artikel")}
-        </h2>
-        <div class="flex-1 border-t border-base-300"></div>
-        <span class="text-xs text-base-content/40 whitespace-nowrap">
-          {length(@stock)} {ngettext("Stück", "Stücke", length(@stock))}
-        </span>
-      </div>
+      <.section_header
+        class="mb-7"
+        label={gettext("Alle Artikel")}
+        count={"#{length(@stock)} #{ngettext("Stück", "Stücke", length(@stock))}"}
+      />
 
       <div :if={@stock == []} class="text-center py-24 text-base-content/40">
         <p class="text-lg">{gettext("Noch keine Artikel verfügbar.")}</p>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-16">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-7 pb-16">
         <.stock_card :for={s <- @stock} stock={s} current_user={@current_user} show_studio={false} />
       </div>
     </Layouts.app>

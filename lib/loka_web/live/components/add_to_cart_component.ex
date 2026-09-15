@@ -8,12 +8,14 @@ defmodule LokaWeb.AddToCartComponent do
      assign(socket,
        stock: assigns.stock,
        current_user: assigns[:current_user],
+       class: assigns[:class] || "btn-primary",
        cart_id: socket.assigns[:cart_id]
      )}
   end
 
   attr :stock, Loka.Inventory.Stock, required: true
   attr :current_user, :any, default: nil
+  attr :class, :any, default: "btn-primary"
 
   @impl true
   def render(assigns) do
@@ -24,7 +26,7 @@ defmodule LokaWeb.AddToCartComponent do
       class="contents"
     >
       <button
-        class="btn btn-primary"
+        class={["btn", @class]}
         phx-click="add_to_cart"
         phx-value-stock_id={@stock.id}
         phx-target={@myself}

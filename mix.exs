@@ -54,6 +54,7 @@ defmodule Loka.MixProject do
       {:cloak, "~> 1.0"},
       {:ash_paper_trail, "~> 0.5"},
       {:live_debugger, "~> 0.6", only: [:dev]},
+      {:dotenvy, "~> 1.1"},
       {:ash_archival, "~> 2.0"},
       {:oban_web, "~> 2.0"},
       {:ash_oban, "~> 0.7"},

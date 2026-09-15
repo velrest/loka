@@ -3,10 +3,17 @@
 
 @import "tailwindcss" source(none);
 @import "leaflet/dist/leaflet.css";
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap");
 @source "../../deps/ash_authentication_phoenix";
 @source "../css";
 @source "../js";
 @source "../../lib/loka_web";
+
+/* Schamotte uses Inter at weight 400/500 everywhere — headings never go
+   past weight 500 (hierarchy is size and space, not boldness). */
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
 
 /* A Tailwind plugin that makes "hero-#{ICON}" classes available.
    The heroicons installation itself is managed by your mix.exs */
@@ -20,76 +27,80 @@
 }
 
 /* daisyUI theme plugin. You can update this file by fetching the latest version with:
-  curl -sLO https://github.com/saadeghi/daisyui/releases/latest/download/daisyui-theme.js
-  We ship with two themes, a light one inspired on Phoenix colors and a dark one inspired
-  on Elixir colors. Build your own at: https://daisyui.com/theme-generator/ */
+  curl -sLO https://github.com/saadeghi/daisyui/releases/latest/download/daisyui-theme.js */
+
+/* Ofenglut ("kiln fire") — the dark study from the same Nocturne palette
+   exploration as Schamotte: dark fired stoneware ground with a lighter
+   kiln-glow orange accent. See Loka Mockup.dc.html, palette 2c. */
 @plugin "../vendor/daisyui-theme" {
   name: "dark";
   default: false;
   prefersdark: true;
   color-scheme: "dark";
-  --color-base-100: oklch(30.33% 0.016 252.42);
-  --color-base-200: oklch(25.26% 0.014 253.1);
-  --color-base-300: oklch(20.15% 0.012 254.09);
-  --color-base-content: oklch(97.807% 0.029 256.847);
-  --color-primary: oklch(58% 0.233 277.117);
-  --color-primary-content: oklch(96% 0.018 272.314);
-  --color-secondary: oklch(58% 0.233 277.117);
-  --color-secondary-content: oklch(96% 0.018 272.314);
-  --color-accent: oklch(60% 0.25 292.717);
-  --color-accent-content: oklch(96% 0.016 293.756);
-  --color-neutral: oklch(37% 0.044 257.287);
-  --color-neutral-content: oklch(98% 0.003 247.858);
-  --color-info: oklch(58% 0.158 241.966);
-  --color-info-content: oklch(97% 0.013 236.62);
-  --color-success: oklch(60% 0.118 184.704);
-  --color-success-content: oklch(98% 0.014 180.72);
-  --color-warning: oklch(66% 0.179 58.318);
-  --color-warning-content: oklch(98% 0.022 95.277);
-  --color-error: oklch(58% 0.253 17.585);
-  --color-error-content: oklch(96% 0.015 12.422);
-  --radius-selector: 0.25rem;
-  --radius-field: 0.25rem;
-  --radius-box: 0.5rem;
+  --color-base-100: #2a211c;
+  --color-base-200: #1c1613;
+  --color-base-300: #2f2520;
+  --color-base-content: #f4ece2;
+  --color-primary: #e8813f;
+  --color-primary-content: #1c1613;
+  --color-secondary: #9d9288;
+  --color-secondary-content: #1c1613;
+  --color-accent: #f0a878;
+  --color-accent-content: #1c1613;
+  --color-neutral: #d9d1c8;
+  --color-neutral-content: #1c1613;
+  --color-info: #7fa3b8;
+  --color-info-content: #1c1613;
+  --color-success: #8bab74;
+  --color-success-content: #1c1613;
+  --color-warning: #d1a53f;
+  --color-warning-content: #1c1613;
+  --color-error: #d97a68;
+  --color-error-content: #1c1613;
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.875rem;
   --size-selector: 0.21875rem;
   --size-field: 0.21875rem;
-  --border: 1.5px;
-  --depth: 1;
+  --border: 1px;
+  --depth: 0;
   --noise: 0;
 }
 
+/* Schamotte — see design_handoff_loka_schamotte/README.md for the full spec.
+   A mid clay ground with a deep brick-red accent. */
 @plugin "../vendor/daisyui-theme" {
   name: "light";
   default: true;
   prefersdark: false;
   color-scheme: "light";
-  --color-base-100: oklch(98% 0 0);
-  --color-base-200: oklch(96% 0.001 286.375);
-  --color-base-300: oklch(92% 0.004 286.32);
-  --color-base-content: oklch(21% 0.006 285.885);
-  --color-primary: oklch(70% 0.213 47.604);
-  --color-primary-content: oklch(98% 0.016 73.684);
-  --color-secondary: oklch(55% 0.027 264.364);
-  --color-secondary-content: oklch(98% 0.002 247.839);
-  --color-accent: oklch(0% 0 0);
-  --color-accent-content: oklch(100% 0 0);
-  --color-neutral: oklch(44% 0.017 285.786);
-  --color-neutral-content: oklch(98% 0 0);
-  --color-info: oklch(62% 0.214 259.815);
-  --color-info-content: oklch(97% 0.014 254.604);
-  --color-success: oklch(70% 0.14 182.503);
-  --color-success-content: oklch(98% 0.014 180.72);
-  --color-warning: oklch(66% 0.179 58.318);
-  --color-warning-content: oklch(98% 0.022 95.277);
-  --color-error: oklch(58% 0.253 17.585);
-  --color-error-content: oklch(96% 0.015 12.422);
-  --radius-selector: 0.25rem;
-  --radius-field: 0.25rem;
-  --radius-box: 0.5rem;
+  --color-base-100: #f1e7d8;
+  --color-base-200: #e6dac7;
+  --color-base-300: #d7c8b1;
+  --color-base-content: #2b2318;
+  --color-primary: #8f3a17;
+  --color-primary-content: #f1e7d8;
+  --color-secondary: #5b4c39;
+  --color-secondary-content: #f1e7d8;
+  --color-accent: #7c3517;
+  --color-accent-content: #f1e7d8;
+  --color-neutral: #463b2c;
+  --color-neutral-content: #f1e7d8;
+  --color-info: #4a6a7c;
+  --color-info-content: #f1e7d8;
+  --color-success: #4f6b43;
+  --color-success-content: #f1e7d8;
+  --color-warning: #8a6420;
+  --color-warning-content: #f1e7d8;
+  --color-error: #8f2f22;
+  --color-error-content: #f1e7d8;
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.875rem;
   --size-selector: 0.21875rem;
   --size-field: 0.21875rem;
-  --border: 1.5px;
-  --depth: 1;
+  --border: 1px;
+  --depth: 0;
   --noise: 0;
 }
 
@@ -101,7 +112,139 @@
 /* Use the data attribute for dark mode  */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
+/* True when the page has scrolled past the top — toggled by the
+   .StickyHeader hook via an IntersectionObserver on #header-sentinel. */
+@custom-variant scrolled (&:where(.is-scrolled, .is-scrolled *));
+
 /* Make LiveView wrapper divs transparent for layout */
 [data-phx-session], [data-phx-teleported-src] { display: contents }
+
+/* daisyUI paints the page canvas from base-100 by default, but Schamotte
+   inverts the usual roles — base-200 is the page ground, base-100 the
+   (lighter) card surface — so repoint the page background at base-200. */
+:root { --root-bg: var(--color-base-200); }
+
+/* Tonal ramps — for tints, tags and hovers beyond daisyUI's semantic
+   tokens. Do not flood large areas with the accent ramp. Theme-aware:
+   Schamotte (light) by default, Ofenglut (dark) under [data-theme=dark]
+   or the OS preference when no theme is explicitly chosen — mirroring
+   how daisyUI itself layers its own theme blocks (see --root-bg above). */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --clay-accent-100: #fdf3ec;
+    --clay-accent-200: #fbe4d5;
+    --clay-accent-300: #f6cdaf;
+    --clay-accent-400: #f0a878;
+    --clay-accent-500: #e8813f;
+    --clay-accent-600: #bd642c;
+    --clay-accent-700: #8f4a20;
+    --clay-accent-800: #5f3115;
+    --clay-accent-900: #3b1f0e;
+    --clay-neutral-100: #f7f4f1;
+    --clay-neutral-200: #ebe5df;
+    --clay-neutral-300: #d9d1c8;
+    --clay-neutral-400: #bdb2a6;
+    --clay-neutral-500: #9d9288;
+    --clay-neutral-600: #7e746a;
+    --clay-neutral-700: #615851;
+    --clay-neutral-800: #463f39;
+    --clay-neutral-900: #2c2724;
+  }
+}
+[data-theme="dark"] {
+  --clay-accent-100: #fdf3ec;
+  --clay-accent-200: #fbe4d5;
+  --clay-accent-300: #f6cdaf;
+  --clay-accent-400: #f0a878;
+  --clay-accent-500: #e8813f;
+  --clay-accent-600: #bd642c;
+  --clay-accent-700: #8f4a20;
+  --clay-accent-800: #5f3115;
+  --clay-accent-900: #3b1f0e;
+  --clay-neutral-100: #f7f4f1;
+  --clay-neutral-200: #ebe5df;
+  --clay-neutral-300: #d9d1c8;
+  --clay-neutral-400: #bdb2a6;
+  --clay-neutral-500: #9d9288;
+  --clay-neutral-600: #7e746a;
+  --clay-neutral-700: #615851;
+  --clay-neutral-800: #463f39;
+  --clay-neutral-900: #2c2724;
+}
+:where(:root), [data-theme="light"] {
+  --clay-accent-100: #52200e;
+  --clay-accent-200: #632912;
+  --clay-accent-300: #7c3517;
+  --clay-accent-400: #93401b;
+  --clay-accent-500: #a2481f;
+  --clay-accent-600: #b86a43;
+  --clay-accent-700: #d5a077;
+  --clay-accent-800: #e8cdb4;
+  --clay-accent-900: #efdcc8;
+  --clay-neutral-100: #2b2318;
+  --clay-neutral-200: #382f22;
+  --clay-neutral-300: #463b2c;
+  --clay-neutral-400: #584a38;
+  --clay-neutral-500: #5b4c39;
+  --clay-neutral-600: #83705a;
+  --clay-neutral-700: #c0ad94;
+  --clay-neutral-800: #d6c5aa;
+  --clay-neutral-900: #e0d0b9;
+}
+
+/* Primary actions are OUTLINED in this system — `btn btn-primary` stays the
+   class used everywhere, only its look changes. */
+.btn-primary {
+  background: transparent;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.btn-primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+.btn-primary:active:not(:disabled) {
+  background: color-mix(in srgb, var(--color-primary) 22%, transparent);
+}
+
+/* Secondary actions are a plain hairline outline, not a filled brown. */
+.btn-secondary {
+  background: transparent;
+  border-color: var(--color-base-300);
+  color: var(--color-base-content);
+}
+.btn-secondary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-base-content) 7%, transparent);
+}
+.btn-secondary:active:not(:disabled) {
+  background: color-mix(in srgb, var(--color-base-content) 14%, transparent);
+}
+
+/* Rules fade to transparent over their last 48px — a Nocturne signature.
+   Use in place of a plain border for section headers and row separators. */
+.rule-fade {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--color-base-content) 18%, transparent),
+    color-mix(in srgb, var(--color-base-content) 18%, transparent) calc(100% - 48px),
+    transparent
+  );
+}
+
+/* Same fade, painted as a bottom-edge background instead of the element's
+   own height — for row separators where the element still needs real height. */
+.rule-fade-bottom {
+  background-image: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--color-base-content) 18%, transparent),
+    color-mix(in srgb, var(--color-base-content) 18%, transparent) calc(100% - 48px),
+    transparent
+  );
+  background-repeat: no-repeat;
+  background-position: bottom;
+  background-size: 100% 1px;
+}
+
+:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 
 /* This file is for your main application CSS */
