@@ -1,5 +1,9 @@
 {
 	"dependencies": {
 		"leaflet": "^1.9.4"
+	},
+	"packageManager": "pnpm@12.6.0",
+	"devDependencies": {
+		"playwright": "^1.63.0"
 	}
 }

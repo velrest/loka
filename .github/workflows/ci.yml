@@ -94,5 +94,23 @@ jobs:
     - name: Migrate DB
       run: mix ash.setup
 
+    # Browser tests (test/loka_web/browser) need Node, Playwright's Chromium
+    # and the esbuild/tailwind binaries to build the JS under test
+    - name: Set up Node
+      uses: actions/setup-node@v4
+      with:
+        node-version-file: .tool-versions
+
+    - name: Install JS dependencies
+      run: |
+        corepack enable pnpm
+        pnpm --dir assets install --frozen-lockfile
+
+    - name: Install Playwright browser
+      run: pnpm --dir assets exec playwright install chromium --with-deps
+
+    - name: Install asset build tools
+      run: mix assets.setup
+
     - name: Run tests
       run: mix test

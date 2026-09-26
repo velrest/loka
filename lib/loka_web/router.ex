@@ -23,10 +23,18 @@ defmodule LokaWeb.Router do
     plug :set_actor, :user
   end
 
+  # Browser tests: lets LiveViews use the test's Ecto sandbox. Prepended so it
+  # runs before AshAuthentication loads the user. Empty outside of tests.
+  @sandbox_on_mount if(Application.compile_env(:loka, :sql_sandbox),
+                      do: [LokaWeb.LiveAcceptance],
+                      else: []
+                    )
+
   scope "/", LokaWeb do
     pipe_through :browser
 
-    ash_authentication_live_session :authenticated_routes, on_mount_prepend: LokaWeb.LiveLocale do
+    ash_authentication_live_session :authenticated_routes,
+      on_mount_prepend: @sandbox_on_mount ++ [LokaWeb.LiveLocale] do
       # in each liveview, add one of the following at the top of the module:
       #
       # If an authenticated user must be present:
@@ -66,6 +74,7 @@ defmodule LokaWeb.Router do
     sign_in_route register_path: "/register",
                   reset_path: "/reset",
                   auth_routes_prefix: "/auth",
+                  on_mount_prepend: @sandbox_on_mount,
                   on_mount: [{LokaWeb.LiveUserAuth, :live_no_user}],
                   overrides: [
                     LokaWeb.AuthOverrides,
@@ -74,6 +83,7 @@ defmodule LokaWeb.Router do
 
     # Remove this if you do not want to use the reset password feature
     reset_route auth_routes_prefix: "/auth",
+                on_mount_prepend: @sandbox_on_mount,
                 overrides: [
                   LokaWeb.AuthOverrides,
                   Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
@@ -82,11 +92,13 @@ defmodule LokaWeb.Router do
     # Remove this if you do not use the confirmation strategy
     confirm_route Loka.Accounts.User, :confirm_new_user,
       auth_routes_prefix: "/auth",
+      on_mount_prepend: @sandbox_on_mount,
       overrides: [LokaWeb.AuthOverrides, Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI]
 
     # Remove this if you do not use the magic link strategy.
     magic_sign_in_route(Loka.Accounts.User, :magic_link,
       auth_routes_prefix: "/auth",
+      on_mount_prepend: @sandbox_on_mount,
       overrides: [LokaWeb.AuthOverrides, Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI]
     )
   end

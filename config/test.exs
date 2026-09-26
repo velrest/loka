@@ -22,12 +22,14 @@ config :loka, Loka.Repo,
   pool_size: System.schedulers_online() * 2,
   port: System.get_env("POSTGRES_PORT", "5433")
 
-# We don't run a server during test. If one is required,
-# you can enable the server option below.
+# The server runs for the Playwright browser tests (test/loka_web/browser)
 config :loka, LokaWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
   secret_key_base: "DfdJYsJAQkA4qIsQBbo3sGeWVUK/SL67vtC1sMfDcix0a51+LjUIJ0hZhRQ0eKgD",
-  server: false
+  server: true
+
+# Lets browser tests share each test's Ecto sandbox (see LokaWeb.LiveAcceptance)
+config :loka, sql_sandbox: true
 
 # In test we don't send emails
 config :loka, Loka.Mailer, adapter: Swoosh.Adapters.Test
@@ -46,6 +48,14 @@ config :phoenix_live_view,
   enable_expensive_runtime_checks: true
 
 config :phoenix_test, :endpoint, LokaWeb.Endpoint
+config :phoenix_test, otp_app: :loka
+
+# Browser tests never reach the internet (e.g. no map tiles from OpenStreetMap);
+# only the test server on localhost resolves
+config :phoenix_test,
+  playwright: [
+    browser_launch_opts: [args: ["--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost"]]
+  ]
 
 # Sort query params output of verified routes for robust url comparisons
 config :phoenix,

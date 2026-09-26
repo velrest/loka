@@ -51,6 +51,11 @@ defmodule LokaWeb do
   def live_view do
     quote do
       use Phoenix.LiveView
+
+      if Application.compile_env(:loka, :sql_sandbox) do
+        on_mount LokaWeb.LiveAcceptance
+      end
+
       on_mount LokaWeb.Utils.AssignCurrentPath
       unquote(html_helpers())
     end

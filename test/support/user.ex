@@ -4,13 +4,13 @@ defmodule Loka.Support.UserHelpers do
 
   alias Loka.Accounts.User
 
-  def create_studio_owner do
+  def create_studio_owner(studio_attrs \\ %{}) do
     owner = create_user()
 
     studio =
-      Loka.Studios.create_studio!(%{name: "My Studio", city: "Zürich", postal_code: "8001"},
-        actor: owner
-      )
+      %{name: "My Studio", city: "Zürich", postal_code: "8001"}
+      |> Map.merge(studio_attrs)
+      |> Loka.Studios.create_studio!(actor: owner)
 
     owner = Ash.load!(owner, [:studio, :has_studio?])
     %{owner: owner, studio: studio}

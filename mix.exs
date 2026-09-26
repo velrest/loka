@@ -91,7 +91,8 @@ defmodule Loka.MixProject do
       {:dns_cluster, "~> 0.3"},
       {:bandit, "~> 1.5"},
       {:mix_test_interactive, "~> 5.0", only: :dev, runtime: false},
-      {:phoenix_test, "~> 0.12", only: :test, runtime: false}
+      {:phoenix_test, "~> 0.12", only: :test, runtime: false},
+      {:phoenix_test_playwright, "~> 0.18.0", only: :test, runtime: false}
     ]
   end
 
@@ -106,7 +107,8 @@ defmodule Loka.MixProject do
       setup: ["deps.get", "ash.setup", "assets.setup", "assets.build", "run priv/repo/seeds.exs"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ash.setup --quiet", "test"],
+      # Browser tests run the built JS, so build it from the code under test
+      test: ["ash.setup --quiet", "assets.build", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["compile", "tailwind loka", "esbuild loka"],
       "assets.deploy": [

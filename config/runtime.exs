@@ -27,7 +27,10 @@ if System.get_env("PHX_SERVER") do
   config :loka, LokaWeb.Endpoint, server: true
 end
 
-config :loka, LokaWeb.Endpoint, http: [port: String.to_integer(System.get_env("PORT", "4000"))]
+# Tests run their own server on the port set in config/test.exs
+if config_env() != :test do
+  config :loka, LokaWeb.Endpoint, http: [port: String.to_integer(System.get_env("PORT", "4000"))]
+end
 
 if config_env() == :prod do
   database_url =
