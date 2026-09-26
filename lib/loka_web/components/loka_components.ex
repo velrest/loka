@@ -168,7 +168,7 @@ defmodule LokaWeb.LokaComponents do
 
   ## Examples
 
-      <.item_thumbnail images={stock.item.images} alt={stock.item.name} class="size-16 rounded-lg bg-base-200" />
+      <.item_thumbnail images={item.images} alt={item.name} class="size-16 rounded-lg bg-base-200" />
   """
   attr :images, :list, required: true
   attr :alt, :string, default: ""
@@ -194,40 +194,40 @@ defmodule LokaWeb.LokaComponents do
   end
 
   @doc """
-  Renders a stock's photo, as an `ImageSlider`-hooked slider with prev/next
+  Renders an item's photo, as an `ImageSlider`-hooked slider with prev/next
   arrows and dot indicators when there is more than one image.
   """
-  attr :stock, Inventory.Stock, required: true
+  attr :item, Inventory.Item, required: true
 
-  def stock_photo_slider(assigns) do
+  def item_photo_slider(assigns) do
     ~H"""
     <div class="relative aspect-square rounded-field overflow-hidden bg-base-300">
       <img
-        :if={@stock.item.images == []}
+        :if={@item.images == []}
         src="/images/placeholder-pot.svg"
         alt=""
         class="w-full h-full object-cover"
       />
 
       <div
-        :if={@stock.item.images != []}
-        id={"slider-#{@stock.id}"}
+        :if={@item.images != []}
+        id={"slider-#{@item.id}"}
         phx-hook="ImageSlider"
         class="relative w-full h-full overflow-hidden"
       >
         <div
-          :for={{image, idx} <- Enum.with_index(@stock.item.images)}
+          :for={{image, idx} <- Enum.with_index(@item.images)}
           data-slide={idx}
           class={[
             "absolute inset-0 transition-opacity duration-150",
             if(idx == 0, do: "opacity-100", else: "opacity-0")
           ]}
         >
-          <img src={image.path} alt={@stock.item.name} class="w-full h-full object-cover" />
+          <img src={image.path} alt={@item.name} class="w-full h-full object-cover" />
         </div>
 
         <div
-          :if={length(@stock.item.images) > 1}
+          :if={length(@item.images) > 1}
           class="absolute inset-x-2 top-1/2 -translate-y-1/2 flex justify-between z-10"
         >
           <button
@@ -267,11 +267,11 @@ defmodule LokaWeb.LokaComponents do
         </div>
 
         <div
-          :if={length(@stock.item.images) > 1}
+          :if={length(@item.images) > 1}
           class="absolute bottom-2 inset-x-0 flex justify-center gap-1 z-10"
         >
           <div
-            :for={{_, idx} <- Enum.with_index(@stock.item.images)}
+            :for={{_, idx} <- Enum.with_index(@item.images)}
             data-dot={idx}
             class={[
               "size-1.5 rounded-full transition-all duration-150",
@@ -329,48 +329,57 @@ defmodule LokaWeb.LokaComponents do
     """
   end
 
-  attr :stock, Inventory.Stock, required: true
+  @doc """
+  Renders an item on the market and studio pages. Items that aren't in stock
+  show no price or add-to-cart button. Expects `stock`, `studio`, `images`
+  and `in_stock?` to be loaded.
+  """
+  attr :item, Inventory.Item, required: true
   attr :current_user, :any, default: nil
   attr :show_studio, :boolean, default: true
 
-  def stock_card(assigns) do
+  def item_card(assigns) do
     ~H"""
-    <div class="flex flex-col gap-2.5" data-item={@stock.id}>
-      <.stock_photo_slider stock={@stock} />
+    <div class="flex flex-col gap-2.5" data-item={@item.id}>
+      <.item_photo_slider item={@item} />
 
       <div class="flex items-baseline justify-between gap-2.5">
         <.link
-          navigate={~p"/shop/item/#{@stock.item.id}"}
+          navigate={~p"/shop/item/#{@item.id}"}
           class="text-xl tracking-tight hover:text-primary transition-colors duration-150"
         >
-          {@stock.item.name}
+          {@item.name}
         </.link>
-        <span class="text-base whitespace-nowrap text-[color:var(--clay-neutral-200)]">
-          {@stock.price}
+        <span
+          :if={@item.stock}
+          class="text-base whitespace-nowrap text-[color:var(--clay-neutral-200)]"
+        >
+          {@item.stock.price}
         </span>
       </div>
 
       <div class="flex items-baseline justify-between gap-2.5 -mt-1">
         <.link
           :if={@show_studio}
-          navigate={~p"/shop/studio/#{@stock.studio.id}"}
+          navigate={~p"/shop/studio/#{@item.studio.id}"}
           class="studio-link"
         >
-          {@stock.studio.name} · {@stock.studio.city}
+          {@item.studio.name} · {@item.studio.city}
         </.link>
         <span class="text-xs whitespace-nowrap text-secondary ml-auto">
-          {stock_line(@stock)}
+          {item_line(@item)}
         </span>
       </div>
 
       <p class="mt-0.5 mb-2 text-sm leading-normal text-secondary line-clamp-2">
-        {@stock.item.description}
+        {@item.description}
       </p>
 
       <.live_component
+        :if={@item.in_stock?}
         module={LokaWeb.AddToCartComponent}
-        id={"add-to-cart-#{@stock.id}"}
-        stock={@stock}
+        id={"add-to-cart-#{@item.id}"}
+        item={@item}
         current_user={@current_user}
         class="btn-primary btn-block mt-auto"
       />
@@ -378,7 +387,10 @@ defmodule LokaWeb.LokaComponents do
     """
   end
 
-  defp stock_line(%{quantity: quantity}) do
+  defp item_line(%{in_stock?: true, stock: %{quantity: quantity}}) do
     gettext("%{count} verfügbar", count: quantity)
   end
+
+  defp item_line(%{stock: nil}), do: gettext("Nicht online erhältlich")
+  defp item_line(_sold_out), do: gettext("Ausverkauft")
 end

@@ -3,7 +3,7 @@ defmodule LokaWeb.AdminRoutesTest do
 
   alias Loka.Support.UserHelpers
 
-  @admin_paths ["/admin", "/oban", "/dashboard"]
+  @admin_paths ["/admin", "/admin/oban", "/admin/dashboard"]
 
   describe "without an admin actor" do
     test "anonymous visitors get a 404", %{conn: conn} do
@@ -26,11 +26,11 @@ defmodule LokaWeb.AdminRoutesTest do
       %{conn: UserHelpers.log_in_user(conn, UserHelpers.create_admin())}
     end
 
-    # /oban is covered by the 404 tests above only — its LiveView needs the
+    # /admin/oban is covered by the 404 tests above only — its LiveView needs the
     # Oban.Met instance, which does not run in the test environment.
     test "admin tools are reachable", %{conn: conn} do
       # LiveDashboard's root redirects to its default page.
-      for path <- ["/admin", "/dashboard/home"] do
+      for path <- ["/admin", "/admin/dashboard/home"] do
         assert conn |> get(path) |> response(200)
       end
     end

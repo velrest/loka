@@ -37,7 +37,7 @@
       "type": "utc_datetime_usec"
     },
     {
-      "allow_nil?": true,
+      "allow_nil?": false,
       "default": "nil",
       "generated?": false,
       "precision": null,
@@ -48,6 +48,8 @@
         "destination_attribute_default": null,
         "destination_attribute_generated": null,
         "index?": false,
+        "index_where": null,
+        "match_tenant?": false,
         "match_type": null,
         "match_with": null,
         "multitenancy": {
@@ -55,20 +57,20 @@
           "global": null,
           "strategy": null
         },
-        "name": "cart_stock_stock_id_fkey",
+        "name": "cart_items_item_id_fkey",
         "on_delete": null,
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
-        "table": "stock"
+        "table": "items"
       },
       "scale": null,
       "size": null,
-      "source": "stock_id",
+      "source": "item_id",
       "type": "uuid"
     },
     {
-      "allow_nil?": true,
+      "allow_nil?": false,
       "default": "nil",
       "generated?": false,
       "precision": null,
@@ -79,6 +81,8 @@
         "destination_attribute_default": null,
         "destination_attribute_generated": null,
         "index?": false,
+        "index_where": null,
+        "match_tenant?": false,
         "match_type": null,
         "match_with": null,
         "multitenancy": {
@@ -86,8 +90,8 @@
           "global": null,
           "strategy": null
         },
-        "name": "cart_stock_cart_id_fkey",
-        "on_delete": null,
+        "name": "cart_items_cart_id_fkey",
+        "on_delete": "delete",
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
@@ -104,8 +108,8 @@
   "create_table_options": null,
   "custom_indexes": [],
   "custom_statements": [],
-  "has_create_action": false,
-  "hash": "BC95EAEB2198E6DEF0E11436AAD0D1AAE53E545F61DCF394A5C044F754AB7E72",
+  "has_create_action": true,
+  "hash": "4ADD8075C05712E4E9C88B87DEF5597C3C8328E75B9298B6718D7B7EAFB7B8F5",
   "identities": [],
   "multitenancy": {
     "attribute": null,
@@ -114,5 +118,5 @@
   },
   "repo": "Elixir.Loka.Repo",
   "schema": null,
-  "table": "cart_stock"
+  "table": "cart_items"
 }

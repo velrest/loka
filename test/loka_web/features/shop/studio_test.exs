@@ -1,7 +1,7 @@
 defmodule LokaWeb.Features.Shop.StudioTest do
   use LokaWeb.ConnCase, async: true
 
-  alias Loka.Support.UserHelpers
+  alias Loka.Support.{InventoryHelpers, UserHelpers}
 
   setup do
     %{owner: owner, studio: studio} = UserHelpers.create_studio_owner()
@@ -28,18 +28,23 @@ defmodule LokaWeb.Features.Shop.StudioTest do
       |> assert_has("p", text: "Noch keine Artikel verfügbar.")
     end
 
-    test "shows stock items when studio has them", %{conn: conn, owner: owner} do
-      {:ok, stock} =
-        Loka.Inventory.create_stock(
-          %{name: "Kleine Vase", description: "Schöne Vase"},
-          %{quantity: 2, price: Money.new(:CHF, 45)},
-          actor: owner
-        )
+    test "shows the studio's items", %{conn: conn, owner: owner, studio: studio} do
+      item = InventoryHelpers.create_item(owner, %{name: "Kleine Vase"})
 
       conn
-      |> visit(~p"/shop/studio/#{stock.studio_id}")
-      |> assert_has("[data-item='#{stock.id}']")
+      |> visit(~p"/shop/studio/#{studio.id}")
+      |> assert_has("[data-item='#{item.id}']")
       |> assert_has("a", text: "Kleine Vase")
+    end
+
+    test "shows items without stock, without add to cart",
+         %{conn: conn, owner: owner, studio: studio} do
+      item = InventoryHelpers.create_item(owner, %{name: "Krug", stock: nil})
+
+      conn
+      |> visit(~p"/shop/studio/#{studio.id}")
+      |> assert_has("[data-item='#{item.id}']", text: "Nicht online erhältlich")
+      |> refute_has("button", text: "In den Warenkorb")
     end
 
     test "redirects to / for unknown studio id", %{conn: conn} do

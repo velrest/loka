@@ -2,8 +2,9 @@ defmodule Loka.Commerce.Cart do
   @moduledoc """
   A shopping cart, owned by a user or anonymous (no user).
 
-  Anonymous carts that haven't been touched in 30 days are deleted by a daily
-  Oban job (see `Loka.Commerce.Cart.Actions.CleanupAnonymous`).
+  Holds items (see `Loka.Commerce.CartItem`). Anonymous carts that haven't
+  been touched in 30 days are deleted by a daily Oban job (see
+  `Loka.Commerce.Cart.Actions.CleanupAnonymous`).
   """
 
   use Ash.Resource,
@@ -121,11 +122,11 @@ defmodule Loka.Commerce.Cart do
   end
 
   relationships do
-    has_many :cart_stocks, Loka.Commerce.CartStock
+    has_many :cart_items, Loka.Commerce.CartItem
 
-    many_to_many :stocks, Loka.Inventory.Stock do
-      through Loka.Commerce.CartStock
-      join_relationship :cart_stocks
+    many_to_many :items, Loka.Inventory.Item do
+      through Loka.Commerce.CartItem
+      join_relationship :cart_items
     end
 
     belongs_to :user, Loka.Accounts.User do
@@ -138,22 +139,25 @@ defmodule Loka.Commerce.Cart do
   end
 
   aggregates do
-    count :item_count, :cart_stocks
+    count :item_count, :cart_items
   end
 end
 
 defmodule Loka.Commerce.Cart.SubtotalCalc do
-  @moduledoc "Sums the prices of all stock in a cart. `nil` for an empty cart."
+  @moduledoc """
+  Sums the current price of every piece in a cart, skipping items that are no
+  longer on sale. `nil` when there's nothing to sum.
+  """
 
   use Ash.Resource.Calculation
 
   @impl true
-  def load(_, _, _), do: [stocks: [:price]]
+  def load(_, _, _), do: [cart_items: [item: [stock: [:price]]]]
 
   @impl true
   def calculate(records, _, _) do
     Enum.map(records, fn cart ->
-      prices = Enum.map(cart.stocks, & &1.price)
+      prices = for %{item: %{stock: %{price: price}}} <- cart.cart_items, do: price
       if prices == [], do: nil, else: Money.sum!(prices)
     end)
   end

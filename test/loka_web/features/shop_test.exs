@@ -1,64 +1,87 @@
 defmodule LokaWeb.Features.ShopTest do
   use LokaWeb.ConnCase, async: true
 
-  alias Loka.Inventory
+  alias Loka.Support.{InventoryHelpers, UserHelpers}
 
   setup %{conn: conn} do
-    %{owner: user} = Loka.Support.UserHelpers.create_studio_owner()
+    %{owner: owner} = UserHelpers.create_studio_owner()
 
-    Inventory.create_stock!(
-      %{name: "Cup", description: "A cup"},
-      %{quantity: 1, price: Money.new(:CHF, 100)},
-      actor: user
-    )
+    cup =
+      InventoryHelpers.create_item(owner, %{
+        name: "Cup",
+        description: "A cup",
+        stock: %{quantity: 1, price: Money.new(:CHF, 100)}
+      })
 
-    Inventory.create_stock!(
-      %{name: "Bowl", description: "A bowl"},
-      %{quantity: 2, price: Money.new(:CHF, 200)},
-      actor: user
-    )
+    bowl =
+      InventoryHelpers.create_item(owner, %{
+        name: "Bowl",
+        description: "A bowl",
+        stock: %{quantity: 0, price: Money.new(:CHF, 200)}
+      })
 
-    Inventory.create_stock!(
-      %{name: "Plate", description: "A plate"},
-      %{quantity: 3, price: Money.new(:CHF, 300)},
-      actor: user
-    )
+    plate =
+      InventoryHelpers.create_item(owner, %{name: "Plate", description: "A plate", stock: nil})
 
-    %{user: user, conn: conn}
+    %{conn: conn, cup: cup, bowl: bowl, plate: plate}
   end
 
   describe "market page" do
-    test "renders all stock entries", %{conn: conn} do
+    test "renders all items, including ones not in stock", %{conn: conn} do
       conn
       |> visit(~p"/")
       |> assert_has("[data-item]", count: 3)
     end
+
+    test "only items in stock get an add to cart button",
+         %{conn: conn, cup: cup, bowl: bowl, plate: plate} do
+      conn
+      |> visit(~p"/")
+      |> assert_has("[data-item='#{cup.id}'] button", text: "In den Warenkorb")
+      |> refute_has("[data-item='#{bowl.id}'] button", text: "In den Warenkorb")
+      |> refute_has("[data-item='#{plate.id}'] button", text: "In den Warenkorb")
+      |> assert_has("[data-item='#{bowl.id}']", text: "Ausverkauft")
+      |> assert_has("[data-item='#{plate.id}']", text: "Nicht online erhältlich")
+    end
   end
 
   describe "item page" do
-    test "renders item name and description", %{conn: conn} do
-      [stock | _] = Inventory.list_all_stock!(load: [item: :images])
-
+    test "renders item name and description", %{conn: conn, cup: cup} do
       conn
-      |> visit(~p"/shop/item/#{stock.item.id}")
-      |> assert_has("h1", text: stock.item.name)
-      |> assert_has("[data-testid='item-description']", text: stock.item.description)
+      |> visit(~p"/shop/item/#{cup.id}")
+      |> assert_has("h1", text: cup.name)
+      |> assert_has("[data-testid='item-description']", text: cup.description)
     end
 
-    test "renders item price", %{conn: conn} do
-      [stock | _] = Inventory.list_all_stock!(load: [item: :images])
-
+    test "renders item price", %{conn: conn, cup: cup} do
       conn
-      |> visit(~p"/shop/item/#{stock.item.id}")
-      |> assert_has("[data-testid='item-price']")
+      |> visit(~p"/shop/item/#{cup.id}")
+      |> assert_has("[data-testid='item-price']", text: "CHF")
     end
 
-    test "renders add to cart button", %{conn: conn} do
-      [stock | _] = Inventory.list_all_stock!(load: [item: :images])
-
+    test "renders add to cart button", %{conn: conn, cup: cup} do
       conn
-      |> visit(~p"/shop/item/#{stock.item.id}")
+      |> visit(~p"/shop/item/#{cup.id}")
       |> assert_has("button", text: "In den Warenkorb")
+    end
+
+    test "sold out item shows no add to cart button", %{conn: conn, bowl: bowl} do
+      conn
+      |> visit(~p"/shop/item/#{bowl.id}")
+      |> assert_has("h1", text: bowl.name)
+      |> assert_has("[data-testid='item-price']", text: "Ausverkauft")
+      |> refute_has("button", text: "In den Warenkorb")
+    end
+
+    test "item without stock shows name, studio and no price or button",
+         %{conn: conn, plate: plate} do
+      conn
+      |> visit(~p"/shop/item/#{plate.id}")
+      |> assert_has("h1", text: plate.name)
+      |> assert_has("a", text: plate.studio.name)
+      |> assert_has("[data-testid='item-price']", text: "Nicht online erhältlich")
+      |> refute_has("[data-testid='item-price']", text: "CHF")
+      |> refute_has("button", text: "In den Warenkorb")
     end
 
     test "unknown item id redirects to shop", %{conn: conn} do

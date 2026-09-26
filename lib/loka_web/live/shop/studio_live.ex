@@ -14,8 +14,8 @@ defmodule LokaWeb.Shop.StudioLive do
          |> push_navigate(to: ~p"/")}
 
       {:ok, studio} ->
-        stock = Inventory.list_studio_stock!(studio.id)
-        {:ok, assign(socket, studio: studio, stock: stock)}
+        items = Inventory.list_studio_items!(studio.id)
+        {:ok, assign(socket, studio: studio, items: items)}
 
       {:error, _} ->
         {:ok,
@@ -65,13 +65,18 @@ defmodule LokaWeb.Shop.StudioLive do
       <.section_header
         class="mb-7"
         label={gettext("Alle Artikel")}
-        count={"#{length(@stock)} #{ngettext("Stück", "Stücke", length(@stock))}"}
+        count={"#{length(@items)} #{ngettext("Stück", "Stücke", length(@items))}"}
       />
 
-      <.empty_state :if={@stock == []} message={gettext("Noch keine Artikel verfügbar.")} />
+      <.empty_state :if={@items == []} message={gettext("Noch keine Artikel verfügbar.")} />
 
       <div class="product-grid pb-16">
-        <.stock_card :for={s <- @stock} stock={s} current_user={@current_user} show_studio={false} />
+        <.item_card
+          :for={item <- @items}
+          item={item}
+          current_user={@current_user}
+          show_studio={false}
+        />
       </div>
     </Layouts.app>
     """

@@ -4,7 +4,7 @@ defmodule LokaWeb.Shop.CartWidgetLiveTest do
   import Phoenix.LiveViewTest
 
   alias Loka.Commerce
-  alias Loka.Support.UserHelpers
+  alias Loka.Support.{InventoryHelpers, UserHelpers}
 
   @password "password123"
 
@@ -33,6 +33,18 @@ defmodule LokaWeb.Shop.CartWidgetLiveTest do
       assert cart_widget_html(view) =~ "dropdown dropdown-end"
     end
 
+    test "cart widget uses the session's locale", %{conn: conn} do
+      {:ok, anon_cart} = Commerce.create_cart()
+
+      {:ok, view, _html} = live(conn, ~p"/?locale=de")
+      widget = find_live_child(view, "cart-widget")
+      render_hook(widget, "load_anonymous_cart", %{"cart_id" => anon_cart.id})
+
+      html = cart_widget_html(view)
+      assert html =~ "Warenkorb anzeigen"
+      refute html =~ "View cart"
+    end
+
     test "cart widget stays hidden for unknown cart id", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/")
       widget = find_live_child(view, "cart-widget")
@@ -44,12 +56,7 @@ defmodule LokaWeb.Shop.CartWidgetLiveTest do
     test "cart widget updates item count on pubsub :cart_updated", %{conn: conn} do
       %{owner: owner} = UserHelpers.create_studio_owner()
 
-      stock =
-        Loka.Inventory.create_stock!(
-          %{name: "Widget", description: "A widget"},
-          %{quantity: 10, price: Money.new(:CHF, 500)},
-          actor: owner
-        )
+      item = InventoryHelpers.create_item(owner)
 
       {:ok, anon_cart} = Commerce.create_cart()
 
@@ -57,7 +64,7 @@ defmodule LokaWeb.Shop.CartWidgetLiveTest do
       widget = find_live_child(view, "cart-widget")
       render_hook(widget, "load_anonymous_cart", %{"cart_id" => anon_cart.id})
 
-      Commerce.add_to_cart!(anon_cart.id, stock.id)
+      Commerce.add_to_cart!(anon_cart.id, item.id)
       Phoenix.PubSub.broadcast(Loka.PubSub, "cart:#{anon_cart.id}", :cart_updated)
 
       assert cart_widget_html(view) =~ "1"
@@ -91,18 +98,13 @@ defmodule LokaWeb.Shop.CartWidgetLiveTest do
     test "cart widget updates item count on pubsub :cart_updated", %{conn: conn, user: user} do
       %{owner: owner} = UserHelpers.create_studio_owner()
 
-      stock =
-        Loka.Inventory.create_stock!(
-          %{name: "Widget", description: "A widget"},
-          %{quantity: 10, price: Money.new(:CHF, 500)},
-          actor: owner
-        )
+      item = InventoryHelpers.create_item(owner)
 
       {:ok, cart} = Commerce.create_cart(actor: user)
 
       {:ok, view, _html} = live(conn, ~p"/")
 
-      Commerce.add_to_cart!(cart.id, stock.id)
+      Commerce.add_to_cart!(cart.id, item.id)
       Phoenix.PubSub.broadcast(Loka.PubSub, "cart:#{cart.id}", :cart_updated)
 
       assert cart_widget_html(view) =~ "1"

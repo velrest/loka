@@ -16,6 +16,7 @@ register = fn email ->
     Loka.Accounts.User,
     %{email: email, password: "password123", password_confirmation: "password123"},
     action: :register_with_password,
+    # User only authorizes AshAuthentication's own sign-in/register flows
     authorize?: false
   )
 end
@@ -48,16 +49,16 @@ owners =
     owner = register.("#{login}@example.com")
 
     Loka.Studios.create_studio!(%{name: name, city: city, postal_code: postal_code},
-      actor: owner,
-      authorize?: false
+      actor: owner
     )
 
-    {login, owner}
+    # Item policies check has_studio? on the actor
+    {login, Ash.load!(owner, :has_studio?)}
   end)
 
 # Items
 #
-# Each studio sells a run of pieces from this catalogue, in its own signature
+# Each studio makes a run of pieces from this catalogue, in its own signature
 # glaze. Studios in the larger cities carry more pieces than the remote ones.
 catalogue = [
   {"Vorratstopf",
@@ -141,7 +142,7 @@ odd_images = %{
 
 priv = to_string(:code.priv_dir(:loka))
 
-seed_images = fn item_id, filenames ->
+seed_images = fn item_id, filenames, owner ->
   for filename <- filenames do
     src = Path.join([priv, "static", "images", "seed", filename])
 
@@ -151,7 +152,7 @@ seed_images = fn item_id, filenames ->
         []
       )
 
-    Loka.Inventory.create_image!(item_id, ash_file, authorize?: false)
+    Loka.Inventory.create_image!(item_id, ash_file, actor: owner)
   end
 end
 
@@ -170,16 +171,24 @@ assortments
 
     # Prices vary a little between studios: -10% to +10%, whole francs
     price = round(base_price * (0.9 + rem(studio_index * 3 + n, 5) * 0.05))
-    quantity = 2 + rem(studio_index * 7 + n * 3, 14)
 
+    # About one piece in nine isn't on sale (no stock) and one in nine is
+    # sold out, so both states show up on the market. Scherben & Glasur (bern3)
+    # sells nothing online at all.
     stock =
-      Loka.Inventory.create_stock!(
-        %{name: "#{name} #{glaze}", description: description},
-        %{quantity: quantity, price: Money.new(:CHF, price)},
-        actor: owner,
-        authorize?: false
+      case {login, rem(studio_index * 4 + n, 9)} do
+        {"bern3", _} -> nil
+        {_, 0} -> nil
+        {_, 1} -> %{quantity: 0, price: Money.new(:CHF, price)}
+        _ -> %{quantity: 2 + rem(studio_index * 7 + n * 3, 14), price: Money.new(:CHF, price)}
+      end
+
+    item =
+      Loka.Inventory.create_item!(
+        %{name: "#{name} #{glaze}", description: description, stock: stock},
+        actor: owner
       )
 
-    seed_images.(stock.item_id, Map.get(odd_images, {login, n}, []) ++ images)
+    seed_images.(item.id, Map.get(odd_images, {login, n}, []) ++ images, owner)
   end
 end)

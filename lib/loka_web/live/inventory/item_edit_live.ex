@@ -8,34 +8,24 @@ defmodule LokaWeb.Inventory.ItemEditLive do
   def mount(%{"id" => id}, _session, socket) do
     user = socket.assigns.current_user
 
-    case Inventory.get_stock(id, actor: user) do
-      {:ok, nil} ->
-        {:ok, push_navigate(socket, to: ~p"/inventory/items")}
-
-      {:error, _} ->
-        {:ok, push_navigate(socket, to: ~p"/inventory/items")}
-
-      {:ok, stock} ->
-        stock_form =
-          Loka.Inventory.form_to_update_stock(stock, actor: user, as: "stock")
-          |> to_form()
-
+    case Inventory.get_own_item(id, actor: user, load: [:stock]) do
+      {:ok, %Inventory.Item{} = item} ->
         item_form =
-          Loka.Inventory.form_to_update_item(stock.item, actor: user, as: "item")
+          Loka.Inventory.form_to_update_item(item, actor: user, as: "item")
           |> to_form()
 
-        images = Inventory.list_item_images!(stock.item.id)
+        images = Inventory.list_item_images!(item.id)
 
         socket =
           socket
           |> assign(
             mode: :edit,
-            stock: stock,
-            stock_form: stock_form,
+            item: item,
             item_form: item_form,
             show_confirm: false,
             image_count: length(images)
           )
+          |> assign_stock(item.stock)
           |> stream(:images, images)
           |> allow_upload(:images,
             accept: ~w[.jpg .jpeg .png .webp],
@@ -44,6 +34,9 @@ defmodule LokaWeb.Inventory.ItemEditLive do
           )
 
         {:ok, socket}
+
+      _ ->
+        {:ok, push_navigate(socket, to: ~p"/inventory/items")}
     end
   end
 
@@ -52,8 +45,8 @@ defmodule LokaWeb.Inventory.ItemEditLive do
     user = socket.assigns.current_user
 
     form =
-      Loka.Inventory.form_to_create_stock(actor: user)
-      |> AshPhoenix.Form.add_form(:item)
+      Loka.Inventory.form_to_create_item(actor: user)
+      |> AshPhoenix.Form.add_form(:stock)
       |> to_form()
 
     socket =
@@ -77,8 +70,8 @@ defmodule LokaWeb.Inventory.ItemEditLive do
 
   def handle_event("save", params, socket) do
     case AshPhoenix.Form.submit(socket.assigns.form.source, params: params["form"]) do
-      {:ok, stock} ->
-        save_image(socket, stock.item_id)
+      {:ok, item} ->
+        save_image(socket, item.id)
 
         {:noreply,
          socket
@@ -105,17 +98,15 @@ defmodule LokaWeb.Inventory.ItemEditLive do
   def handle_event("save_stock", params, socket) do
     case AshPhoenix.Form.submit(socket.assigns.stock_form.source, params: params["stock"]) do
       {:ok, stock} ->
-        stock_form =
-          AshPhoenix.Form.for_update(stock, :update_stock,
-            actor: socket.assigns.current_user,
-            as: "stock"
-          )
-          |> to_form()
+        message =
+          if socket.assigns.stock,
+            do: gettext("Preis und Bestand aktualisiert."),
+            else: gettext("Artikel wird zum Verkauf angeboten.")
 
         {:noreply,
          socket
-         |> put_flash(:info, gettext("Preis und Bestand aktualisiert."))
-         |> assign(stock: stock, stock_form: stock_form)}
+         |> put_flash(:info, message)
+         |> assign_stock(stock)}
 
       {:error, form} ->
         {:noreply, assign(socket, stock_form: to_form(form))}
@@ -152,8 +143,22 @@ defmodule LokaWeb.Inventory.ItemEditLive do
     {:noreply, assign(socket, show_confirm: false)}
   end
 
-  def handle_event("delete", _params, socket) do
+  def handle_event("unlist", _params, socket) do
     case Inventory.archive_stock(socket.assigns.stock, actor: socket.assigns.current_user) do
+      :ok ->
+        {:noreply,
+         socket
+         |> put_flash(:info, gettext("Artikel vom Verkauf genommen."))
+         |> assign_stock(nil)}
+
+      {:error, _} ->
+        {:noreply,
+         put_flash(socket, :error, gettext("Artikel konnte nicht vom Verkauf genommen werden."))}
+    end
+  end
+
+  def handle_event("delete", _params, socket) do
+    case Inventory.archive_item(socket.assigns.item, actor: socket.assigns.current_user) do
       :ok ->
         {:noreply,
          socket
@@ -219,27 +224,31 @@ defmodule LokaWeb.Inventory.ItemEditLive do
             ← {gettext("Zurück zu Artikeln")}
           </.link>
           <h1 class="text-2xl font-bold mt-3">
-            {if @mode == :create, do: gettext("Neuer Artikel"), else: @stock.item.name}
+            {if @mode == :create, do: gettext("Neuer Artikel"), else: @item.name}
           </h1>
         </div>
 
         <%!-- Create mode --%>
         <div :if={@mode == :create} class="max-w-lg">
           <.form for={@form} phx-change="validate" phx-submit="save" class="flex flex-col gap-5">
-            <.inputs_for :let={item_form} field={@form[:item]}>
-              <.input field={item_form[:name]} type="text" label={gettext("Name")} />
-              <.input
-                field={item_form[:description]}
-                type="textarea"
-                label={gettext("Beschreibung")}
-                rows="3"
-              />
-            </.inputs_for>
+            <.input field={@form[:name]} type="text" label={gettext("Name")} />
+            <.input
+              field={@form[:description]}
+              type="textarea"
+              label={gettext("Beschreibung")}
+              rows="3"
+            />
 
-            <div class="grid grid-cols-2 gap-4">
-              <.input field={@form[:price]} type="text" label={gettext("Preis (z.B. CHF 100)")} />
-              <.input field={@form[:quantity]} type="number" label={gettext("Menge")} />
-            </div>
+            <.inputs_for :let={stock_form} field={@form[:stock]}>
+              <div class="grid grid-cols-2 gap-4">
+                <.input
+                  field={stock_form[:price]}
+                  type="text"
+                  label={gettext("Preis (z.B. CHF 100)")}
+                />
+                <.input field={stock_form[:quantity]} type="number" label={gettext("Menge")} />
+              </div>
+            </.inputs_for>
 
             <div>
               <p class="text-sm font-medium mb-2">
@@ -352,6 +361,11 @@ defmodule LokaWeb.Inventory.ItemEditLive do
             <div class="card bg-base-100 border border-base-300 shadow shadow-black/30">
               <div class="card-body gap-4">
                 <h3 class="font-semibold">{gettext("Preis & Bestand")}</h3>
+                <p :if={!@stock} class="text-sm text-base-content/50">
+                  {gettext(
+                    "Dieser Artikel ist nicht im Verkauf. Gib Preis und Menge an, um ihn anzubieten."
+                  )}
+                </p>
                 <.form
                   for={@stock_form}
                   phx-change="validate_stock"
@@ -362,9 +376,19 @@ defmodule LokaWeb.Inventory.ItemEditLive do
                     <.input field={@stock_form[:price]} type="text" label={gettext("Preis")} />
                     <.input field={@stock_form[:quantity]} type="number" label={gettext("Menge")} />
                   </div>
-                  <.button type="submit" class="btn btn-primary btn-sm self-end">
-                    {gettext("Speichern")}
-                  </.button>
+                  <div class="flex justify-end gap-2">
+                    <.button
+                      :if={@stock}
+                      type="button"
+                      phx-click="unlist"
+                      class="btn btn-ghost btn-sm"
+                    >
+                      {gettext("Vom Verkauf nehmen")}
+                    </.button>
+                    <.button type="submit" class="btn btn-primary btn-sm">
+                      {if @stock, do: gettext("Speichern"), else: gettext("Zum Verkauf anbieten")}
+                    </.button>
+                  </div>
                 </.form>
               </div>
             </div>
@@ -408,6 +432,27 @@ defmodule LokaWeb.Inventory.ItemEditLive do
       </dialog>
     </Layouts.app>
     """
+  end
+
+  # Edits the current stock in place, or offers a create form when the item
+  # isn't on sale
+  defp assign_stock(socket, stock) do
+    user = socket.assigns.current_user
+
+    form =
+      if stock do
+        Loka.Inventory.form_to_update_stock(stock, actor: user, as: "stock")
+      else
+        item_id = socket.assigns.item.id
+
+        Loka.Inventory.form_to_create_stock(
+          actor: user,
+          as: "stock",
+          transform_params: fn _form, params, _type -> Map.put(params, "item_id", item_id) end
+        )
+      end
+
+    assign(socket, stock: stock, stock_form: to_form(form))
   end
 
   defp save_image(socket, item_id) do

@@ -2,20 +2,16 @@ defmodule Loka.Resources.ImageTest do
   use Loka.DataCase, async: true
 
   alias Loka.Inventory
-  alias Loka.Support.UserHelpers
+  alias Loka.Support.{InventoryHelpers, UserHelpers}
 
   setup do
     %{owner: owner} = UserHelpers.create_studio_owner()
+    %{owner: other_owner} = UserHelpers.create_studio_owner()
     other = UserHelpers.create_user()
 
-    stock =
-      Inventory.create_stock!(
-        %{name: "Widget", description: "A widget"},
-        %{quantity: 5, price: Money.new(:CHF, 100)},
-        actor: owner
-      )
+    item = InventoryHelpers.create_item(owner)
 
-    %{owner: owner, other: other, item: stock.item}
+    %{owner: owner, other_owner: other_owner, other: other, item: item}
   end
 
   defp make_upload(filename \\ "test.jpg") do
@@ -36,6 +32,16 @@ defmodule Loka.Resources.ImageTest do
       assert image.position == 0
     end
 
+    test "studio owner can add images to an item that isn't on sale", %{owner: owner} do
+      item = InventoryHelpers.create_item(owner, %{stock: nil})
+      assert {:ok, _image} = create_image(item, owner)
+    end
+
+    test "owner of another studio cannot create an image for the item",
+         %{other_owner: other_owner, item: item} do
+      assert {:error, %Ash.Error.Forbidden{}} = create_image(item, other_owner)
+    end
+
     test "actor without a studio cannot create an image", %{item: item} do
       no_studio_user = UserHelpers.create_user()
       assert {:error, _} = create_image(item, no_studio_user)
@@ -54,6 +60,11 @@ defmodule Loka.Resources.ImageTest do
 
     test "studio owner can delete their image", %{owner: owner, image: image} do
       assert :ok = Inventory.delete_image(image, actor: owner)
+    end
+
+    test "owner of another studio cannot delete the image",
+         %{other_owner: other_owner, image: image} do
+      assert {:error, _} = Inventory.delete_image(image, actor: other_owner)
     end
 
     test "non-owner cannot delete the image", %{other: other, image: image} do

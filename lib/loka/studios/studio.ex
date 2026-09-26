@@ -111,7 +111,7 @@ defmodule Loka.Studios.Studio do
 
   relationships do
     belongs_to :owner, Loka.Accounts.User
-    has_many :stock, Loka.Inventory.Stock
+    has_many :items, Loka.Inventory.Item
   end
 
   identities do

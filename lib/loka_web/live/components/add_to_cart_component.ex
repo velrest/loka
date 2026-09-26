@@ -1,6 +1,6 @@
 defmodule LokaWeb.AddToCartComponent do
   @moduledoc """
-  "Add to cart" button for a piece of stock.
+  "Add to cart" button for an item. Only render it for items in stock.
 
   For anonymous visitors it first makes sure a cart exists and has the
   browser remember its id.
@@ -13,14 +13,14 @@ defmodule LokaWeb.AddToCartComponent do
   def update(assigns, socket) do
     {:ok,
      assign(socket,
-       stock: assigns.stock,
+       item: assigns.item,
        current_user: assigns[:current_user],
        class: assigns[:class] || "btn-primary",
        cart_id: socket.assigns[:cart_id]
      )}
   end
 
-  attr :stock, Loka.Inventory.Stock, required: true
+  attr :item, Loka.Inventory.Item, required: true
   attr :current_user, :any, default: nil
   attr :class, :any, default: "btn-primary"
 
@@ -28,14 +28,14 @@ defmodule LokaWeb.AddToCartComponent do
   def render(assigns) do
     ~H"""
     <div
-      id={"add-to-cart-#{@stock.id}"}
+      id={"add-to-cart-#{@item.id}"}
       phx-hook=".AddToCart"
       class="contents"
     >
       <button
         class={["btn", @class]}
         phx-click="add_to_cart"
-        phx-value-stock_id={@stock.id}
+        phx-value-item_id={@item.id}
         phx-target={@myself}
       >
         {gettext("In den Warenkorb")}
@@ -101,7 +101,7 @@ defmodule LokaWeb.AddToCartComponent do
   end
 
   @impl true
-  def handle_event("add_to_cart", %{"stock_id" => stock_id}, socket) do
+  def handle_event("add_to_cart", %{"item_id" => item_id}, socket) do
     {cart_id, socket} =
       case socket.assigns[:cart_id] do
         nil ->
@@ -126,7 +126,7 @@ defmodule LokaWeb.AddToCartComponent do
           {cart_id, socket}
       end
 
-    Commerce.add_to_cart!(cart_id, stock_id)
+    Commerce.add_to_cart!(cart_id, item_id)
     Phoenix.PubSub.broadcast(Loka.PubSub, "cart:#{cart_id}", :cart_updated)
 
     {:noreply, socket}

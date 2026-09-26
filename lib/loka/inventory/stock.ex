@@ -1,8 +1,10 @@
 defmodule Loka.Inventory.Stock do
   @moduledoc """
-  A studio's offer of an item: quantity and price.
+  The price and quantity an item is on sale for.
 
-  Creating stock also creates its item, and assigns the stock to the actor's studio.
+  An item has at most one current stock. Price and quantity are edited in
+  place (the paper trail keeps the history); to take an item off sale the
+  stock is archived, and re-listing it creates a new stock.
   """
 
   use Ash.Resource,
@@ -15,6 +17,8 @@ defmodule Loka.Inventory.Stock do
   postgres do
     table "stock"
     repo Loka.Repo
+
+    identity_wheres_to_sql one_current_stock_per_item: "archived_at IS NULL"
   end
 
   paper_trail do
@@ -28,48 +32,18 @@ defmodule Loka.Inventory.Stock do
   actions do
     defaults [:read]
 
-    read :list_all_stock do
-      prepare build(load: [item: [:images]])
-    end
-
-    read :list_studio_stock do
-      argument :studio_id, :uuid, allow_nil?: false
-      filter expr(studio_id == ^arg(:studio_id))
-      prepare build(load: [item: [:images]])
-    end
-
-    read :get_stock do
-      get_by :id
-      prepare build(load: [:item])
-    end
-
-    read :get_stock_for_item do
-      argument :item_id, :uuid, allow_nil?: false
-      get? true
-      filter expr(item_id == ^arg(:item_id) and studio.owner_id == ^actor(:id))
-    end
-
     create :create_stock do
-      accept [:quantity, :price]
-      argument :item, :map, allow_nil?: false
-
-      change manage_relationship(:item, type: :create)
-
-      change fn changeset, %{actor: actor} ->
-        with actor when not is_nil(actor) <- actor,
-             {:ok, %{studio: %{id: studio_id}}} <- Ash.load(actor, :studio) do
-          Ash.Changeset.force_change_attribute(changeset, :studio_id, studio_id)
-        else
-          _ -> changeset
-        end
-      end
+      primary? true
+      accept [:quantity, :price, :item_id]
     end
 
     update :update_stock do
       accept [:quantity, :price]
     end
 
-    destroy :archive_stock
+    destroy :archive_stock do
+      primary? true
+    end
   end
 
   policies do
@@ -78,15 +52,15 @@ defmodule Loka.Inventory.Stock do
     end
 
     policy action_type(:create) do
-      authorize_if actor_attribute_equals(:has_studio?, true)
+      authorize_if Loka.Checks.ActorOwnsItem
     end
 
     policy action_type(:update) do
-      authorize_if relates_to_actor_via([:studio, :owner])
+      authorize_if relates_to_actor_via([:item, :studio, :owner])
     end
 
     policy action_type(:destroy) do
-      authorize_if relates_to_actor_via([:studio, :owner])
+      authorize_if relates_to_actor_via([:item, :studio, :owner])
     end
   end
 
@@ -111,17 +85,12 @@ defmodule Loka.Inventory.Stock do
     belongs_to :item, Loka.Inventory.Item do
       allow_nil? false
     end
-
-    belongs_to :studio, Loka.Studios.Studio do
-      allow_nil? false
-    end
-
-    many_to_many :carts, Loka.Commerce.Cart do
-      through Loka.Commerce.CartStock
-    end
   end
 
   identities do
-    identity :unique_item_per_studio, [:item_id, :studio_id]
+    identity :one_current_stock_per_item, [:item_id] do
+      where expr(is_nil(archived_at))
+      message "item already has stock"
+    end
   end
 end

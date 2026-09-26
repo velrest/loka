@@ -198,22 +198,16 @@ defmodule LokaWeb.Layouts do
         class="input input-bordered hidden md:inline-flex md:w-56 shrink-0"
       />
 
-      <.link
-        navigate={~p"/about"}
-        class="nav-link"
-      >
+      <.icon_link navigate={~p"/about"} icon="hero-question-mark-circle" class="nav-link">
         {gettext("Über Loka")}
-      </.link>
-      <.link
-        href={~p"/#studio-map"}
-        class="nav-link"
-      >
+      </.icon_link>
+      <.icon_link href={~p"/#studio-map"} icon="hero-building-storefront" class="nav-link">
         {gettext("Studios")}
-      </.link>
+      </.icon_link>
 
       {live_render(@socket, LokaWeb.Shop.CartWidgetLive, id: "cart-widget")}
 
-      <.profile_dropdown current_user={@current_user}/>
+      <.profile_dropdown current_user={@current_user} />
     </div>
     """
   end
@@ -228,34 +222,81 @@ defmodule LokaWeb.Layouts do
 
   def profile_dropdown(assigns) do
     ~H"""
-    <div class="dropdown dropdown-end">
-      <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-        <div class="w-10 rounded-full">
-          <.icon name="hero-user-circle" class="size-8" />
+    <%= if @current_user do %>
+      <div class="dropdown dropdown-end">
+        <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+          <div class="w-10 rounded-full">
+            <.icon name="hero-user-circle" class="size-8" />
+          </div>
+        </div>
+        <div
+          tabindex="-1"
+          class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
+        >
+          <ul>
+            <li>
+              <.icon_link navigate={~p"/me"} icon="hero-user-circle">{gettext("Profil")}</.icon_link>
+            </li>
+            <li>
+              <.icon_link navigate={~p"/inventory/studio"} icon="hero-building-storefront">{gettext(
+                "Studio verwalten"
+              )}</.icon_link>
+            </li>
+            <li>
+              <.icon_link patch={~p"/sign-out"} icon="hero-arrow-left-start-on-rectangle">{gettext(
+                "Abmelden"
+              )}</.icon_link>
+            </li>
+            <%= if @current_user.admin? do %>
+              <.admin_link navigate={~p"/admin"}>{gettext("Ash Admin")}</.admin_link>
+              <.admin_link navigate={~p"/admin/dashboard"}>{gettext("Phoenix Dashboard")}</.admin_link>
+              <.admin_link navigate={~p"/admin/oban"}>{gettext("Oban")}</.admin_link>
+            <% end %>
+          </ul>
+          <.theme_toggle />
         </div>
       </div>
-      <div
-        tabindex="-1"
-        class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
-      >
-        <ul>
-          <%= if @current_user do %>
-            <li><.link navigate={~p"/me"}>{gettext("Profil")}</.link></li>
-            <li><.link navigate={~p"/inventory/studio"}>{gettext("Studio verwalten")}</.link></li>
-            <li><.link patch={~p"/sign-out"}>{gettext("Abmelden")}</.link></li>
-            <%= if @current_user.admin? do %>
-            <li><.link navigate={~p"/admin"}>{gettext("Ash Admin")}</.link></li>
-            <li><.link navigate={~p"/dashboard"}>{gettext("Phoenix Dashboard")}</.link></li>
-            <li><.link navigate={~p"/oban"}>{gettext("Oban")}</.link></li>
-            <% end %>
-          <% else %>
-            <li><.link patch={~p"/sign-in"}>{gettext("Anmelden")}</.link></li>
-            <li><.link patch={~p"/register"}>{gettext("Registrieren")}</.link></li>
-          <% end %>
-        </ul>
-        <.theme_toggle />
-      </div>
-    </div>
+    <% else %>
+      <button class="btn btn-ghost btn-circle">
+        <.link patch={~p"/sign-in"}>
+          <.icon name="hero-user-circle" class="size-8" />
+        </.link>
+      </button>
+    <% end %>
+    """
+  end
+
+  @doc """
+  Renders a link to the admin tools with a gear icon.
+  ## Examples
+
+      <.admin_link navigate={~p"/admin"}>Ash Admin</.admin_link>
+  """
+  attr :rest, :global, include: ~w(navigate patch href)
+  slot :inner_block, required: true
+
+  def admin_link(assigns) do
+    ~H"""
+    <li>
+      <.icon_link icon="hero-cog-6-tooth" {@rest}>{render_slot(@inner_block)}</.icon_link>
+    </li>
+    """
+  end
+
+  @doc """
+  Renders a link with the passed icon.
+
+  ## Examples
+
+      <.icon_link navigate={~p"/me"} icon="hero-user-circle">Profil</.icon_link>
+  """
+  attr :icon, :string, required: true
+  attr :rest, :global, include: ~w(navigate patch href)
+  slot :inner_block, required: true
+
+  def icon_link(assigns) do
+    ~H"""
+    <.link {@rest}><.icon name={@icon} />{render_slot(@inner_block)}</.link>
     """
   end
 end

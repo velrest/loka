@@ -8,13 +8,13 @@ defmodule LokaWeb.Inventory.ItemsLive do
   def mount(_params, _session, socket) do
     user = socket.assigns.current_user
 
-    stock =
+    items =
       case Loka.Studios.get_own_studio(actor: user) do
-        {:ok, %{id: studio_id}} -> Inventory.list_studio_stock!(studio_id, actor: user)
+        {:ok, %{id: studio_id}} -> Inventory.list_studio_items!(studio_id, actor: user)
         _ -> []
       end
 
-    {:ok, assign(socket, stock: stock)}
+    {:ok, assign(socket, items: items)}
   end
 
   @impl true
@@ -33,7 +33,7 @@ defmodule LokaWeb.Inventory.ItemsLive do
           </.link>
         </div>
 
-        <.empty_state :if={@stock == []} message={gettext("Noch keine Artikel.")}>
+        <.empty_state :if={@items == []} message={gettext("Noch keine Artikel.")}>
           <:icon>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -59,41 +59,47 @@ defmodule LokaWeb.Inventory.ItemsLive do
 
         <div class="flex flex-col gap-3">
           <.link
-            :for={s <- @stock}
-            navigate={~p"/inventory/items/#{s.id}"}
-            data-item={s.id}
+            :for={item <- @items}
+            navigate={~p"/inventory/items/#{item.id}"}
+            data-item={item.id}
             class="card bg-base-100 border border-base-300 shadow shadow-black/30 hover:shadow-md transition-shadow"
           >
             <div class="card-body p-4">
               <div class="flex items-center gap-4">
                 <%!-- Thumbnail --%>
                 <.item_thumbnail
-                  images={s.item.images}
-                  alt={s.item.name}
+                  images={item.images}
+                  alt={item.name}
                   class="shrink-0 size-16 rounded-lg bg-base-200"
                 />
 
                 <%!-- Info --%>
                 <div class="flex-1 min-w-0">
-                  <p class="font-semibold truncate">{s.item.name}</p>
-                  <p class="text-sm text-base-content/50 truncate mt-0.5">{s.item.description}</p>
+                  <p class="font-semibold truncate">{item.name}</p>
+                  <p class="text-sm text-base-content/50 truncate mt-0.5">{item.description}</p>
                 </div>
 
                 <%!-- Stats --%>
-                <div class="hidden sm:flex items-center gap-6 text-sm shrink-0">
+                <div
+                  :if={item.stock}
+                  class="hidden sm:flex items-center gap-6 text-sm shrink-0"
+                >
                   <div class="text-right">
                     <p class="text-base-content/40 text-xs uppercase tracking-wide">
                       {gettext("Preis")}
                     </p>
-                    <p class="font-semibold">{s.price}</p>
+                    <p class="font-semibold">{item.stock.price}</p>
                   </div>
                   <div class="text-right">
                     <p class="text-base-content/40 text-xs uppercase tracking-wide">
                       {gettext("Menge")}
                     </p>
-                    <p class="font-semibold">{s.quantity}</p>
+                    <p class="font-semibold">{item.stock.quantity}</p>
                   </div>
                 </div>
+                <span :if={!item.stock} class="badge badge-ghost badge-sm shrink-0">
+                  {gettext("Nicht im Verkauf")}
+                </span>
 
                 <%!-- Arrow --%>
                 <svg

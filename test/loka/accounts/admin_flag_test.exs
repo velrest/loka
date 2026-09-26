@@ -33,8 +33,7 @@ defmodule Loka.Accounts.AdminFlagTest do
           password: "password123",
           password_confirmation: "password123",
           admin?: true
-        },
-        authorize?: false
+        }
       )
       |> Ash.create!()
     end

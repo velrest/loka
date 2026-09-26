@@ -4,7 +4,11 @@ defmodule LokaWeb.Shop.CartLive do
 
   on_mount {LokaWeb.LiveUserAuth, :live_user_optional}
 
-  @cart_load [:subtotal, :item_count, cart_stocks: [stock: [:studio, item: :images]]]
+  @cart_load [
+    :subtotal,
+    :item_count,
+    cart_items: [item: [:studio, :images, :stock, :in_stock?]]
+  ]
 
   @impl true
   def mount(_params, _session, socket) do
@@ -44,22 +48,22 @@ defmodule LokaWeb.Shop.CartLive do
   end
 
   @impl true
-  def handle_event("increase_quantity", %{"stock_id" => stock_id}, socket) do
+  def handle_event("increase_quantity", %{"item_id" => item_id}, socket) do
     cart = socket.assigns.cart
-    Commerce.add_to_cart!(cart.id, stock_id)
+    Commerce.add_to_cart!(cart.id, item_id)
     Phoenix.PubSub.broadcast(Loka.PubSub, "cart:#{cart.id}", :cart_updated)
     {:noreply, socket}
   end
 
-  def handle_event("decrease_quantity", %{"stock_id" => stock_id}, socket) do
+  def handle_event("decrease_quantity", %{"item_id" => item_id}, socket) do
     cart = socket.assigns.cart
     user = socket.assigns.current_user
 
-    cart.cart_stocks
-    |> Enum.find(&(&1.stock_id == stock_id))
+    cart.cart_items
+    |> Enum.find(&(&1.item_id == item_id))
     |> case do
       nil -> :ok
-      cart_stock -> Commerce.remove_from_cart!(cart_stock, actor: user)
+      cart_item -> Commerce.remove_from_cart!(cart_item, actor: user)
     end
 
     Phoenix.PubSub.broadcast(Loka.PubSub, "cart:#{cart.id}", :cart_updated)
@@ -133,33 +137,35 @@ defmodule LokaWeb.Shop.CartLive do
         >
           <div>
             <div
-              :for={{stock, quantity, entries} <- @line_items}
+              :for={{item, quantity} <- @line_items}
               class="flex items-center gap-4.5 py-4.5 rule-fade-bottom"
             >
               <%!-- Thumbnail --%>
               <.item_thumbnail
-                images={stock.item.images}
-                alt={stock.item.name}
+                images={item.images}
+                alt={item.name}
                 class="shrink-0 size-20 rounded-field bg-base-300"
               />
 
               <%!-- Info --%>
               <div class="flex-1 min-w-0">
                 <.link
-                  navigate={~p"/shop/item/#{stock.item.id}"}
+                  navigate={~p"/shop/item/#{item.id}"}
                   class="text-lg tracking-tight hover:text-primary transition-colors duration-150"
                 >
-                  {stock.item.name}
+                  {item.name}
                 </.link>
                 <.link
-                  :if={stock.studio}
-                  navigate={~p"/shop/studio/#{stock.studio.id}"}
+                  navigate={~p"/shop/studio/#{item.studio.id}"}
                   class="block studio-link"
                 >
-                  {stock.studio.name} · {stock.studio.city}
+                  {item.studio.name} · {item.studio.city}
                 </.link>
-                <p class="text-xs text-secondary mt-0.5">
-                  {stock.price} {gettext("/ Stück")}
+                <p :if={item.stock} class="text-xs text-secondary mt-0.5">
+                  {item.stock.price} {gettext("/ Stück")}
+                </p>
+                <p :if={!item.stock} class="text-xs text-error mt-0.5">
+                  {gettext("Nicht mehr online erhältlich")}
                 </p>
               </div>
 
@@ -167,7 +173,7 @@ defmodule LokaWeb.Shop.CartLive do
               <div class="join shrink-0">
                 <button
                   phx-click="decrease_quantity"
-                  phx-value-stock_id={stock.id}
+                  phx-value-item_id={item.id}
                   class="join-item px-3 border border-base-300 hover:bg-base-content/7 transition-colors duration-150"
                 >
                   <%= if quantity == 1 do %>
@@ -181,15 +187,16 @@ defmodule LokaWeb.Shop.CartLive do
                 </span>
                 <button
                   phx-click="increase_quantity"
-                  phx-value-stock_id={stock.id}
-                  class="join-item px-3 border border-base-300 hover:bg-base-content/7 transition-colors duration-150"
+                  phx-value-item_id={item.id}
+                  disabled={!item.in_stock?}
+                  class="join-item px-3 border border-base-300 hover:bg-base-content/7 transition-colors duration-150 disabled:opacity-40"
                 >
                   +
                 </button>
               </div>
 
               <span class="w-32 text-right text-base whitespace-nowrap">
-                {line_total(entries)}
+                {line_total(item, quantity)}
               </span>
             </div>
 
@@ -244,27 +251,20 @@ defmodule LokaWeb.Shop.CartLive do
   end
 
   defp cart_line_items(nil), do: []
-  defp cart_line_items(%{cart_stocks: []}), do: []
 
-  defp cart_line_items(%{cart_stocks: cart_stocks}) do
-    cart_stocks
-    |> Enum.group_by(& &1.stock_id)
-    |> Enum.map(fn {_stock_id, [first | _] = entries} ->
-      {first.stock, length(entries), entries}
-    end)
+  defp cart_line_items(%{cart_items: cart_items}) do
+    cart_items
+    |> Enum.group_by(& &1.item_id)
+    |> Enum.map(fn {_item_id, [first | _] = entries} -> {first.item, length(entries)} end)
   end
 
-  defp line_total(entries) do
-    entries
-    |> Enum.map(& &1.stock.price)
-    |> Money.sum!()
-  end
+  defp line_total(%{stock: %{price: price}}, quantity), do: Money.mult!(price, quantity)
+  defp line_total(_item, _quantity), do: nil
 
   defp shipping_note(line_items) do
     studio_count =
       line_items
-      |> Enum.map(fn {stock, _quantity, _entries} -> stock.studio && stock.studio.id end)
-      |> Enum.reject(&is_nil/1)
+      |> Enum.map(fn {item, _quantity} -> item.studio_id end)
       |> Enum.uniq()
       |> length()
 

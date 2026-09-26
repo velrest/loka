@@ -48,7 +48,7 @@ defmodule Loka.Inventory.Image do
     end
 
     policy action_type(:destroy) do
-      authorize_if relates_to_actor_via([:item, :stock, :studio, :owner])
+      authorize_if relates_to_actor_via([:item, :studio, :owner])
     end
   end
 

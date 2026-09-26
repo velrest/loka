@@ -1,5 +1,10 @@
-defmodule Loka.Commerce.CartStock do
-  @moduledoc "Join between a cart and a piece of stock in it."
+defmodule Loka.Commerce.CartItem do
+  @moduledoc """
+  One piece of an item in a cart. Adding the same item twice adds two rows.
+
+  Carts hold items rather than stock, so they always use the item's current
+  price; an item whose stock is archived stays in the cart as unavailable.
+  """
 
   use Ash.Resource,
     otp_app: :loka,
@@ -8,7 +13,7 @@ defmodule Loka.Commerce.CartStock do
     authorizers: [Ash.Policy.Authorizer]
 
   postgres do
-    table "cart_stock"
+    table "cart_items"
     repo Loka.Repo
 
     references do
@@ -26,7 +31,8 @@ defmodule Loka.Commerce.CartStock do
 
     create :create do
       primary? true
-      accept [:cart_id, :stock_id]
+      accept [:cart_id, :item_id]
+      validate Loka.Commerce.CartItem.Validations.ItemInStock
     end
 
     destroy :destroy do
@@ -57,13 +63,29 @@ defmodule Loka.Commerce.CartStock do
   end
 
   relationships do
-    belongs_to :stock, Loka.Inventory.Stock do
+    belongs_to :item, Loka.Inventory.Item do
       allow_nil? false
       public? true
     end
 
     belongs_to :cart, Loka.Commerce.Cart do
       allow_nil? false
+    end
+  end
+end
+
+defmodule Loka.Commerce.CartItem.Validations.ItemInStock do
+  @moduledoc "Only items with current stock left can be added to a cart."
+
+  use Ash.Resource.Validation
+
+  @impl true
+  def validate(changeset, _opts, context) do
+    item_id = Ash.Changeset.get_attribute(changeset, :item_id)
+
+    case item_id && Loka.Inventory.get_item(item_id, actor: context.actor) do
+      {:ok, %{in_stock?: true}} -> :ok
+      _ -> {:error, field: :item_id, message: "is not in stock"}
     end
   end
 end

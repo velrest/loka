@@ -2,6 +2,8 @@ defmodule LokaWeb.Shop.CartWidgetLive do
   alias Loka.Commerce
   use LokaWeb, :live_view
 
+  # Nested via live_render, so the router's live_session hooks don't run here
+  on_mount LokaWeb.LiveLocale
   on_mount {LokaWeb.LiveUserAuth, :current_user}
 
   @impl true
@@ -13,6 +15,7 @@ defmodule LokaWeb.Shop.CartWidgetLive do
         class="dropdown dropdown-end shrink-0"
       >
         <div tabindex="0" role="button" class="btn btn-secondary gap-2">
+          <.icon name="hero-shopping-cart" />
           {gettext("Warenkorb")}
           <span :if={@cart.item_count > 0} class="badge badge-primary badge-soft badge-sm">
             {@cart.item_count}

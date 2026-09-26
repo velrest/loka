@@ -1,5 +1,8 @@
 defmodule Loka.Checks.ActorOwnsItem do
-  @moduledoc "Policy check: the actor's studio has stock for the `item_id` argument."
+  @moduledoc """
+  Policy check: the item given by `item_id` (argument or attribute) belongs to
+  the actor's studio.
+  """
 
   use Ash.Policy.SimpleCheck
 
@@ -7,16 +10,17 @@ defmodule Loka.Checks.ActorOwnsItem do
   def describe(_opts), do: "actor owns the item through their studio"
 
   @impl true
-  def match?(actor, %{changeset: changeset}, _opts) do
-    item_id = Ash.Changeset.get_argument(changeset, :item_id)
+  def match?(nil, _context, _opts), do: false
 
-    if is_nil(item_id) or is_nil(actor) do
-      false
-    else
-      case Loka.Inventory.get_stock_for_item(item_id, actor: actor) do
-        {:ok, stock} when not is_nil(stock) -> true
-        _ -> false
-      end
+  def match?(actor, %{changeset: changeset}, _opts) do
+    case Ash.Changeset.get_argument_or_attribute(changeset, :item_id) do
+      nil ->
+        false
+
+      item_id ->
+        match?({:ok, %Loka.Inventory.Item{}}, Loka.Inventory.get_own_item(item_id, actor: actor))
     end
   end
+
+  def match?(_actor, _context, _opts), do: false
 end

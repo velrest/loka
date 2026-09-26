@@ -108,7 +108,7 @@ defmodule LokaWeb.Router do
 
   @admin_on_mount [{LokaWeb.LiveUserAuth, :live_admin_required}]
 
-  scope "/" do
+  scope "/admin" do
     pipe_through [:browser, :admin]
 
     import Phoenix.LiveDashboard.Router
@@ -120,7 +120,7 @@ defmodule LokaWeb.Router do
 
     oban_dashboard("/oban", on_mount: @admin_on_mount)
 
-    ash_admin("/admin", on_mount: @admin_on_mount)
+    ash_admin("/", on_mount: @admin_on_mount)
   end
 
   # Mailbox preview is a plain plug (no LiveView), and only makes sense where

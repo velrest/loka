@@ -5,18 +5,18 @@ defmodule LokaWeb.Shop.CartLiveTest do
 
   alias Loka.Commerce
   alias Loka.Inventory
-  alias Loka.Support.UserHelpers
+  alias Loka.Support.{InventoryHelpers, UserHelpers}
 
   @password "password123"
 
-  defp create_stock do
+  defp create_item do
     %{owner: owner} = UserHelpers.create_studio_owner()
 
-    Inventory.create_stock!(
-      %{name: "Cup", description: "A nice cup"},
-      %{quantity: 10, price: Money.new(:CHF, 1500)},
-      actor: owner
-    )
+    InventoryHelpers.create_item(owner, %{
+      name: "Cup",
+      description: "A nice cup",
+      stock: %{quantity: 10, price: Money.new(:CHF, 1500)}
+    })
   end
 
   describe "anonymous user" do
@@ -26,9 +26,9 @@ defmodule LokaWeb.Shop.CartLiveTest do
     end
 
     test "loads anonymous cart via hook event", %{conn: conn} do
-      stock = create_stock()
+      item = create_item()
       {:ok, cart} = Commerce.create_cart()
-      Commerce.add_to_cart!(cart.id, stock.id)
+      Commerce.add_to_cart!(cart.id, item.id)
 
       {:ok, view, _html} = live(conn, ~p"/shop/cart")
       render_hook(view, "load_anonymous_cart", %{"cart_id" => cart.id})
@@ -44,7 +44,7 @@ defmodule LokaWeb.Shop.CartLiveTest do
     end
 
     test "refreshes on :cart_updated pubsub", %{conn: conn} do
-      stock = create_stock()
+      item = create_item()
       {:ok, cart} = Commerce.create_cart()
 
       {:ok, view, _html} = live(conn, ~p"/shop/cart")
@@ -52,16 +52,30 @@ defmodule LokaWeb.Shop.CartLiveTest do
 
       refute render(view) =~ "Cup"
 
-      Commerce.add_to_cart!(cart.id, stock.id)
+      Commerce.add_to_cart!(cart.id, item.id)
       Phoenix.PubSub.broadcast(Loka.PubSub, "cart:#{cart.id}", :cart_updated)
 
       assert render(view) =~ "Cup"
     end
 
-    test "decrease_quantity removes item from anonymous cart", %{conn: conn} do
-      stock = create_stock()
+    test "item taken off sale stays in the cart as unavailable", %{conn: conn} do
+      %{owner: owner} = UserHelpers.create_studio_owner()
+      item = InventoryHelpers.create_item(owner)
       {:ok, cart} = Commerce.create_cart()
-      Commerce.add_to_cart!(cart.id, stock.id)
+      Commerce.add_to_cart!(cart.id, item.id)
+      :ok = Inventory.archive_stock(item.stock, actor: owner)
+
+      {:ok, view, _html} = live(conn, ~p"/shop/cart")
+      render_hook(view, "load_anonymous_cart", %{"cart_id" => cart.id})
+
+      assert has_element?(view, "p", "Nicht mehr online erhältlich")
+      assert has_element?(view, "button[phx-click='increase_quantity'][disabled]")
+    end
+
+    test "decrease_quantity removes item from anonymous cart", %{conn: conn} do
+      item = create_item()
+      {:ok, cart} = Commerce.create_cart()
+      Commerce.add_to_cart!(cart.id, item.id)
 
       {:ok, view, _html} = live(conn, ~p"/shop/cart")
       render_hook(view, "load_anonymous_cart", %{"cart_id" => cart.id})
@@ -88,18 +102,18 @@ defmodule LokaWeb.Shop.CartLiveTest do
     end
 
     test "renders cart items when user has a cart", %{conn: conn, user: user} do
-      stock = create_stock()
+      item = create_item()
       {:ok, cart} = Commerce.create_cart(actor: user)
-      Commerce.add_to_cart!(cart.id, stock.id)
+      Commerce.add_to_cart!(cart.id, item.id)
 
       {:ok, _view, html} = live(conn, ~p"/shop/cart")
       assert html =~ "Cup"
     end
 
     test "increase_quantity adds another unit", %{conn: conn, user: user} do
-      stock = create_stock()
+      item = create_item()
       {:ok, cart} = Commerce.create_cart(actor: user)
-      Commerce.add_to_cart!(cart.id, stock.id)
+      Commerce.add_to_cart!(cart.id, item.id)
 
       {:ok, view, _html} = live(conn, ~p"/shop/cart")
       view |> element("button[phx-click='increase_quantity']") |> render_click()
@@ -109,9 +123,9 @@ defmodule LokaWeb.Shop.CartLiveTest do
     end
 
     test "decrease_quantity removes item when quantity is 1", %{conn: conn, user: user} do
-      stock = create_stock()
+      item = create_item()
       {:ok, cart} = Commerce.create_cart(actor: user)
-      Commerce.add_to_cart!(cart.id, stock.id)
+      Commerce.add_to_cart!(cart.id, item.id)
 
       {:ok, view, _html} = live(conn, ~p"/shop/cart")
       view |> element("button[phx-click='decrease_quantity']") |> render_click()
@@ -121,9 +135,9 @@ defmodule LokaWeb.Shop.CartLiveTest do
     end
 
     test "ignores load_anonymous_cart when authenticated", %{conn: conn, user: user} do
-      stock = create_stock()
+      item = create_item()
       {:ok, anon_cart} = Commerce.create_cart()
-      Commerce.add_to_cart!(anon_cart.id, stock.id)
+      Commerce.add_to_cart!(anon_cart.id, item.id)
 
       {:ok, cart} = Commerce.create_cart(actor: user)
       _ = cart
@@ -137,13 +151,13 @@ defmodule LokaWeb.Shop.CartLiveTest do
     end
 
     test "refreshes on :cart_updated pubsub", %{conn: conn, user: user} do
-      stock = create_stock()
+      item = create_item()
       {:ok, cart} = Commerce.create_cart(actor: user)
 
       {:ok, view, _html} = live(conn, ~p"/shop/cart")
       refute render(view) =~ "Cup"
 
-      Commerce.add_to_cart!(cart.id, stock.id)
+      Commerce.add_to_cart!(cart.id, item.id)
       Phoenix.PubSub.broadcast(Loka.PubSub, "cart:#{cart.id}", :cart_updated)
 
       assert render(view) =~ "Cup"

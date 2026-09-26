@@ -2,7 +2,8 @@ defmodule Loka.Resources.CartTest do
   use Loka.DataCase, async: true
 
   alias Loka.Commerce
-  alias Loka.Support.UserHelpers
+  alias Loka.Inventory
+  alias Loka.Support.{InventoryHelpers, UserHelpers}
 
   setup do
     %{buyer: UserHelpers.create_user()}
@@ -67,23 +68,92 @@ defmodule Loka.Resources.CartTest do
     end
   end
 
+  describe "add_to_cart" do
+    setup do
+      %{owner: owner} = UserHelpers.create_studio_owner()
+      %{owner: owner}
+    end
+
+    test "adds an item that's in stock", %{owner: owner} do
+      item = InventoryHelpers.create_item(owner)
+      {:ok, cart} = Commerce.create_cart()
+
+      assert {:ok, cart_item} = Commerce.add_to_cart(cart.id, item.id)
+      assert cart_item.item_id == item.id
+    end
+
+    test "rejects an item that isn't on sale", %{owner: owner} do
+      item = InventoryHelpers.create_item(owner, %{stock: nil})
+      {:ok, cart} = Commerce.create_cart()
+
+      assert {:error, _} = Commerce.add_to_cart(cart.id, item.id)
+    end
+
+    test "rejects an item with no pieces left", %{owner: owner} do
+      item =
+        InventoryHelpers.create_item(owner, %{stock: %{quantity: 0, price: Money.new(:CHF, 5)}})
+
+      {:ok, cart} = Commerce.create_cart()
+
+      assert {:error, _} = Commerce.add_to_cart(cart.id, item.id)
+    end
+  end
+
+  describe "subtotal" do
+    setup do
+      %{owner: owner} = UserHelpers.create_studio_owner()
+      {:ok, cart} = Commerce.create_cart()
+      %{owner: owner, cart: cart}
+    end
+
+    test "counts every piece in the cart", %{owner: owner, cart: cart} do
+      mug =
+        InventoryHelpers.create_item(owner, %{stock: %{quantity: 5, price: Money.new(:CHF, 30)}})
+
+      vase =
+        InventoryHelpers.create_item(owner, %{stock: %{quantity: 5, price: Money.new(:CHF, 70)}})
+
+      Commerce.add_to_cart!(cart.id, mug.id)
+      Commerce.add_to_cart!(cart.id, mug.id)
+      Commerce.add_to_cart!(cart.id, vase.id)
+
+      cart = Ash.load!(cart, [:subtotal, :item_count])
+      assert cart.item_count == 3
+      assert Money.equal?(cart.subtotal, Money.new(:CHF, 130))
+    end
+
+    test "uses the item's current price", %{owner: owner, cart: cart} do
+      item = InventoryHelpers.create_item(owner)
+      Commerce.add_to_cart!(cart.id, item.id)
+
+      Inventory.update_stock!(item.stock, %{price: Money.new(:CHF, 42)}, actor: owner)
+
+      assert Money.equal?(Ash.load!(cart, :subtotal).subtotal, Money.new(:CHF, 42))
+    end
+
+    test "items taken off sale stay in the cart but aren't counted",
+         %{owner: owner, cart: cart} do
+      item = InventoryHelpers.create_item(owner)
+      Commerce.add_to_cart!(cart.id, item.id)
+
+      :ok = Inventory.archive_stock(item.stock, actor: owner)
+
+      cart = Ash.load!(cart, [:subtotal, :item_count])
+      assert cart.item_count == 1
+      assert cart.subtotal == nil
+    end
+  end
+
   describe "merge_from" do
     setup do
       %{owner: owner} = UserHelpers.create_studio_owner()
 
-      stock =
-        Loka.Inventory.create_stock!(
-          %{name: "Widget", description: "A widget"},
-          %{quantity: 10, price: Money.new(:CHF, 500)},
-          actor: owner
-        )
-
-      %{stock: stock}
+      %{item: InventoryHelpers.create_item(owner)}
     end
 
-    test "copies items from anonymous cart into user cart", %{buyer: buyer, stock: stock} do
+    test "copies items from anonymous cart into user cart", %{buyer: buyer, item: item} do
       {:ok, anon_cart} = Commerce.create_cart()
-      Commerce.add_to_cart!(anon_cart.id, stock.id)
+      Commerce.add_to_cart!(anon_cart.id, item.id)
 
       {:ok, user_cart} = Commerce.create_cart(actor: buyer)
 
@@ -92,13 +162,13 @@ defmodule Loka.Resources.CartTest do
         |> Ash.Changeset.for_update(:merge_from, %{anonymous_cart_id: anon_cart.id}, actor: buyer)
         |> Ash.update()
 
-      merged = Ash.load!(merged, :cart_stocks, actor: buyer)
-      assert length(merged.cart_stocks) == 1
+      merged = Ash.load!(merged, :cart_items, actor: buyer)
+      assert length(merged.cart_items) == 1
     end
 
-    test "deletes the anonymous cart after merge", %{buyer: buyer, stock: stock} do
+    test "deletes the anonymous cart after merge", %{buyer: buyer, item: item} do
       {:ok, anon_cart} = Commerce.create_cart()
-      Commerce.add_to_cart!(anon_cart.id, stock.id)
+      Commerce.add_to_cart!(anon_cart.id, item.id)
       anon_cart_id = anon_cart.id
 
       {:ok, user_cart} = Commerce.create_cart(actor: buyer)
@@ -125,14 +195,7 @@ defmodule Loka.Resources.CartTest do
     setup do
       %{owner: owner} = UserHelpers.create_studio_owner()
 
-      stock =
-        Loka.Inventory.create_stock!(
-          %{name: "Widget", description: "A widget"},
-          %{quantity: 10, price: Money.new(:CHF, 500)},
-          actor: owner
-        )
-
-      %{stock: stock}
+      %{item: InventoryHelpers.create_item(owner)}
     end
 
     test "anonymous user + no cart ID → creates anonymous cart" do
@@ -177,9 +240,9 @@ defmodule Loka.Resources.CartTest do
     end
 
     test "logged-in user + user cart + anon cart → merges and returns user cart",
-         %{buyer: buyer, stock: stock} do
+         %{buyer: buyer, item: item} do
       {:ok, anon_cart} = Commerce.create_cart()
-      Commerce.add_to_cart!(anon_cart.id, stock.id)
+      Commerce.add_to_cart!(anon_cart.id, item.id)
       anon_cart_id = anon_cart.id
 
       {:ok, user_cart} = Commerce.create_cart(actor: buyer)
@@ -188,8 +251,8 @@ defmodule Loka.Resources.CartTest do
                Commerce.ensure_cart_for_session(%{anonymous_cart_id: anon_cart.id}, actor: buyer)
 
       assert cart.id == user_cart.id
-      cart = Ash.load!(cart, :cart_stocks, actor: buyer)
-      assert length(cart.cart_stocks) == 1
+      cart = Ash.load!(cart, :cart_items, actor: buyer)
+      assert length(cart.cart_items) == 1
       assert {:ok, nil} = Commerce.get_anonymous_cart(anon_cart_id)
     end
   end
@@ -205,8 +268,7 @@ defmodule Loka.Resources.CartTest do
 
       {:ok, fresh_cart} = Commerce.create_cart()
 
-      # cleanup_anonymous is a system Oban job — no user actor exists in this context
-      assert :ok = Commerce.cleanup_anonymous(authorize?: false)
+      assert :ok = Commerce.cleanup_anonymous()
 
       assert {:ok, nil} = Commerce.get_anonymous_cart(old_cart.id)
       assert {:ok, _} = Commerce.get_anonymous_cart(fresh_cart.id)
@@ -220,8 +282,7 @@ defmodule Loka.Resources.CartTest do
         [DateTime.add(DateTime.utc_now(), -31, :day), Ecto.UUID.dump!(user_cart.id)]
       )
 
-      # cleanup_anonymous is a system Oban job — no user actor exists in this context
-      assert :ok = Commerce.cleanup_anonymous(authorize?: false)
+      assert :ok = Commerce.cleanup_anonymous()
 
       assert {:ok, cart} = Commerce.get_user_cart(actor: buyer)
       assert cart.id == user_cart.id

@@ -17,7 +17,7 @@ defmodule LokaWeb.Shop.ItemLive do
       >
         <.item_photos images={@item.images} name={@item.name} />
 
-        <div :for={stock <- @item.stock} class="order-3">
+        <div class="order-3">
           <h6 class="m-0 mb-2.5 text-xs font-semibold uppercase tracking-widest text-accent">
             {gettext("Steinzeug · Unikat")}
           </h6>
@@ -27,37 +27,40 @@ defmodule LokaWeb.Shop.ItemLive do
           </h1>
 
           <.link
-            :if={stock.studio}
-            navigate={~p"/shop/studio/#{stock.studio.id}"}
+            navigate={~p"/shop/studio/#{@item.studio.id}"}
             class="text-base text-accent hover:opacity-80 transition-opacity duration-150"
           >
-            {stock.studio.name} · {stock.studio.city}
+            {@item.studio.name} · {@item.studio.city}
           </.link>
 
           <div class="rule-fade my-5"></div>
 
           <div class="flex items-end justify-between gap-4">
             <div data-testid="item-price">
-              <div class="text-3xl tracking-tight">
-                {stock.price}
+              <div :if={@item.stock} class="text-3xl tracking-tight">
+                {@item.stock.price}
                 <span class="text-sm text-secondary">{gettext("/ Stück")}</span>
               </div>
               <p class="text-xs text-secondary mt-1">
-                {ngettext(
-                  "%{count} Stück verfügbar",
-                  "%{count} Stücke verfügbar",
-                  stock.quantity,
-                  count: stock.quantity
-                )}
-                <%= if stock.studio do %>
-                  · {gettext("Versand ab Studio %{city}", city: stock.studio.city)}
+                <%= if @item.in_stock? do %>
+                  {ngettext(
+                    "%{count} Stück verfügbar",
+                    "%{count} Stücke verfügbar",
+                    @item.stock.quantity,
+                    count: @item.stock.quantity
+                  )} · {gettext("Versand ab Studio %{city}", city: @item.studio.city)}
+                <% else %>
+                  {if @item.stock,
+                    do: gettext("Ausverkauft"),
+                    else: gettext("Nicht online erhältlich")}
                 <% end %>
               </p>
             </div>
             <.live_component
+              :if={@item.in_stock?}
               module={LokaWeb.AddToCartComponent}
-              id={"add-to-cart-#{stock.id}"}
-              stock={stock}
+              id={"add-to-cart-#{@item.id}"}
+              item={@item}
               current_user={@current_user}
               class="btn-primary whitespace-nowrap"
             />
@@ -70,15 +73,12 @@ defmodule LokaWeb.Shop.ItemLive do
             {@item.description}
           </p>
 
-          <div
-            :if={stock.studio}
-            class="flex items-center gap-3.5 mt-6 p-3.5 rounded-field bg-base-100 card-hairline"
-          >
+          <div class="flex items-center gap-3.5 mt-6 p-3.5 rounded-field bg-base-100 card-hairline">
             <div class="shrink-0 size-14 rounded-field overflow-hidden bg-base-300 flex items-center justify-center">
-              <%= if stock.studio.logo_path do %>
+              <%= if @item.studio.logo_path do %>
                 <img
-                  src={stock.studio.logo_path}
-                  alt={stock.studio.name}
+                  src={@item.studio.logo_path}
+                  alt={@item.studio.name}
                   class="w-full h-full object-cover"
                 />
               <% else %>
@@ -86,18 +86,18 @@ defmodule LokaWeb.Shop.ItemLive do
               <% end %>
             </div>
             <div class="flex-1 min-w-0">
-              <div class="text-base">{stock.studio.name}</div>
+              <div class="text-base">{@item.studio.name}</div>
               <div class="text-xs text-secondary">
-                {stock.studio.city} · {ngettext(
+                {@item.studio.city} · {ngettext(
                   "%{count} weiteres Stück",
                   "%{count} weitere Stücke",
-                  other_stock_count(stock.studio.id, @item.id),
-                  count: other_stock_count(stock.studio.id, @item.id)
+                  @other_item_count,
+                  count: @other_item_count
                 )}
               </div>
             </div>
             <.link
-              navigate={~p"/shop/studio/#{stock.studio.id}"}
+              navigate={~p"/shop/studio/#{@item.studio.id}"}
               class="btn btn-secondary btn-sm whitespace-nowrap"
             >
               {gettext("Studio ansehen")}
@@ -111,7 +111,7 @@ defmodule LokaWeb.Shop.ItemLive do
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
-    case Inventory.get_item(id, load: [stock: :studio]) do
+    case Inventory.get_item(id) do
       {:ok, nil} ->
         {:ok,
          socket
@@ -125,13 +125,13 @@ defmodule LokaWeb.Shop.ItemLive do
          |> push_navigate(to: ~p"/")}
 
       {:ok, item} ->
-        {:ok, assign(socket, item: item)}
+        {:ok, assign(socket, item: item, other_item_count: other_item_count(item))}
     end
   end
 
-  defp other_stock_count(studio_id, item_id) do
-    studio_id
-    |> Inventory.list_studio_stock!()
-    |> Enum.count(&(&1.item_id != item_id))
+  defp other_item_count(item) do
+    item.studio_id
+    |> Inventory.list_studio_items!()
+    |> Enum.count(&(&1.id != item.id))
   end
 end

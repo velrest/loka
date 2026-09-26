@@ -14,6 +14,30 @@
     },
     {
       "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "name",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "description",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
       "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
       "generated?": false,
       "precision": null,
@@ -37,35 +61,16 @@
       "type": "utc_datetime_usec"
     },
     {
-      "allow_nil?": false,
+      "allow_nil?": true,
       "default": "nil",
       "generated?": false,
       "precision": null,
       "primary_key?": false,
-      "references": {
-        "deferrable": false,
-        "destination_attribute": "id",
-        "destination_attribute_default": null,
-        "destination_attribute_generated": null,
-        "index?": false,
-        "match_type": null,
-        "match_with": null,
-        "multitenancy": {
-          "attribute": null,
-          "global": null,
-          "strategy": null
-        },
-        "name": "cart_stock_stock_id_fkey",
-        "on_delete": null,
-        "on_update": null,
-        "primary_key?": true,
-        "schema": "public",
-        "table": "stock"
-      },
+      "references": null,
       "scale": null,
       "size": null,
-      "source": "stock_id",
-      "type": "uuid"
+      "source": "archived_at",
+      "type": "utc_datetime_usec"
     },
     {
       "allow_nil?": false,
@@ -79,6 +84,8 @@
         "destination_attribute_default": null,
         "destination_attribute_generated": null,
         "index?": false,
+        "index_where": null,
+        "match_tenant?": false,
         "match_type": null,
         "match_with": null,
         "multitenancy": {
@@ -86,16 +93,16 @@
           "global": null,
           "strategy": null
         },
-        "name": "cart_stock_cart_id_fkey",
+        "name": "items_studio_id_fkey",
         "on_delete": null,
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
-        "table": "cart"
+        "table": "studios"
       },
       "scale": null,
       "size": null,
-      "source": "cart_id",
+      "source": "studio_id",
       "type": "uuid"
     }
   ],
@@ -105,7 +112,7 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "2BD3B0008C67F86AE95E815B1C7CBA63EE26416BB63E6CAD2C5EBF76FCD1ACD7",
+  "hash": "53AFC83F363BD3CC41691A9C0C09481A1F50DE40AD63632B684063DF2FBF38DB",
   "identities": [],
   "multitenancy": {
     "attribute": null,
@@ -114,5 +121,5 @@
   },
   "repo": "Elixir.Loka.Repo",
   "schema": null,
-  "table": "cart_stock"
+  "table": "items"
 }

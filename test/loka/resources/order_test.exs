@@ -2,19 +2,14 @@ defmodule Loka.Resources.OrderTest do
   use Loka.DataCase, async: true
 
   alias Loka.Commerce
-  alias Loka.Support.UserHelpers
+  alias Loka.Support.{InventoryHelpers, UserHelpers}
 
   setup do
     %{owner: owner} = UserHelpers.create_studio_owner()
     buyer = UserHelpers.create_user()
     other = UserHelpers.create_user()
 
-    stock =
-      Loka.Inventory.create_stock!(
-        %{name: "Widget", description: "A widget"},
-        %{quantity: 10, price: Money.new(:CHF, 500)},
-        actor: owner
-      )
+    stock = InventoryHelpers.create_item(owner).stock
 
     %{owner: owner, buyer: buyer, other: other, stock: stock}
   end

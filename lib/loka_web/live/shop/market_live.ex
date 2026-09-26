@@ -6,7 +6,7 @@ defmodule LokaWeb.Shop.MarketLive do
 
   @impl true
   def render(assigns) do
-    filtered = filtered_stock(assigns.stock, assigns.visible_studio_ids)
+    filtered = filtered_items(assigns.items, assigns.visible_studio_ids)
     studio_count = filtered |> Enum.map(& &1.studio.id) |> Enum.uniq() |> length()
 
     assigns = assign(assigns, filtered: filtered, studio_count: studio_count)
@@ -47,9 +47,9 @@ defmodule LokaWeb.Shop.MarketLive do
         class="scroll-mt-24"
         label={gettext("Jetzt verfügbar")}
         count={
-          gettext("%{count} %{stock_word} · %{studio_count} %{studio_word} im Kartenausschnitt",
+          gettext("%{count} %{item_word} · %{studio_count} %{studio_word} im Kartenausschnitt",
             count: length(@filtered),
-            stock_word: ngettext("Stück", "Stücke", length(@filtered)),
+            item_word: ngettext("Stück", "Stücke", length(@filtered)),
             studio_count: @studio_count,
             studio_word: ngettext("Studio", "Studios", @studio_count)
           )
@@ -59,7 +59,7 @@ defmodule LokaWeb.Shop.MarketLive do
       <.empty_state :if={@filtered == []} message={gettext("Noch keine Artikel verfügbar.")} />
 
       <div class="product-grid py-7 pb-13">
-        <.stock_card :for={stock <- @filtered} stock={stock} current_user={@current_user} />
+        <.item_card :for={item <- @filtered} item={item} current_user={@current_user} />
       </div>
     </Layouts.app>
     """
@@ -67,9 +67,9 @@ defmodule LokaWeb.Shop.MarketLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    stock = Inventory.list_all_stock!(load: [:studio, item: :images])
-    studios = stock |> Enum.map(& &1.studio) |> Enum.uniq_by(& &1.id)
-    {:ok, assign(socket, stock: stock, all_studios: studios, visible_studio_ids: nil)}
+    items = Inventory.list_all_items!()
+    studios = items |> Enum.map(& &1.studio) |> Enum.uniq_by(& &1.id)
+    {:ok, assign(socket, items: items, all_studios: studios, visible_studio_ids: nil)}
   end
 
   @impl true
@@ -104,6 +104,6 @@ defmodule LokaWeb.Shop.MarketLive do
     {:noreply, assign(socket, visible_studio_ids: visible_ids)}
   end
 
-  defp filtered_stock(stock, nil), do: stock
-  defp filtered_stock(stock, ids), do: Enum.filter(stock, &(&1.studio.id in ids))
+  defp filtered_items(items, nil), do: items
+  defp filtered_items(items, ids), do: Enum.filter(items, &(&1.studio.id in ids))
 end

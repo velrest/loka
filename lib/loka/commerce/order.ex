@@ -125,11 +125,11 @@ defmodule Loka.Commerce.Order do
     end
 
     policy action(:mark_paid) do
-      authorize_if relates_to_actor_via([:order_lines, :stock, :studio, :owner])
+      authorize_if relates_to_actor_via([:order_lines, :stock, :item, :studio, :owner])
     end
 
     policy action(:fulfil) do
-      authorize_if relates_to_actor_via([:order_lines, :stock, :studio, :owner])
+      authorize_if relates_to_actor_via([:order_lines, :stock, :item, :studio, :owner])
     end
 
     policy action(:cancel) do
