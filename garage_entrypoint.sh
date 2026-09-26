@@ -1,8 +1,9 @@
 #!/bin/sh
 set -e
 
-RPC_HOST="garage:3901"
-GARAGE="garage -c /etc/garage.toml --rpc-host $RPC_HOST"
+# Node key is read from the shared (read-only) metadata volume; the CLI
+# connects via rpc_public_addr from garage.toml
+GARAGE="garage -c /etc/garage.toml"
 
 # Wait until the garage server accepts RPC connections
 until $GARAGE status >/dev/null 2>&1; do
