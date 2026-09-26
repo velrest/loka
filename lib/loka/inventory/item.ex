@@ -29,6 +29,7 @@ defmodule Loka.Inventory.Item do
   end
 
   archive do
+    exclude_read_actions([:archived_for_studio, :list_own_archived_items])
     archive_related([:stock])
     # Archiving the item is already authorized, and the stock's own policy
     # can't see the item once it's archived
@@ -81,7 +82,29 @@ defmodule Loka.Inventory.Item do
       accept [:name, :description]
     end
 
-    destroy :archive_item
+    destroy :archive_item do
+      primary? true
+    end
+
+    # The actor's own archived items, so they can be restored
+    read :list_own_archived_items do
+      filter expr(studio.owner_id == ^actor(:id) and not is_nil(archived_at))
+      prepare build(load: [:images], sort: [archived_at: :desc])
+    end
+
+    # Items archived together with their studio (at or after `archived_since`),
+    # for restoring them with the studio
+    read :archived_for_studio do
+      argument :studio_id, :uuid, allow_nil?: false
+      argument :archived_since, :utc_datetime_usec, allow_nil?: false
+      filter expr(studio_id == ^arg(:studio_id) and archived_at >= ^arg(:archived_since))
+    end
+
+    # Restores the item and the stock that was archived with it
+    update :unarchive_item do
+      require_atomic? false
+      change Loka.Inventory.Item.Changes.UnarchiveWithStock
+    end
   end
 
   policies do

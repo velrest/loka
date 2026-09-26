@@ -1,6 +1,7 @@
 defmodule Loka.Studios.Studio do
   @moduledoc """
-  A pottery studio. Archived instead of deleted.
+  A pottery studio. Archived instead of deleted; archiving a studio archives
+  its items (and their stock) too, so nothing of it stays visible.
 
   Latitude and longitude are derived from the postal code (see
   `Loka.Studios.Studio.Changes.GeocodeAddress`).
@@ -25,6 +26,14 @@ defmodule Loka.Studios.Studio do
     ignore_attributes([:inserted_at, :updated_at])
     # This is handled by ash_archival
     ignore_actions([:destroy])
+  end
+
+  archive do
+    exclude_read_actions([:get_own_archived_studio])
+    archive_related([:items])
+    # Archiving the studio is already authorized, and the items' own policy
+    # can't see the studio once it's archived
+    archive_related_authorize?(false)
   end
 
   actions do
@@ -54,11 +63,25 @@ defmodule Loka.Studios.Studio do
       change Loka.Studios.Studio.Changes.UploadLogo
     end
 
-    destroy :archive_studio
+    destroy :archive_studio do
+      primary? true
+    end
+
+    read :get_own_archived_studio do
+      get? true
+      filter expr(owner_id == ^actor(:id) and not is_nil(archived_at))
+    end
+
+    # Restores the studio and the items (with their stock) that were archived
+    # with it; items archived on their own before stay archived
+    update :unarchive_studio do
+      require_atomic? false
+      change Loka.Studios.Studio.Changes.UnarchiveWithItems
+    end
   end
 
   policies do
-    policy action(:get_own_studio) do
+    policy action([:get_own_studio, :get_own_archived_studio]) do
       authorize_if relates_to_actor_via(:owner)
     end
 

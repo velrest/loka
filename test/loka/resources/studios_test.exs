@@ -2,7 +2,8 @@ defmodule Loka.Resources.StudiosTest do
   use Loka.DataCase, async: true
 
   alias Loka.Studios
-  alias Loka.Support.UserHelpers
+  alias Loka.Inventory
+  alias Loka.Support.{InventoryHelpers, UserHelpers}
 
   setup do
     %{owner: owner, studio: studio} = UserHelpers.create_studio_owner()
@@ -125,7 +126,69 @@ defmodule Loka.Resources.StudiosTest do
     end
   end
 
+  describe "unarchive_studio" do
+    test "owner can restore their archived studio with the items archived with it",
+         %{owner: owner, studio: studio} do
+      item = InventoryHelpers.create_item(owner)
+      removed_before = InventoryHelpers.create_item(owner, %{name: "Removed before"})
+      :ok = Inventory.archive_item(removed_before, actor: owner)
+
+      :ok = Studios.archive_studio(studio, actor: owner)
+      assert {:ok, nil} = Studios.get_own_studio(actor: owner)
+
+      {:ok, archived} = Studios.get_own_archived_studio(actor: owner)
+      assert archived.id == studio.id
+
+      assert {:ok, restored} = Studios.unarchive_studio(archived, actor: owner)
+      assert restored.archived_at == nil
+      assert {:ok, %{id: id}} = Studios.get_own_studio(actor: owner)
+      assert id == studio.id
+
+      # The item comes back on sale; the one archived on its own stays archived
+      assert {:ok, %{in_stock?: true}} = Inventory.get_item(item.id)
+      assert {:ok, nil} = Inventory.get_item(removed_before.id)
+    end
+
+    test "another user can neither see nor restore the archived studio",
+         %{owner: owner, studio: studio, other: other} do
+      :ok = Studios.archive_studio(studio, actor: owner)
+      {:ok, archived} = Studios.get_own_archived_studio(actor: owner)
+
+      assert {:ok, nil} = Studios.get_own_archived_studio(actor: other)
+      assert {:error, _} = Studios.unarchive_studio(archived, actor: other)
+    end
+
+    test "an owner without an archived studio gets nil", %{owner: owner} do
+      assert {:ok, nil} = Studios.get_own_archived_studio(actor: owner)
+    end
+  end
+
   describe "archive_studio" do
+    test "archiving a studio archives its items and their stock",
+         %{owner: owner, studio: studio} do
+      item = InventoryHelpers.create_item(owner)
+      unlisted = InventoryHelpers.create_item(owner, %{stock: nil})
+
+      assert :ok = Studios.archive_studio(studio, actor: owner)
+
+      assert {:ok, nil} = Studios.get_studio(studio.id)
+      assert {:ok, nil} = Inventory.get_item(item.id)
+      assert {:ok, nil} = Inventory.get_item(unlisted.id)
+      assert {:error, %Ash.Error.Invalid{}} = Ash.get(Inventory.Stock, item.stock.id)
+      assert Inventory.list_all_items!() == []
+    end
+
+    test "archiving a studio leaves other studios' items alone", %{owner: owner, studio: studio} do
+      %{owner: other_owner} = UserHelpers.create_studio_owner()
+      theirs = InventoryHelpers.create_item(other_owner)
+      InventoryHelpers.create_item(owner)
+
+      :ok = Studios.archive_studio(studio, actor: owner)
+
+      assert [%{id: id}] = Inventory.list_all_items!()
+      assert id == theirs.id
+    end
+
     test "owner can archive their studio", %{owner: owner, studio: studio} do
       assert :ok = Studios.archive_studio(studio, actor: owner)
     end

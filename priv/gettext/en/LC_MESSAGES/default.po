@@ -30,14 +30,14 @@ msgid_plural "%{count} weitere Stücke"
 msgstr[0] "%{count} more piece"
 msgstr[1] "%{count} more pieces"
 
-#: lib/loka_web/live/shop/cart_live.ex:165
+#: lib/loka_web/live/shop/cart_live.ex:172
 #: lib/loka_web/live/shop/item_live.ex:42
 #, elixir-autogen, elixir-format
 msgid "/ Stück"
 msgstr "/ piece"
 
 #: lib/loka_web/live/inventory/item_edit_live.ex:424
-#: lib/loka_web/live/inventory/studio_live.ex:256
+#: lib/loka_web/live/inventory/studio_live.ex:308
 #, elixir-autogen, elixir-format
 msgid "Abbrechen"
 msgstr "Cancel"
@@ -52,12 +52,12 @@ msgstr "Sign out"
 msgid "Actions"
 msgstr "Actions"
 
-#: lib/loka_web/live/user/studio_live.ex:102
+#: lib/loka_web/live/user/studio_live.ex:116
 #, elixir-autogen, elixir-format
 msgid "Adresse"
 msgstr "Address"
 
-#: lib/loka_web/live/user/studio_live.ex:77
+#: lib/loka_web/live/user/studio_live.ex:90
 #, elixir-autogen, elixir-format
 msgid "Aktiv"
 msgstr "Active"
@@ -77,13 +77,13 @@ msgstr "All pieces"
 msgid "Archivierte Artikel sind für Kunden nicht mehr sichtbar."
 msgstr "Archived items are no longer visible to customers."
 
-#: lib/loka_web/live/inventory/studio_live.ex:235
+#: lib/loka_web/live/inventory/studio_live.ex:287
 #, elixir-autogen, elixir-format
 msgid "Archivierte Studios sind für Kunden nicht mehr sichtbar."
 msgstr "Archived studios are no longer visible to customers."
 
 #: lib/loka_web/components/loka_components.ex:85
-#: lib/loka_web/live/inventory/items_live.ex:30
+#: lib/loka_web/live/inventory/items_live.ex:55
 #: lib/loka_web/live/shop/cart_live.ex:104
 #, elixir-autogen, elixir-format
 msgid "Artikel"
@@ -128,7 +128,7 @@ msgstr "Item details updated."
 
 #: lib/loka_web/live/inventory/item_edit_live.ex:238
 #: lib/loka_web/live/inventory/item_edit_live.ex:350
-#: lib/loka_web/live/inventory/studio_live.ex:180
+#: lib/loka_web/live/inventory/studio_live.ex:231
 #, elixir-autogen, elixir-format
 msgid "Beschreibung"
 msgstr "Description"
@@ -149,15 +149,10 @@ msgstr "Image could not be removed."
 msgid "Bilder"
 msgstr "Images"
 
-#: lib/loka_web/live/user/studio_live.ex:136
+#: lib/loka_web/live/user/studio_live.ex:150
 #, elixir-autogen, elixir-format
 msgid "Dein Studio wartet"
 msgstr "Your studio awaits"
-
-#: lib/loka_web/live/inventory/studio_live.ex:250
-#, elixir-autogen, elixir-format
-msgid "Dein Studio wird archiviert und ist weder für dich noch für Kunden sichtbar. Deine Daten bleiben erhalten und können über den Support wiederhergestellt werden."
-msgstr "Your studio will be archived and won't be visible to you or to customers. Your data is preserved and can be restored via support."
 
 #: lib/loka_web/live/shop/cart_live.ex:109
 #, elixir-autogen, elixir-format
@@ -168,11 +163,6 @@ msgstr "Your cart is empty."
 #, elixir-autogen, elixir-format
 msgid "Diesen Artikel archivieren?"
 msgstr "Archive this item?"
-
-#: lib/loka_web/live/inventory/item_edit_live.ex:418
-#, elixir-autogen, elixir-format
-msgid "Dieser Artikel wird archiviert und ist für Kunden nicht mehr sichtbar. Deine Daten bleiben erhalten und können über den Support wiederhergestellt werden."
-msgstr "This item will be archived and will no longer be visible to customers. Your data is preserved and can be restored via support."
 
 #: lib/loka_web/live/user/profile_live.ex:29
 #, elixir-autogen, elixir-format
@@ -195,7 +185,7 @@ msgstr "Settings"
 msgid "Entfernen"
 msgstr "Remove"
 
-#: lib/loka_web/live/user/studio_live.ex:138
+#: lib/loka_web/live/user/studio_live.ex:152
 #, elixir-autogen, elixir-format
 msgid "Erreiche neue Kunden, zeige dein Handwerk und baue etwas, das Menschen begeistert."
 msgstr "Reach new customers, showcase your craft, and build something people love."
@@ -206,17 +196,17 @@ msgid "Etwas ist schiefgelaufen!"
 msgstr "Something went wrong!"
 
 #: lib/loka_web/live/inventory/item_edit_live.ex:399
-#: lib/loka_web/live/inventory/studio_live.ex:233
+#: lib/loka_web/live/inventory/studio_live.ex:285
 #, elixir-autogen, elixir-format
 msgid "Gefahrenzone"
 msgstr "Danger zone"
 
-#: lib/loka_web/live/shop/cart_live.ex:225
+#: lib/loka_web/live/shop/cart_live.ex:232
 #, elixir-autogen, elixir-format
 msgid "Gesamt"
 msgstr "Total"
 
-#: lib/loka_web/live/inventory/studio_live.ex:225
+#: lib/loka_web/live/inventory/studio_live.ex:277
 #, elixir-autogen, elixir-format
 msgid "Gespeichert!"
 msgstr "Saved!"
@@ -237,7 +227,7 @@ msgstr "Add to cart"
 msgid "Item not found."
 msgstr "Item not found."
 
-#: lib/loka_web/live/inventory/studio_live.ex:170
+#: lib/loka_web/live/inventory/studio_live.ex:221
 #, elixir-autogen, elixir-format
 msgid "JPG, PNG oder WEBP"
 msgstr "JPG, PNG or WEBP"
@@ -248,7 +238,7 @@ msgid "Ja"
 msgstr "Yes"
 
 #: lib/loka_web/live/inventory/item_edit_live.ex:427
-#: lib/loka_web/live/inventory/studio_live.ex:259
+#: lib/loka_web/live/inventory/studio_live.ex:311
 #, elixir-autogen, elixir-format
 msgid "Ja, archivieren"
 msgstr "Yes, archive"
@@ -263,7 +253,7 @@ msgstr "Every piece is one of a kind."
 msgid "Jetzt verfügbar"
 msgstr "Available now"
 
-#: lib/loka_web/live/user/studio_live.ex:98
+#: lib/loka_web/live/user/studio_live.ex:112
 #, elixir-autogen, elixir-format
 msgid "Kann jederzeit geändert werden."
 msgstr "Can be changed anytime."
@@ -273,7 +263,7 @@ msgstr "Can be changed anytime."
 msgid "Keine Internetverbindung"
 msgstr "No internet connection"
 
-#: lib/loka_web/live/inventory/studio_live.ex:216
+#: lib/loka_web/live/inventory/studio_live.ex:267
 #, elixir-autogen, elixir-format
 msgid "Keine Koordinaten verfügbar."
 msgstr "No coordinates available."
@@ -303,7 +293,7 @@ msgstr "Account confirmed"
 msgid "Kontodaten"
 msgstr "Account details"
 
-#: lib/loka_web/live/inventory/studio_live.ex:164
+#: lib/loka_web/live/inventory/studio_live.ex:215
 #, elixir-autogen, elixir-format
 msgid "Logo"
 msgstr "Logo"
@@ -315,7 +305,7 @@ msgstr "Loka"
 
 #: lib/loka_web/live/inventory/item_edit_live.ex:249
 #: lib/loka_web/live/inventory/item_edit_live.ex:377
-#: lib/loka_web/live/inventory/items_live.ex:95
+#: lib/loka_web/live/inventory/items_live.ex:120
 #, elixir-autogen, elixir-format
 msgid "Menge"
 msgstr "Quantity"
@@ -337,8 +327,8 @@ msgid "Nein"
 msgstr "No"
 
 #: lib/loka_web/live/inventory/item_edit_live.ex:227
-#: lib/loka_web/live/inventory/items_live.ex:32
-#: lib/loka_web/live/inventory/items_live.ex:55
+#: lib/loka_web/live/inventory/items_live.ex:57
+#: lib/loka_web/live/inventory/items_live.ex:80
 #, elixir-autogen, elixir-format
 msgid "Neuer Artikel"
 msgstr "New item"
@@ -354,13 +344,13 @@ msgstr "Not confirmed"
 msgid "Noch keine Artikel verfügbar."
 msgstr "No items available yet."
 
-#: lib/loka_web/live/inventory/items_live.ex:36
+#: lib/loka_web/live/inventory/items_live.ex:61
 #, elixir-autogen, elixir-format
 msgid "Noch keine Artikel."
 msgstr "No items yet."
 
-#: lib/loka_web/live/inventory/studio_live.ex:195
-#: lib/loka_web/live/user/studio_live.ex:108
+#: lib/loka_web/live/inventory/studio_live.ex:246
+#: lib/loka_web/live/user/studio_live.ex:122
 #, elixir-autogen, elixir-format
 msgid "Nr."
 msgstr "No."
@@ -381,7 +371,7 @@ msgid "Passwort"
 msgstr "Password"
 
 #: lib/loka_web/live/inventory/item_edit_live.ex:376
-#: lib/loka_web/live/inventory/items_live.ex:89
+#: lib/loka_web/live/inventory/items_live.ex:114
 #, elixir-autogen, elixir-format
 msgid "Preis"
 msgstr "Price"
@@ -417,12 +407,12 @@ msgstr "Profile"
 
 #: lib/loka_web/live/inventory/item_edit_live.ex:354
 #: lib/loka_web/live/inventory/item_edit_live.ex:389
-#: lib/loka_web/live/inventory/studio_live.ex:225
+#: lib/loka_web/live/inventory/studio_live.ex:277
 #, elixir-autogen, elixir-format
 msgid "Speichern"
 msgstr "Save"
 
-#: lib/loka_web/live/inventory/studio_live.ex:189
+#: lib/loka_web/live/inventory/studio_live.ex:240
 #, elixir-autogen, elixir-format
 msgid "Standort"
 msgstr "Location"
@@ -432,8 +422,8 @@ msgstr "Location"
 msgid "Steinzeug · Unikat"
 msgstr "Stoneware · One of a kind"
 
-#: lib/loka_web/live/inventory/studio_live.ex:193
-#: lib/loka_web/live/user/studio_live.ex:106
+#: lib/loka_web/live/inventory/studio_live.ex:244
+#: lib/loka_web/live/user/studio_live.ex:120
 #, elixir-autogen, elixir-format
 msgid "Strasse"
 msgstr "Street"
@@ -441,7 +431,7 @@ msgstr "Street"
 #: lib/loka_web/components/loka_components.ex:66
 #: lib/loka_web/components/loka_components.ex:84
 #: lib/loka_web/live/shop/market_live.ex:54
-#: lib/loka_web/live/user/studio_live.ex:66
+#: lib/loka_web/live/user/studio_live.ex:78
 #, elixir-autogen, elixir-format
 msgid "Studio"
 msgid_plural "Studios"
@@ -453,41 +443,31 @@ msgstr[1] "Studios"
 msgid "Studio ansehen"
 msgstr "View studio"
 
-#: lib/loka_web/live/inventory/studio_live.ex:239
+#: lib/loka_web/live/inventory/studio_live.ex:291
 #, elixir-autogen, elixir-format
 msgid "Studio archivieren"
 msgstr "Archive studio"
 
-#: lib/loka_web/live/inventory/studio_live.ex:248
+#: lib/loka_web/live/inventory/studio_live.ex:300
 #, elixir-autogen, elixir-format
 msgid "Studio archivieren?"
 msgstr "Archive studio?"
 
-#: lib/loka_web/live/user/studio_live.ex:119
+#: lib/loka_web/live/user/studio_live.ex:133
 #, elixir-autogen, elixir-format
 msgid "Studio erstellen"
 msgstr "Create studio"
 
-#: lib/loka_web/live/user/studio_live.ex:92
-#: lib/loka_web/live/user/studio_live.ex:145
+#: lib/loka_web/live/user/studio_live.ex:106
+#: lib/loka_web/live/user/studio_live.ex:159
 #, elixir-autogen, elixir-format
 msgid "Studio eröffnen"
 msgstr "Open a studio"
 
-#: lib/loka_web/live/inventory/studio_live.ex:68
-#, elixir-autogen, elixir-format
-msgid "Studio gelöscht."
-msgstr "Studio deleted."
-
-#: lib/loka_web/live/inventory/studio_live.ex:108
+#: lib/loka_web/live/inventory/studio_live.ex:133
 #, elixir-autogen, elixir-format
 msgid "Studio gespeichert."
 msgstr "Studio saved."
-
-#: lib/loka_web/live/inventory/studio_live.ex:74
-#, elixir-autogen, elixir-format
-msgid "Studio konnte nicht gelöscht werden."
-msgstr "Studio could not be deleted."
 
 #: lib/loka_web/live/shop/studio_live.ex:13
 #: lib/loka_web/live/shop/studio_live.ex:23
@@ -496,24 +476,25 @@ msgid "Studio nicht gefunden."
 msgstr "Studio not found."
 
 #: lib/loka_web/components/layouts.ex:241
-#: lib/loka_web/live/inventory/studio_live.ex:141
-#: lib/loka_web/live/user/studio_live.ex:82
+#: lib/loka_web/live/inventory/studio_live.ex:166
+#: lib/loka_web/live/inventory/studio_live.ex:190
+#: lib/loka_web/live/user/studio_live.ex:96
 #, elixir-autogen, elixir-format
 msgid "Studio verwalten"
 msgstr "Manage studio"
 
-#: lib/loka_web/live/inventory/studio_live.ex:148
+#: lib/loka_web/live/inventory/studio_live.ex:199
 #, elixir-autogen, elixir-format
 msgid "Studiodetails"
 msgstr "Studio details"
 
-#: lib/loka_web/live/inventory/studio_live.ex:175
-#: lib/loka_web/live/user/studio_live.ex:100
+#: lib/loka_web/live/inventory/studio_live.ex:226
+#: lib/loka_web/live/user/studio_live.ex:114
 #, elixir-autogen, elixir-format
 msgid "Studioname"
 msgstr "Studio name"
 
-#: lib/loka_web/live/user/studio_live.ex:97
+#: lib/loka_web/live/user/studio_live.ex:111
 #, elixir-autogen, elixir-format
 msgid "Studioname wählen"
 msgstr "Choose a studio name"
@@ -541,7 +522,7 @@ msgstr[1] "Pieces"
 msgid "Suchen"
 msgstr "Search"
 
-#: lib/loka_web/live/shop/cart_live.ex:233
+#: lib/loka_web/live/shop/cart_live.ex:240
 #, elixir-autogen, elixir-format
 msgid "TWINT · Visa · Mastercard — CHF"
 msgstr "TWINT · Visa · Mastercard — CHF"
@@ -552,7 +533,7 @@ msgstr "TWINT · Visa · Mastercard — CHF"
 msgid "Verbindung wird hergestellt…"
 msgstr "Connecting…"
 
-#: lib/loka_web/live/shop/cart_live.ex:218
+#: lib/loka_web/live/shop/cart_live.ex:225
 #, elixir-autogen, elixir-format
 msgid "Versand"
 msgstr "Shipping"
@@ -562,7 +543,7 @@ msgstr "Shipping"
 msgid "Versand ab Studio %{city}"
 msgstr "Ships from studio in %{city}"
 
-#: lib/loka_web/live/shop/cart_live.ex:272
+#: lib/loka_web/live/shop/cart_live.ex:283
 #, elixir-autogen, elixir-format
 msgid "Versand pro Studio getrennt"
 msgstr "Shipped separately per studio"
@@ -593,7 +574,7 @@ msgstr "View cart"
 msgid "Zum Shop"
 msgstr "To the shop"
 
-#: lib/loka_web/live/shop/cart_live.ex:230
+#: lib/loka_web/live/shop/cart_live.ex:237
 #, elixir-autogen, elixir-format
 msgid "Zur Kasse"
 msgstr "Checkout"
@@ -610,12 +591,12 @@ msgstr "Back to items"
 msgid "Zurück zum Markt"
 msgstr "Back to market"
 
-#: lib/loka_web/live/shop/cart_live.ex:210
+#: lib/loka_web/live/shop/cart_live.ex:217
 #, elixir-autogen, elixir-format
 msgid "Zusammenfassung"
 msgstr "Summary"
 
-#: lib/loka_web/live/shop/cart_live.ex:213
+#: lib/loka_web/live/shop/cart_live.ex:220
 #: lib/loka_web/live/shop/cart_widget_live.ex:33
 #, elixir-autogen, elixir-format
 msgid "Zwischensumme"
@@ -646,7 +627,7 @@ msgstr "loved"
 msgid "gemacht,"
 msgstr "by hand,"
 
-#: lib/loka_web/live/shop/cart_live.ex:219
+#: lib/loka_web/live/shop/cart_live.ex:226
 #, elixir-autogen, elixir-format
 msgid "wird berechnet"
 msgstr "calculated at checkout"
@@ -697,12 +678,12 @@ msgstr "Sold out"
 msgid "Dieser Artikel ist nicht im Verkauf. Gib Preis und Menge an, um ihn anzubieten."
 msgstr "This item isn't on sale. Enter a price and quantity to offer it."
 
-#: lib/loka_web/live/inventory/items_live.ex:101
+#: lib/loka_web/live/inventory/items_live.ex:126
 #, elixir-autogen, elixir-format
 msgid "Nicht im Verkauf"
 msgstr "Not on sale"
 
-#: lib/loka_web/live/shop/cart_live.ex:168
+#: lib/loka_web/live/shop/cart_live.ex:175
 #, elixir-autogen, elixir-format
 msgid "Nicht mehr online erhältlich"
 msgstr "No longer available online"
@@ -732,3 +713,83 @@ msgstr "Take off sale"
 #, elixir-autogen, elixir-format
 msgid "Zum Verkauf anbieten"
 msgstr "Put on sale"
+
+#: lib/loka_web/live/inventory/studio_live.ex:172
+#, elixir-autogen, elixir-format
+msgid "%{name} ist archiviert"
+msgstr "%{name} is archived"
+
+#: lib/loka_web/live/user/studio_live.ex:90
+#, elixir-autogen, elixir-format
+msgid "Archiviert"
+msgstr "Archived"
+
+#: lib/loka_web/live/inventory/items_live.ex:149
+#, elixir-autogen, elixir-format
+msgid "Archivierte Artikel"
+msgstr "Archived items"
+
+#: lib/loka_web/live/inventory/items_live.ex:25
+#, elixir-autogen, elixir-format
+msgid "Artikel konnte nicht wiederhergestellt werden."
+msgstr "The item could not be restored."
+
+#: lib/loka_web/live/inventory/items_live.ex:20
+#, elixir-autogen, elixir-format
+msgid "Artikel wiederhergestellt."
+msgstr "Item restored."
+
+#: lib/loka_web/live/inventory/studio_live.ex:302
+#, elixir-autogen, elixir-format
+msgid "Dein Studio und alle seine Artikel werden archiviert und sind für Kunden nicht mehr sichtbar. Du kannst das Studio hier jederzeit wiederherstellen."
+msgstr "Your studio and all its items will be archived and no longer visible to customers. You can restore the studio here at any time."
+
+#: lib/loka_web/live/inventory/studio_live.ex:175
+#, elixir-autogen, elixir-format
+msgid "Dein Studio und seine Artikel sind für Kunden nicht sichtbar. Beim Wiederherstellen kommen auch die Artikel zurück, die mit dem Studio archiviert wurden."
+msgstr "Your studio and its items are not visible to customers. Restoring it also brings back the items that were archived with the studio."
+
+#: lib/loka_web/live/inventory/item_edit_live.ex:418
+#, elixir-autogen, elixir-format
+msgid "Dieser Artikel wird archiviert und ist für Kunden nicht mehr sichtbar. Du kannst ihn in deiner Artikelliste jederzeit wiederherstellen."
+msgstr "This item will be archived and no longer visible to customers. You can restore it from your item list at any time."
+
+#: lib/loka_web/live/shop/cart_live.ex:154
+#, elixir-autogen, elixir-format
+msgid "Dieser Artikel wurde entfernt"
+msgstr "This item was removed"
+
+#: lib/loka_web/live/inventory/items_live.ex:151
+#, elixir-autogen, elixir-format
+msgid "Nicht sichtbar für Kunden. Beim Wiederherstellen kommt auch der Bestand zurück."
+msgstr "Not visible to customers. Restoring an item also brings back its stock."
+
+#: lib/loka_web/live/inventory/studio_live.ex:77
+#, elixir-autogen, elixir-format
+msgid "Studio archiviert."
+msgstr "Studio archived."
+
+#: lib/loka_web/live/inventory/studio_live.ex:83
+#, elixir-autogen, elixir-format
+msgid "Studio konnte nicht archiviert werden."
+msgstr "The studio could not be archived."
+
+#: lib/loka_web/live/inventory/studio_live.ex:100
+#, elixir-autogen, elixir-format
+msgid "Studio konnte nicht wiederhergestellt werden."
+msgstr "The studio could not be restored."
+
+#: lib/loka_web/live/inventory/studio_live.ex:95
+#, elixir-autogen, elixir-format
+msgid "Studio wiederhergestellt."
+msgstr "Studio restored."
+
+#: lib/loka_web/live/inventory/studio_live.ex:181
+#, elixir-autogen, elixir-format
+msgid "Studio wiederherstellen"
+msgstr "Restore studio"
+
+#: lib/loka_web/live/inventory/items_live.ex:177
+#, elixir-autogen, elixir-format
+msgid "Wiederherstellen"
+msgstr "Restore"

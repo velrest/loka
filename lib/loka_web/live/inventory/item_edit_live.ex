@@ -44,6 +44,13 @@ defmodule LokaWeb.Inventory.ItemEditLive do
   def mount(_params, _session, socket) do
     user = socket.assigns.current_user
 
+    case Loka.Studios.get_own_studio(actor: user) do
+      {:ok, nil} -> {:ok, push_navigate(socket, to: ~p"/inventory/studio")}
+      _ -> mount_create(socket, user)
+    end
+  end
+
+  defp mount_create(socket, user) do
     form =
       Loka.Inventory.form_to_create_item(actor: user)
       |> AshPhoenix.Form.add_form(:stock)
@@ -416,7 +423,7 @@ defmodule LokaWeb.Inventory.ItemEditLive do
           <h3 class="text-lg font-bold">{gettext("Diesen Artikel archivieren?")}</h3>
           <p class="py-4 text-base-content/70">
             {gettext(
-              "Dieser Artikel wird archiviert und ist für Kunden nicht mehr sichtbar. Deine Daten bleiben erhalten und können über den Support wiederhergestellt werden."
+              "Dieser Artikel wird archiviert und ist für Kunden nicht mehr sichtbar. Du kannst ihn in deiner Artikelliste jederzeit wiederherstellen."
             )}
           </p>
           <div class="modal-action">

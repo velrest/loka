@@ -124,6 +124,38 @@ defmodule Loka.Resources.Inventory.InventoryTest do
     end
   end
 
+  describe "unarchive_item" do
+    test "owner can restore an archived item with its stock", %{owner: owner, item: item} do
+      :ok = Inventory.archive_item(item, actor: owner)
+      [archived] = Inventory.list_own_archived_items!(actor: owner)
+
+      assert {:ok, _} = Inventory.unarchive_item(archived, actor: owner)
+
+      assert {:ok, restored} = Inventory.get_item(item.id)
+      assert restored.stock.id == item.stock.id
+      assert restored.in_stock?
+    end
+
+    test "stock taken off sale before archiving stays off sale", %{owner: owner, item: item} do
+      :ok = Inventory.archive_stock(item.stock, actor: owner)
+      :ok = Inventory.archive_item(item, actor: owner)
+      [archived] = Inventory.list_own_archived_items!(actor: owner)
+
+      {:ok, _} = Inventory.unarchive_item(archived, actor: owner)
+
+      assert {:ok, %{stock: nil}} = Inventory.get_item(item.id)
+    end
+
+    test "owner of another studio can't see or restore it",
+         %{owner: owner, other_owner: other_owner, item: item} do
+      :ok = Inventory.archive_item(item, actor: owner)
+      [archived] = Inventory.list_own_archived_items!(actor: owner)
+
+      assert Inventory.list_own_archived_items!(actor: other_owner) == []
+      assert {:error, _} = Inventory.unarchive_item(archived, actor: other_owner)
+    end
+  end
+
   describe "archive_item" do
     test "studio owner can archive an item, which archives its stock too",
          %{owner: owner, item: item} do

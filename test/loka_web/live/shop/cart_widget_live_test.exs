@@ -125,17 +125,23 @@ defmodule LokaWeb.Shop.CartWidgetLiveTest do
       assert cart_widget_html(view) =~ "dropdown dropdown-end"
     end
 
-    test "ignores load_anonymous_cart event when user is authenticated", %{conn: conn, user: user} do
+    test "merges the anonymous cart from before signing in, once, and tells the browser to forget it",
+         %{conn: conn, user: user} do
+      %{owner: owner} = UserHelpers.create_studio_owner()
+      item = InventoryHelpers.create_item(owner)
       {:ok, anon_cart} = Commerce.create_cart()
-      {:ok, _user_cart} = Commerce.create_cart(actor: user)
+      Commerce.add_to_cart!(anon_cart.id, item.id)
 
       {:ok, view, _html} = live(conn, ~p"/")
       widget = find_live_child(view, "cart-widget")
-
-      html_before = render(widget)
       render_hook(widget, "load_anonymous_cart", %{"cart_id" => anon_cart.id})
 
-      assert render(widget) == html_before
+      assert_reply(widget, %{forget: true})
+      assert cart_widget_html(view) =~ "1"
+      assert {:ok, nil} = Commerce.get_anonymous_cart(anon_cart.id)
+
+      cart = Commerce.get_user_cart!(actor: user, load: :item_count)
+      assert cart.item_count == 1
     end
   end
 end

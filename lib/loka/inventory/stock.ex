@@ -29,6 +29,10 @@ defmodule Loka.Inventory.Stock do
     ignore_actions([:destroy])
   end
 
+  archive do
+    exclude_read_actions([:archived_for_item])
+  end
+
   actions do
     defaults [:read]
 
@@ -43,6 +47,19 @@ defmodule Loka.Inventory.Stock do
 
     destroy :archive_stock do
       primary? true
+    end
+
+    # Stock archived together with its item (at or after `archived_since`),
+    # for restoring it with the item
+    read :archived_for_item do
+      argument :item_id, :uuid, allow_nil?: false
+      argument :archived_since, :utc_datetime_usec, allow_nil?: false
+      filter expr(item_id == ^arg(:item_id) and archived_at >= ^arg(:archived_since))
+    end
+
+    update :unarchive_stock do
+      require_atomic? false
+      change set_attribute(:archived_at, nil)
     end
   end
 

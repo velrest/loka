@@ -44,13 +44,21 @@ defmodule LokaWeb.Shop.CartWidgetLive do
     <script :type={Phoenix.LiveView.ColocatedHook} name=".CartWidget">
       export default {
         mounted() {
+          // The widget is on every page exactly once, so it's the one place
+          // that syncs the browser's anonymous cart with the server
+          const load = (cart_id) =>
+            this.pushEvent("load_anonymous_cart", {cart_id}, ({forget}) => {
+              if (forget) localStorage.removeItem("cart-id")
+            })
+
           const cartId = localStorage.getItem("cart-id")
-          if (cartId) {
-            this.pushEvent("load_anonymous_cart", {cart_id: cartId})
-          }
-          window.addEventListener("cart-created", ({detail: {cart_id}}) => {
-            this.pushEvent("load_anonymous_cart", {cart_id})
-          })
+          if (cartId) load(cartId)
+
+          this._onCartCreated = ({detail: {cart_id}}) => load(cart_id)
+          window.addEventListener("cart-created", this._onCartCreated)
+        },
+        destroyed() {
+          window.removeEventListener("cart-created", this._onCartCreated)
         }
       }
     </script>
@@ -72,37 +80,35 @@ defmodule LokaWeb.Shop.CartWidgetLive do
     end
   end
 
+  # Signed in: the anonymous cart from before signing in is merged into the
+  # user's cart, and the browser can forget its id
   @impl true
-  def handle_event("load_anonymous_cart", _params, %{assigns: %{current_user: user}} = socket)
+  def handle_event(
+        "load_anonymous_cart",
+        %{"cart_id" => cart_id},
+        %{assigns: %{current_user: user}} = socket
+      )
       when not is_nil(user) do
-    {:noreply, socket}
+    {:ok, cart} = Commerce.ensure_cart_for_session(%{anonymous_cart_id: cart_id}, actor: user)
+    Phoenix.PubSub.broadcast(Loka.PubSub, "cart:#{cart.id}", :cart_updated)
+
+    cart = Commerce.get_user_cart!(load: [:item_count, :subtotal], actor: user)
+    {:reply, %{forget: true}, show_cart(socket, cart)}
   end
 
   def handle_event("load_anonymous_cart", %{"cart_id" => cart_id}, socket) do
     case Commerce.get_anonymous_cart(cart_id, load: [:item_count, :subtotal]) do
-      {:ok, nil} ->
-        {:noreply, socket}
-
-      {:ok, cart} ->
-        if connected?(socket) do
-          Phoenix.PubSub.subscribe(Loka.PubSub, "cart:#{cart.id}")
-        end
-
-        {:noreply, assign(socket, cart: cart)}
+      # Unknown or cleaned-up cart: the next add to cart starts a new one
+      {:ok, nil} -> {:reply, %{forget: true}, socket}
+      {:ok, cart} -> {:reply, %{forget: false}, show_cart(socket, cart)}
     end
   end
 
   @impl true
-  def handle_info({:cart_created, cart_id}, socket) do
+  def handle_info({:cart_created, _cart_id}, socket) do
     user = socket.assigns.current_user
     cart = Commerce.get_user_cart!(load: [:item_count, :subtotal], actor: user)
-
-    if connected?(socket) do
-      Phoenix.PubSub.unsubscribe(Loka.PubSub, "user:#{user.id}:cart_created")
-      Phoenix.PubSub.subscribe(Loka.PubSub, "cart:#{cart_id}")
-    end
-
-    {:noreply, assign(socket, cart: cart)}
+    {:noreply, show_cart(socket, cart)}
   end
 
   def handle_info(:cart_updated, socket) do
@@ -117,6 +123,23 @@ defmodule LokaWeb.Shop.CartWidgetLive do
       end
 
     {:noreply, assign(socket, cart: updated_cart)}
+  end
+
+  # Subscribes to the cart's updates, once per cart
+  defp show_cart(socket, cart) do
+    current = socket.assigns.cart
+
+    if connected?(socket) and (is_nil(current) or current.id != cart.id) do
+      if current, do: Phoenix.PubSub.unsubscribe(Loka.PubSub, "cart:#{current.id}")
+
+      if user = socket.assigns.current_user do
+        Phoenix.PubSub.unsubscribe(Loka.PubSub, "user:#{user.id}:cart_created")
+      end
+
+      Phoenix.PubSub.subscribe(Loka.PubSub, "cart:#{cart.id}")
+    end
+
+    assign(socket, cart: cart)
   end
 
   defp subscribe_to_cart(nil, user),

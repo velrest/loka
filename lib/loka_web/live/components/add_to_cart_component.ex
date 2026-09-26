@@ -2,23 +2,15 @@ defmodule LokaWeb.AddToCartComponent do
   @moduledoc """
   "Add to cart" button for an item. Only render it for items in stock.
 
-  For anonymous visitors it first makes sure a cart exists and has the
-  browser remember its id.
+  Nothing happens until it's clicked: the click sends the anonymous cart id
+  from the browser (if any), the server finds or creates the cart, and replies
+  with the cart id so an anonymous visitor's browser can remember it. Merging
+  an anonymous cart after signing in is done once per page by
+  `LokaWeb.Shop.CartWidgetLive`, not here.
   """
 
   alias Loka.Commerce
   use LokaWeb, :live_component
-
-  @impl true
-  def update(assigns, socket) do
-    {:ok,
-     assign(socket,
-       item: assigns.item,
-       current_user: assigns[:current_user],
-       class: assigns[:class] || "btn-primary",
-       cart_id: socket.assigns[:cart_id]
-     )}
-  end
 
   attr :item, Loka.Inventory.Item, required: true
   attr :current_user, :any, default: nil
@@ -30,41 +22,32 @@ defmodule LokaWeb.AddToCartComponent do
     <div
       id={"add-to-cart-#{@item.id}"}
       phx-hook=".AddToCart"
+      data-item-id={@item.id}
+      phx-target={@myself}
       class="contents"
     >
-      <button
-        class={["btn", @class]}
-        phx-click="add_to_cart"
-        phx-value-item_id={@item.id}
-        phx-target={@myself}
-      >
+      <button type="button" class={["btn", @class]}>
         {gettext("In den Warenkorb")}
       </button>
       <script :type={Phoenix.LiveView.ColocatedHook} name=".AddToCart">
         export default {
           mounted() {
-            const cartId = localStorage.getItem("cart-id")
-            this.pushEventTo(this.el, "ensure_cart", {cart_id: cartId || ""})
-            this.handleEvent("cart_assigned", ({cart_id, anonymous}) => {
-              if (anonymous && cart_id) {
-                const isNew = localStorage.getItem("cart-id") !== cart_id
-                localStorage.setItem("cart-id", cart_id)
-                if (isNew) {
+            this.el.querySelector("button").addEventListener("click", () => {
+              const payload = {
+                item_id: this.el.dataset.itemId,
+                cart_id: localStorage.getItem("cart-id") || ""
+              }
+
+              // The reply only reaches this button, not every button on the page
+              this.pushEventTo(this.el, "add_to_cart", payload, ({cart_id, anonymous}) => {
+                if (!anonymous) {
+                  localStorage.removeItem("cart-id")
+                } else if (localStorage.getItem("cart-id") !== cart_id) {
+                  localStorage.setItem("cart-id", cart_id)
                   window.dispatchEvent(new CustomEvent("cart-created", {detail: {cart_id}}))
                 }
-              } else {
-                localStorage.removeItem("cart-id")
-              }
+              })
             })
-            this._cartCreatedHandler = ({detail: {cart_id}}) => {
-              if (this.el.isConnected) {
-                this.pushEventTo(this.el, "ensure_cart", {cart_id})
-              }
-            }
-            window.addEventListener("cart-created", this._cartCreatedHandler)
-          },
-          destroyed() {
-            window.removeEventListener("cart-created", this._cartCreatedHandler)
           }
         }
       </script>
@@ -73,62 +56,29 @@ defmodule LokaWeb.AddToCartComponent do
   end
 
   @impl true
-  def handle_event("ensure_cart", %{"cart_id" => cart_id}, socket) do
-    anonymous_cart_id = if cart_id == "", do: nil, else: cart_id
+  def handle_event("add_to_cart", %{"item_id" => item_id} = params, socket) do
+    user = socket.assigns.current_user
 
-    if is_nil(anonymous_cart_id) and is_nil(socket.assigns.current_user) do
-      # No existing cart and no user — defer creation to the first add_to_cart click
-      {:noreply, socket}
-    else
-      params = if anonymous_cart_id, do: %{anonymous_cart_id: anonymous_cart_id}, else: %{}
-      {:ok, cart} = Commerce.ensure_cart_for_session(params, actor: socket.assigns.current_user)
-
-      if cart.user_id do
-        Phoenix.PubSub.broadcast(
-          Loka.PubSub,
-          "user:#{cart.user_id}:cart_created",
-          {:cart_created, cart.id}
-        )
+    session_params =
+      case params["cart_id"] do
+        id when id in [nil, ""] -> %{}
+        id -> %{anonymous_cart_id: id}
       end
 
-      socket =
-        socket
-        |> assign(cart_id: cart.id)
-        |> push_event("cart_assigned", %{cart_id: cart.id, anonymous: is_nil(cart.user_id)})
+    {:ok, cart} = Commerce.ensure_cart_for_session(session_params, actor: user)
+    Commerce.add_to_cart!(cart.id, item_id)
 
-      {:noreply, socket}
+    # A signed-in user's widget may not know this cart yet
+    if cart.user_id do
+      Phoenix.PubSub.broadcast(
+        Loka.PubSub,
+        "user:#{cart.user_id}:cart_created",
+        {:cart_created, cart.id}
+      )
     end
-  end
 
-  @impl true
-  def handle_event("add_to_cart", %{"item_id" => item_id}, socket) do
-    {cart_id, socket} =
-      case socket.assigns[:cart_id] do
-        nil ->
-          {:ok, cart} = Commerce.ensure_cart_for_session(%{}, actor: socket.assigns.current_user)
+    Phoenix.PubSub.broadcast(Loka.PubSub, "cart:#{cart.id}", :cart_updated)
 
-          if cart.user_id do
-            Phoenix.PubSub.broadcast(
-              Loka.PubSub,
-              "user:#{cart.user_id}:cart_created",
-              {:cart_created, cart.id}
-            )
-          end
-
-          socket =
-            socket
-            |> assign(cart_id: cart.id)
-            |> push_event("cart_assigned", %{cart_id: cart.id, anonymous: is_nil(cart.user_id)})
-
-          {cart.id, socket}
-
-        cart_id ->
-          {cart_id, socket}
-      end
-
-    Commerce.add_to_cart!(cart_id, item_id)
-    Phoenix.PubSub.broadcast(Loka.PubSub, "cart:#{cart_id}", :cart_updated)
-
-    {:noreply, socket}
+    {:reply, %{cart_id: cart.id, anonymous: is_nil(cart.user_id)}, socket}
   end
 end

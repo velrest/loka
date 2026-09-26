@@ -21,6 +21,8 @@ defmodule Loka.Studios do
       define :create_studio
       define :update_studio
       define :archive_studio
+      define :get_own_archived_studio, not_found_error?: false
+      define :unarchive_studio
     end
   end
 end

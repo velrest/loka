@@ -23,28 +23,34 @@ defmodule LokaWeb.LokaComponents do
 
   slot :item, required: true do
     attr :link, :string, required: true
+    attr :disabled, :boolean, doc: "Shown greyed out and not clickable"
   end
 
   def tab_nav(assigns) do
     ~H"""
     <div role="tablist" class="tabs tabs-box mx-4 sm:mx-6 lg:mx-8 my-2">
-      <.link
-        :for={item <- @item}
-        role="tab"
-        class={[
-          "tab",
-          if(
-            if(@partial_match?,
-              do: String.contains?(@active_path, item.link),
-              else: item.link == @active_path
-            ),
-            do: "tab-active"
-          )
-        ]}
-        navigate={item.link}
-      >
-        {render_slot(item)}
-      </.link>
+      <%= for item <- @item do %>
+        <span :if={item[:disabled]} role="tab" class="tab tab-disabled" aria-disabled="true">
+          {render_slot(item)}
+        </span>
+        <.link
+          :if={!item[:disabled]}
+          role="tab"
+          class={[
+            "tab",
+            if(
+              if(@partial_match?,
+                do: String.contains?(@active_path, item.link),
+                else: item.link == @active_path
+              ),
+              do: "tab-active"
+            )
+          ]}
+          navigate={item.link}
+        >
+          {render_slot(item)}
+        </.link>
+      <% end %>
     </div>
     """
   end
@@ -73,16 +79,20 @@ defmodule LokaWeb.LokaComponents do
 
   ## Examples
 
-      <.inventory_tab_nav active={@current_path} /
+      <.inventory_tab_nav active={@current_path} />
   """
   attr :active, :string, required: true
   attr :partial_match?, :boolean, default: false, doc: "Active if active_path matches partially"
+
+  attr :items_disabled?, :boolean,
+    default: false,
+    doc: "Disables the items tab, e.g. while the studio is archived"
 
   def inventory_tab_nav(assigns) do
     ~H"""
     <.tab_nav active_path={@active} partial_match?={@partial_match?}>
       <:item link="/inventory/studio">{gettext("Studio")}</:item>
-      <:item link="/inventory/items">{gettext("Artikel")}</:item>
+      <:item link="/inventory/items" disabled={@items_disabled?}>{gettext("Artikel")}</:item>
     </.tab_nav>
     """
   end

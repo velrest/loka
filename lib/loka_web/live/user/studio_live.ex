@@ -5,9 +5,21 @@ defmodule LokaWeb.User.StudioLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, studio} = Loka.Studios.get_own_studio(actor: socket.assigns.current_user)
+    user = socket.assigns.current_user
+    {:ok, studio} = Loka.Studios.get_own_studio(actor: user)
 
-    {:ok, assign(socket, studio: studio, show_form: false, form: nil, last_params: %{})}
+    # An archived studio can be restored, and blocks opening a new one
+    archived_studio =
+      if studio, do: nil, else: elem(Loka.Studios.get_own_archived_studio(actor: user), 1)
+
+    {:ok,
+     assign(socket,
+       studio: studio || archived_studio,
+       archived?: !is_nil(archived_studio),
+       show_form: false,
+       form: nil,
+       last_params: %{}
+     )}
   end
 
   @impl true
@@ -38,7 +50,7 @@ defmodule LokaWeb.User.StudioLive do
   def handle_event("save", params, socket) do
     case AshPhoenix.Form.submit(socket.assigns.form.source, params: params["studio"] || %{}) do
       {:ok, studio} ->
-        {:noreply, assign(socket, studio: studio, show_form: false, form: nil)}
+        {:noreply, assign(socket, studio: studio, archived?: false, show_form: false, form: nil)}
 
       {:error, form} ->
         {:noreply, assign(socket, form: to_form(form))}
@@ -74,7 +86,9 @@ defmodule LokaWeb.User.StudioLive do
               </div>
               <div>
                 <p class="font-semibold">{@studio.name}</p>
-                <p class="text-xs text-base-content/50">{gettext("Aktiv")}</p>
+                <p class="text-xs text-base-content/50">
+                  {if @archived?, do: gettext("Archiviert"), else: gettext("Aktiv")}
+                </p>
               </div>
             </div>
             <div class="pt-2">

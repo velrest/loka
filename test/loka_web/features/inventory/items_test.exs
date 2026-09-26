@@ -274,6 +274,23 @@ defmodule LokaWeb.Features.Inventory.ItemsTest do
       assert has_element?(view, "[data-item='#{unlisted.id}']", "Nicht im Verkauf")
     end
 
+    test "archived items can be restored from the list", %{conn: conn, user: user} do
+      item = InventoryHelpers.create_item(user, %{name: "Old Jug"})
+      :ok = Loka.Inventory.archive_item(item, actor: user)
+
+      {:ok, view, _html} = live(conn, ~p"/inventory/items")
+      refute has_element?(view, "[data-item='#{item.id}']")
+      assert has_element?(view, "[data-archived-item='#{item.id}']", "Old Jug")
+
+      view
+      |> element("[data-archived-item='#{item.id}'] button", "Wiederherstellen")
+      |> render_click()
+
+      assert has_element?(view, "[data-item='#{item.id}']")
+      refute has_element?(view, "[data-archived-item='#{item.id}']")
+      assert {:ok, %{in_stock?: true}} = Loka.Inventory.get_item(item.id)
+    end
+
     test "does not render an inline creation form", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/inventory/items")
       refute html =~ "<form"

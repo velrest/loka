@@ -89,12 +89,53 @@ defmodule LokaWeb.Features.Inventory.StudioTest do
       |> refute_has("dialog.modal-open")
     end
 
-    test "confirming archive redirects to /me/studio", %{conn: conn} do
+    test "confirming archive keeps the owner on the page with a restore option",
+         %{conn: conn} do
       conn
       |> visit(~p"/inventory/studio")
       |> click_button("Studio archivieren")
       |> click_button("Ja, archivieren")
-      |> assert_path(~p"/me/studio")
+      |> assert_path(~p"/inventory/studio")
+      |> assert_has("h3", text: "ist archiviert")
+      |> assert_has("button", text: "Studio wiederherstellen")
+      |> refute_has("button", text: "Studio archivieren")
+    end
+
+    test "while archived, the items tab is disabled and item pages redirect back",
+         %{conn: conn} do
+      session =
+        conn
+        |> visit(~p"/inventory/studio")
+        |> assert_has("a[role='tab']", text: "Artikel")
+        |> click_button("Studio archivieren")
+        |> click_button("Ja, archivieren")
+        |> assert_has("span[role='tab'][aria-disabled='true']", text: "Artikel")
+        |> refute_has("a[role='tab']", text: "Artikel")
+
+      session |> visit(~p"/inventory/items") |> assert_path(~p"/inventory/studio")
+      session |> visit(~p"/inventory/items/new") |> assert_path(~p"/inventory/studio")
+    end
+
+    test "restoring the archived studio brings back the edit form", %{conn: conn} do
+      conn
+      |> visit(~p"/inventory/studio")
+      |> click_button("Studio archivieren")
+      |> click_button("Ja, archivieren")
+      |> click_button("Studio wiederherstellen")
+      |> assert_has("[role='alert']", text: "Studio wiederhergestellt.")
+      |> assert_has("button", text: "Studio archivieren")
+      |> assert_has("a[role='tab']", text: "Artikel")
+    end
+
+    test "/me/studio shows the archived studio instead of offering a new one",
+         %{conn: conn} do
+      conn
+      |> visit(~p"/inventory/studio")
+      |> click_button("Studio archivieren")
+      |> click_button("Ja, archivieren")
+      |> visit(~p"/me/studio")
+      |> assert_has("p", text: "Archiviert")
+      |> refute_has("button", text: "Studio eröffnen")
     end
   end
 

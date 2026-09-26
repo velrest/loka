@@ -23,7 +23,7 @@ end
 
 # admin? isn't writable through any action, so it's set out of band
 "admin@example.com" |> register.() |> Ash.Seed.update!(%{admin?: true})
-register.("user@example.com")
+shopper = register.("user@example.com")
 
 # Studios, each with its own owner. The login is <city>@example.com, or
 # <city><n>@example.com when a city has several studios.
@@ -41,7 +41,9 @@ studios = [
   {"zurich3", "Tonstube", "Zürich", "8004"},
   {"zurich4", "Keramikwerk Kreis 5", "Zürich", "8005"},
   {"zurich5", "Atelier Wipkingen", "Zürich", "8037"},
-  {"zurich6", "Erde & Feuer", "Zürich", "8044"}
+  {"zurich6", "Erde & Feuer", "Zürich", "8044"},
+  # Archived at the end of this file, to try restoring a studio
+  {"thun", "Töpferei am See", "Thun", "3600"}
 ]
 
 owners =
@@ -126,7 +128,8 @@ assortments = [
   {"solothurn", "Salzglasur", 7},
   {"grenchen", "Kupferrot", 6},
   {"worb", "Sandstein", 5},
-  {"lengnau", "Rauchbrand", 5}
+  {"lengnau", "Rauchbrand", 5},
+  {"thun", "Seeblau", 6}
 ]
 
 # A few Bern items get oddly sized images first, to check that product cards
@@ -192,3 +195,35 @@ assortments
     seed_images.(item.id, Map.get(odd_images, {login, n}, []) ++ images, owner)
   end
 end)
+
+# Archived things
+#
+# A few single items are archived, one of them after it was put in
+# user@example.com's cart (it shows there as removed). The Thun studio is
+# archived as a whole; one of its items was archived on its own before, so it
+# stays archived when the studio is restored.
+studio_items = fn login ->
+  {:ok, studio} = Loka.Studios.get_own_studio(actor: owners[login])
+  studio.id |> Loka.Inventory.list_studio_items!() |> Enum.sort_by(& &1.inserted_at)
+end
+
+first_in_stock = fn login -> login |> studio_items.() |> Enum.find(& &1.in_stock?) end
+
+{:ok, cart} = Loka.Commerce.create_cart(actor: shopper)
+removed_from_cart = first_in_stock.("bern1")
+
+for item <- [first_in_stock.("zurich1"), first_in_stock.("bern2"), removed_from_cart] do
+  Loka.Commerce.add_to_cart!(cart.id, item.id)
+end
+
+for {login, item} <- [
+      {"bern1", removed_from_cart},
+      {"zurich2", Enum.at(studio_items.("zurich2"), 2)},
+      {"biel", Enum.at(studio_items.("biel"), 1)},
+      {"thun", Enum.at(studio_items.("thun"), 0)}
+    ] do
+  :ok = Loka.Inventory.archive_item(item, actor: owners[login])
+end
+
+{:ok, thun} = Loka.Studios.get_own_studio(actor: owners["thun"])
+:ok = Loka.Studios.archive_studio(thun, actor: owners["thun"])

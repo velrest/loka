@@ -6,15 +6,45 @@ defmodule LokaWeb.Inventory.ItemsLive do
 
   @impl true
   def mount(_params, _session, socket) do
+    case Loka.Studios.get_own_studio(actor: socket.assigns.current_user) do
+      # Without an active studio (none, or archived) there are no items to
+      # manage; the studio page offers creating or restoring one
+      {:ok, nil} -> {:ok, push_navigate(socket, to: ~p"/inventory/studio")}
+      _ -> {:ok, assign_items(socket)}
+    end
+  end
+
+  @impl true
+  def handle_event("restore_item", %{"id" => id}, socket) do
     user = socket.assigns.current_user
 
-    items =
+    with %Inventory.Item{} = item <- Enum.find(socket.assigns.archived_items, &(&1.id == id)),
+         {:ok, _item} <- Inventory.unarchive_item(item, actor: user) do
+      {:noreply,
+       socket
+       |> put_flash(:info, gettext("Artikel wiederhergestellt."))
+       |> assign_items()}
+    else
+      _ ->
+        {:noreply,
+         put_flash(socket, :error, gettext("Artikel konnte nicht wiederhergestellt werden."))}
+    end
+  end
+
+  defp assign_items(socket) do
+    user = socket.assigns.current_user
+
+    {items, archived_items} =
       case Loka.Studios.get_own_studio(actor: user) do
-        {:ok, %{id: studio_id}} -> Inventory.list_studio_items!(studio_id, actor: user)
-        _ -> []
+        {:ok, %{id: studio_id}} ->
+          {Inventory.list_studio_items!(studio_id, actor: user),
+           Inventory.list_own_archived_items!(actor: user)}
+
+        _ ->
+          {[], []}
       end
 
-    {:ok, assign(socket, items: items)}
+    assign(socket, items: items, archived_items: archived_items)
   end
 
   @impl true
@@ -117,6 +147,44 @@ defmodule LokaWeb.Inventory.ItemsLive do
               </div>
             </div>
           </.link>
+        </div>
+
+        <%!-- Archived items --%>
+        <div :if={@archived_items != []} class="mt-12">
+          <h2 class="text-lg font-semibold mb-1">{gettext("Archivierte Artikel")}</h2>
+          <p class="text-sm text-base-content/50 mb-4">
+            {gettext(
+              "Nicht sichtbar für Kunden. Beim Wiederherstellen kommt auch der Bestand zurück."
+            )}
+          </p>
+
+          <div class="flex flex-col gap-3">
+            <div
+              :for={item <- @archived_items}
+              data-archived-item={item.id}
+              class="card bg-base-100 border border-base-300"
+            >
+              <div class="card-body p-4">
+                <div class="flex items-center gap-4">
+                  <.item_thumbnail
+                    images={item.images}
+                    alt={item.name}
+                    class="shrink-0 size-12 rounded-lg bg-base-200 opacity-60"
+                  />
+                  <div class="flex-1 min-w-0">
+                    <p class="font-semibold truncate text-base-content/60">{item.name}</p>
+                  </div>
+                  <.button
+                    phx-click="restore_item"
+                    phx-value-id={item.id}
+                    class="btn btn-ghost btn-sm"
+                  >
+                    {gettext("Wiederherstellen")}
+                  </.button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </Layouts.app>

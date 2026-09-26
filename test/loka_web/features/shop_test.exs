@@ -23,7 +23,7 @@ defmodule LokaWeb.Features.ShopTest do
     plate =
       InventoryHelpers.create_item(owner, %{name: "Plate", description: "A plate", stock: nil})
 
-    %{conn: conn, cup: cup, bowl: bowl, plate: plate}
+    %{conn: conn, owner: owner, cup: cup, bowl: bowl, plate: plate}
   end
 
   describe "market page" do
@@ -33,8 +33,21 @@ defmodule LokaWeb.Features.ShopTest do
       |> assert_has("[data-item]", count: 3)
     end
 
+    test "leaves out archived items and archived studios", %{conn: conn, owner: owner, cup: cup} do
+      %{owner: gone_owner, studio: gone_studio} = UserHelpers.create_studio_owner()
+      gone = InventoryHelpers.create_item(gone_owner, %{name: "Gone"})
+      :ok = Loka.Studios.archive_studio(gone_studio, actor: gone_owner)
+      :ok = Loka.Inventory.archive_item(cup, actor: owner)
+
+      conn
+      |> visit(~p"/")
+      |> assert_has("[data-item]", count: 2)
+      |> refute_has("[data-item='#{cup.id}']")
+      |> refute_has("[data-item='#{gone.id}']")
+    end
+
     test "only items in stock get an add to cart button",
-         %{conn: conn, cup: cup, bowl: bowl, plate: plate} do
+         %{conn: conn, owner: owner, cup: cup, bowl: bowl, plate: plate} do
       conn
       |> visit(~p"/")
       |> assert_has("[data-item='#{cup.id}'] button", text: "In den Warenkorb")
@@ -82,6 +95,14 @@ defmodule LokaWeb.Features.ShopTest do
       |> assert_has("[data-testid='item-price']", text: "Nicht online erhältlich")
       |> refute_has("[data-testid='item-price']", text: "CHF")
       |> refute_has("button", text: "In den Warenkorb")
+    end
+
+    test "archived item redirects to shop", %{conn: conn, owner: owner, cup: cup} do
+      :ok = Loka.Inventory.archive_item(cup, actor: owner)
+
+      conn
+      |> visit(~p"/shop/item/#{cup.id}")
+      |> assert_path("/")
     end
 
     test "unknown item id redirects to shop", %{conn: conn} do

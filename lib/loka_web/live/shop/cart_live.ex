@@ -137,18 +137,25 @@ defmodule LokaWeb.Shop.CartLive do
         >
           <div>
             <div
-              :for={{item, quantity} <- @line_items}
+              :for={{item_id, item, quantity} <- @line_items}
+              data-cart-line={item_id}
               class="flex items-center gap-4.5 py-4.5 rule-fade-bottom"
             >
               <%!-- Thumbnail --%>
               <.item_thumbnail
-                images={item.images}
-                alt={item.name}
+                images={if item, do: item.images, else: []}
+                alt={if item, do: item.name, else: ""}
                 class="shrink-0 size-20 rounded-field bg-base-300"
               />
 
-              <%!-- Info --%>
-              <div class="flex-1 min-w-0">
+              <%!-- Info: an archived item no longer loads, so there's nothing to link to --%>
+              <div :if={!item} class="flex-1 min-w-0">
+                <p class="text-lg tracking-tight text-secondary">
+                  {gettext("Dieser Artikel wurde entfernt")}
+                </p>
+              </div>
+
+              <div :if={item} class="flex-1 min-w-0">
                 <.link
                   navigate={~p"/shop/item/#{item.id}"}
                   class="text-lg tracking-tight hover:text-primary transition-colors duration-150"
@@ -173,7 +180,7 @@ defmodule LokaWeb.Shop.CartLive do
               <div class="join shrink-0">
                 <button
                   phx-click="decrease_quantity"
-                  phx-value-item_id={item.id}
+                  phx-value-item_id={item_id}
                   class="join-item px-3 border border-base-300 hover:bg-base-content/7 transition-colors duration-150"
                 >
                   <%= if quantity == 1 do %>
@@ -187,8 +194,8 @@ defmodule LokaWeb.Shop.CartLive do
                 </span>
                 <button
                   phx-click="increase_quantity"
-                  phx-value-item_id={item.id}
-                  disabled={!item.in_stock?}
+                  phx-value-item_id={item_id}
+                  disabled={!(item && item.in_stock?)}
                   class="join-item px-3 border border-base-300 hover:bg-base-content/7 transition-colors duration-150 disabled:opacity-40"
                 >
                   +
@@ -253,9 +260,10 @@ defmodule LokaWeb.Shop.CartLive do
   defp cart_line_items(nil), do: []
 
   defp cart_line_items(%{cart_items: cart_items}) do
+    # The item is nil once it's archived; the row still knows its item_id
     cart_items
     |> Enum.group_by(& &1.item_id)
-    |> Enum.map(fn {_item_id, [first | _] = entries} -> {first.item, length(entries)} end)
+    |> Enum.map(fn {item_id, [first | _] = entries} -> {item_id, first.item, length(entries)} end)
   end
 
   defp line_total(%{stock: %{price: price}}, quantity), do: Money.mult!(price, quantity)
@@ -264,7 +272,10 @@ defmodule LokaWeb.Shop.CartLive do
   defp shipping_note(line_items) do
     studio_count =
       line_items
-      |> Enum.map(fn {item, _quantity} -> item.studio_id end)
+      |> Enum.flat_map(fn
+        {_item_id, nil, _quantity} -> []
+        {_item_id, item, _quantity} -> [item.studio_id]
+      end)
       |> Enum.uniq()
       |> length()
 

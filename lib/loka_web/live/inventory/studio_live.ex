@@ -5,9 +5,17 @@ defmodule LokaWeb.Inventory.StudioLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    case Loka.Studios.get_own_studio(actor: socket.assigns.current_user) do
+    user = socket.assigns.current_user
+
+    case Loka.Studios.get_own_studio(actor: user) do
       {:ok, nil} ->
-        {:ok, push_navigate(socket, to: ~p"/me/studio")}
+        case Loka.Studios.get_own_archived_studio(actor: user) do
+          {:ok, %Loka.Studios.Studio{} = archived} ->
+            {:ok, assign(socket, archived_studio: archived, show_confirm: false)}
+
+          _ ->
+            {:ok, push_navigate(socket, to: ~p"/me/studio")}
+        end
 
       {:ok, studio} ->
         form =
@@ -26,6 +34,7 @@ defmodule LokaWeb.Inventory.StudioLive do
         {:ok,
          socket
          |> assign(
+           archived_studio: nil,
            studio: studio,
            form: form,
            saved: false,
@@ -65,14 +74,30 @@ defmodule LokaWeb.Inventory.StudioLive do
       :ok ->
         {:noreply,
          socket
-         |> put_flash(:info, gettext("Studio gelöscht."))
-         |> push_navigate(to: ~p"/me/studio")}
+         |> put_flash(:info, gettext("Studio archiviert."))
+         |> push_navigate(to: ~p"/inventory/studio")}
 
       {:error, _} ->
         {:noreply,
          socket
-         |> put_flash(:error, gettext("Studio konnte nicht gelöscht werden."))
+         |> put_flash(:error, gettext("Studio konnte nicht archiviert werden."))
          |> assign(show_confirm: false)}
+    end
+  end
+
+  def handle_event("restore", _params, socket) do
+    case Loka.Studios.unarchive_studio(socket.assigns.archived_studio,
+           actor: socket.assigns.current_user
+         ) do
+      {:ok, _studio} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, gettext("Studio wiederhergestellt."))
+         |> push_navigate(to: ~p"/inventory/studio")}
+
+      {:error, _} ->
+        {:noreply,
+         put_flash(socket, :error, gettext("Studio konnte nicht wiederhergestellt werden."))}
     end
   end
 
@@ -133,88 +158,115 @@ defmodule LokaWeb.Inventory.StudioLive do
     ~H"""
     <Layouts.app current_user={@current_user} flash={@flash} socket={@socket} locale={@locale}>
       <:nav>
-        <.inventory_tab_nav active={@current_path} />
+        <.inventory_tab_nav active={@current_path} items_disabled?={!is_nil(@archived_studio)} />
       </:nav>
 
-      <div class="px-4 py-10 sm:px-6 lg:px-8 max-w-lg">
+      <div :if={@archived_studio} class="px-4 py-10 sm:px-6 lg:px-8">
+        <div class="mb-8">
+          <h1 class="text-2xl font-bold">{gettext("Studio verwalten")}</h1>
+        </div>
+
+        <div class="card bg-base-100 border border-base-300 shadow shadow-black/30 max-w-lg">
+          <div class="card-body gap-3">
+            <h3 class="font-semibold">
+              {gettext("%{name} ist archiviert", name: @archived_studio.name)}
+            </h3>
+            <p class="text-sm text-base-content/60">
+              {gettext(
+                "Dein Studio und seine Artikel sind für Kunden nicht sichtbar. Beim Wiederherstellen kommen auch die Artikel zurück, die mit dem Studio archiviert wurden."
+              )}
+            </p>
+            <div class="mt-2">
+              <.button phx-click="restore" class="btn btn-primary btn-sm">
+                {gettext("Studio wiederherstellen")}
+              </.button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div :if={!@archived_studio} class="px-4 py-10 sm:px-6 lg:px-8">
         <div class="mb-8">
           <h1 class="text-2xl font-bold">{gettext("Studio verwalten")}</h1>
         </div>
 
         <.form for={@form} phx-change="validate" phx-submit="save" class="flex flex-col gap-6">
-          <%!-- Card 1: Studio details --%>
-          <div class="card bg-base-100 border border-base-300 shadow shadow-black/30">
-            <div class="card-body gap-4">
-              <h3 class="font-semibold">{gettext("Studiodetails")}</h3>
+          <%!-- Side by side when there's room --%>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            <%!-- Card 1: Studio details --%>
+            <div class="card bg-base-100 border border-base-300 shadow shadow-black/30">
+              <div class="card-body gap-4">
+                <h3 class="font-semibold">{gettext("Studiodetails")}</h3>
 
-              <%!-- Logo --%>
-              <div class="flex items-center gap-4">
-                <div class="shrink-0 size-20 rounded-xl overflow-hidden bg-base-200 flex items-center justify-center">
-                  <%= if entry = List.first(@uploads.logo.entries) do %>
-                    <.live_img_preview entry={entry} class="w-full h-full object-cover" />
-                  <% else %>
-                    <%= if @studio.logo_path do %>
-                      <img src={@studio.logo_path} alt="" class="w-full h-full object-cover" />
+                <%!-- Logo --%>
+                <div class="flex items-center gap-4">
+                  <div class="shrink-0 size-20 rounded-xl overflow-hidden bg-base-200 flex items-center justify-center">
+                    <%= if entry = List.first(@uploads.logo.entries) do %>
+                      <.live_img_preview entry={entry} class="w-full h-full object-cover" />
                     <% else %>
-                      <.icon name="hero-building-storefront" class="size-8 text-base-content/30" />
+                      <%= if @studio.logo_path do %>
+                        <img src={@studio.logo_path} alt="" class="w-full h-full object-cover" />
+                      <% else %>
+                        <.icon name="hero-building-storefront" class="size-8 text-base-content/30" />
+                      <% end %>
                     <% end %>
-                  <% end %>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium mb-1">{gettext("Logo")}</p>
+                    <.live_file_input
+                      upload={@uploads.logo}
+                      class="file-input file-input-sm file-input-bordered w-full"
+                    />
+                    <p class="text-xs text-base-content/40 mt-1">
+                      {gettext("JPG, PNG oder WEBP")}
+                    </p>
+                  </div>
                 </div>
-                <div class="flex-1">
-                  <p class="text-sm font-medium mb-1">{gettext("Logo")}</p>
-                  <.live_file_input
-                    upload={@uploads.logo}
-                    class="file-input file-input-sm file-input-bordered w-full"
-                  />
-                  <p class="text-xs text-base-content/40 mt-1">
-                    {gettext("JPG, PNG oder WEBP")}
-                  </p>
-                </div>
-              </div>
 
-              <.input field={@form[:name]} type="text" label={gettext("Studioname")} />
+                <.input field={@form[:name]} type="text" label={gettext("Studioname")} />
 
-              <.input
-                field={@form[:description]}
-                type="textarea"
-                label={gettext("Beschreibung")}
-                rows="3"
-              />
-            </div>
-          </div>
-
-          <%!-- Card 2: Location --%>
-          <div class="card bg-base-100 border border-base-300 shadow shadow-black/30">
-            <div class="card-body gap-4">
-              <h3 class="font-semibold">{gettext("Standort")}</h3>
-
-              <div class="grid grid-cols-3 gap-3">
-                <div class="col-span-2">
-                  <.input field={@form[:street]} type="text" label={gettext("Strasse")} />
-                </div>
-                <.input field={@form[:house_number]} type="text" label={gettext("Nr.")} />
-              </div>
-
-              <.live_component
-                module={LokaWeb.AddressInputComponent}
-                id="address-input"
-                postal_code_field={@form[:postal_code]}
-                city_field={@form[:city]}
-              />
-
-              <div :if={@studio.latitude && @studio.longitude} class="pt-1">
-                <div
-                  id="studio-location-map"
-                  phx-hook=".StudioLocationMap"
-                  data-lat={@studio.latitude}
-                  data-lng={@studio.longitude}
-                  class="h-48 w-full rounded-lg overflow-hidden"
-                  style="z-index: 0"
+                <.input
+                  field={@form[:description]}
+                  type="textarea"
+                  label={gettext("Beschreibung")}
+                  rows="3"
                 />
               </div>
-              <p :if={!@studio.latitude || !@studio.longitude} class="text-sm text-base-content/40">
-                {gettext("Keine Koordinaten verfügbar.")}
-              </p>
+            </div>
+
+            <%!-- Card 2: Location --%>
+            <div class="card bg-base-100 border border-base-300 shadow shadow-black/30">
+              <div class="card-body gap-4">
+                <h3 class="font-semibold">{gettext("Standort")}</h3>
+
+                <div class="grid grid-cols-3 gap-3">
+                  <div class="col-span-2">
+                    <.input field={@form[:street]} type="text" label={gettext("Strasse")} />
+                  </div>
+                  <.input field={@form[:house_number]} type="text" label={gettext("Nr.")} />
+                </div>
+
+                <.live_component
+                  module={LokaWeb.AddressInputComponent}
+                  id="address-input"
+                  postal_code_field={@form[:postal_code]}
+                  city_field={@form[:city]}
+                />
+
+                <div :if={@studio.latitude && @studio.longitude} class="pt-1">
+                  <div
+                    id="studio-location-map"
+                    phx-hook=".StudioLocationMap"
+                    data-lat={@studio.latitude}
+                    data-lng={@studio.longitude}
+                    class="h-48 w-full rounded-lg overflow-hidden"
+                    style="z-index: 0"
+                  />
+                </div>
+                <p :if={!@studio.latitude || !@studio.longitude} class="text-sm text-base-content/40">
+                  {gettext("Keine Koordinaten verfügbar.")}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -243,12 +295,12 @@ defmodule LokaWeb.Inventory.StudioLive do
         </div>
       </div>
 
-      <dialog class={["modal", @show_confirm && "modal-open"]}>
+      <dialog :if={!@archived_studio} class={["modal", @show_confirm && "modal-open"]}>
         <div class="modal-box">
           <h3 class="text-lg font-bold">{gettext("Studio archivieren?")}</h3>
           <p class="py-4 text-base-content/70">
             {gettext(
-              "Dein Studio wird archiviert und ist weder für dich noch für Kunden sichtbar. Deine Daten bleiben erhalten und können über den Support wiederhergestellt werden."
+              "Dein Studio und alle seine Artikel werden archiviert und sind für Kunden nicht mehr sichtbar. Du kannst das Studio hier jederzeit wiederherstellen."
             )}
           </p>
           <div class="modal-action">

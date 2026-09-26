@@ -22,12 +22,25 @@ defmodule Loka.Inventory do
       define :create_item
       define :update_item
       define :archive_item
+
+      define :list_archived_studio_items,
+        action: :archived_for_studio,
+        args: [:studio_id, :archived_since]
+
+      define :unarchive_item
+      define :list_own_archived_items
     end
 
     resource Loka.Inventory.Stock do
       define :create_stock, args: [:item_id]
       define :update_stock
       define :archive_stock
+
+      define :list_archived_item_stock,
+        action: :archived_for_item,
+        args: [:item_id, :archived_since]
+
+      define :unarchive_stock
     end
 
     resource Loka.Inventory.Image do

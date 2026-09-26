@@ -72,6 +72,27 @@ defmodule LokaWeb.Shop.CartLiveTest do
       assert has_element?(view, "button[phx-click='increase_quantity'][disabled]")
     end
 
+    test "archived item shows as removed, without a link, and can be taken out",
+         %{conn: conn} do
+      %{owner: owner} = UserHelpers.create_studio_owner()
+      item = InventoryHelpers.create_item(owner)
+      {:ok, cart} = Commerce.create_cart()
+      Commerce.add_to_cart!(cart.id, item.id)
+      :ok = Inventory.archive_item(item, actor: owner)
+
+      {:ok, view, _html} = live(conn, ~p"/shop/cart")
+      render_hook(view, "load_anonymous_cart", %{"cart_id" => cart.id})
+
+      assert has_element?(view, "[data-cart-line='#{item.id}']", "Dieser Artikel wurde entfernt")
+      refute has_element?(view, "a[href='/shop/item/#{item.id}']")
+      assert has_element?(view, "button[phx-click='increase_quantity'][disabled]")
+
+      view |> element("button[phx-click='decrease_quantity']") |> render_click()
+      Phoenix.PubSub.broadcast(Loka.PubSub, "cart:#{cart.id}", :cart_updated)
+
+      assert render(view) =~ "Dein Warenkorb ist leer"
+    end
+
     test "decrease_quantity removes item from anonymous cart", %{conn: conn} do
       item = create_item()
       {:ok, cart} = Commerce.create_cart()
