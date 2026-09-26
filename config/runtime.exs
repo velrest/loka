@@ -5,6 +5,7 @@ import Dotenvy
 source!([Path.absname(".env"), System.get_env()])
 
 config :loka, :thunderforest_api_key, env!("THUNDERFOREST_API_KEY", :string, nil)
+config :loka, :email_from, env!("EMAIL_FROM", :string, "noreply@example.com")
 
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
