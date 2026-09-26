@@ -1,4 +1,6 @@
 defmodule LokaWeb.Utils.AssignCurrentPath do
+  @moduledoc "`on_mount` hook that keeps `@current_path` set to the current URL path."
+
   import Phoenix.LiveView, only: [attach_hook: 4]
   import Phoenix.Component, only: [assign: 2]
 

@@ -1,4 +1,11 @@
 defmodule Loka.Accounts.User do
+  @moduledoc """
+  A user account. Signs in with password or magic link.
+
+  A user becomes a seller by creating a studio (see `has_studio?`). `admin?`
+  can't be set through any action, only out of band.
+  """
+
   use Ash.Resource,
     otp_app: :loka,
     domain: Loka.Accounts,

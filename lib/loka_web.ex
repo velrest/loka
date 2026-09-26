@@ -5,8 +5,8 @@ defmodule LokaWeb do
 
   This can be used in your application as:
 
-      use LokaWeb, :controller
-      use LokaWeb, :html
+    use LokaWeb, :controller
+    use LokaWeb, :html
 
   The definitions below will be executed for every controller,
   component, etc, so keep them short and clean, focused

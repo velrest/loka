@@ -1,4 +1,6 @@
 defmodule LokaWeb.StudioMapComponent do
+  @moduledoc "Map with a marker for every studio that has coordinates."
+
   use LokaWeb, :live_component
 
   @impl true

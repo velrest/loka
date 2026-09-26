@@ -1,4 +1,6 @@
 defmodule Loka.Commerce.Cart.Actions.CleanupAnonymous do
+  @moduledoc "Deletes anonymous carts older than 30 days. Run daily by Oban."
+
   alias Loka.Commerce
 
   def run(_input, _opts, _context) do

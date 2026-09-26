@@ -1,4 +1,6 @@
 defmodule Loka.Checks.ActorOwnsItem do
+  @moduledoc "Policy check: the actor's studio has stock for the `item_id` argument."
+
   use Ash.Policy.SimpleCheck
 
   @impl true

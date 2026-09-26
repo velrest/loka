@@ -1,4 +1,10 @@
 defmodule Loka.Inventory.Stock do
+  @moduledoc """
+  A studio's offer of an item: quantity and price.
+
+  Creating stock also creates its item, and assigns the stock to the actor's studio.
+  """
+
   use Ash.Resource,
     otp_app: :loka,
     domain: Loka.Inventory,

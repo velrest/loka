@@ -1,4 +1,6 @@
 defmodule Loka.Commerce.OrderLine do
+  @moduledoc "One line of an order, with the unit price captured at order time."
+
   use Ash.Resource,
     otp_app: :loka,
     domain: Loka.Commerce,
@@ -59,6 +61,8 @@ defmodule Loka.Commerce.OrderLine do
 end
 
 defmodule Loka.Commerce.Order do
+  @moduledoc "A placed order and its lifecycle: `pending` → `paid` → `fulfilled`, or `cancelled`."
+
   use Ash.Resource,
     otp_app: :loka,
     domain: Loka.Commerce,

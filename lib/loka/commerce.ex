@@ -1,4 +1,12 @@
 defmodule Loka.Commerce do
+  @moduledoc """
+  Shopping carts and orders.
+
+  Carts exist for signed-in users and anonymously (tracked by id in the
+  browser). When an anonymous visitor signs in, `ensure_cart_for_session/1`
+  assigns or merges their anonymous cart into their user cart.
+  """
+
   use Ash.Domain, otp_app: :loka, extensions: [AshPhoenix, AshAdmin.Domain]
 
   admin do

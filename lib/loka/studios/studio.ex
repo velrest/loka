@@ -1,4 +1,11 @@
 defmodule Loka.Studios.Studio do
+  @moduledoc """
+  A pottery studio. Archived instead of deleted.
+
+  Latitude and longitude are derived from the postal code (see
+  `Loka.Studios.Studio.Changes.GeocodeAddress`).
+  """
+
   use Ash.Resource,
     otp_app: :loka,
     domain: Loka.Studios,

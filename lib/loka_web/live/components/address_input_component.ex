@@ -1,4 +1,6 @@
 defmodule LokaWeb.AddressInputComponent do
+  @moduledoc "Street, postal code and city inputs that suggest Swiss localities as you type."
+
   use LokaWeb, :live_component
 
   @impl true

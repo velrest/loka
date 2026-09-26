@@ -1,4 +1,6 @@
 defmodule Loka.Commerce.Cart.Changes.MergeFrom do
+  @moduledoc "Moves all stock from an anonymous cart into this cart, then deletes the anonymous cart."
+
   use Ash.Resource.Change
 
   alias Loka.Commerce

@@ -1,4 +1,6 @@
 defmodule Loka.Inventory.Item do
+  @moduledoc "A product: name and description. Archived instead of deleted."
+
   use Ash.Resource,
     otp_app: :loka,
     domain: Loka.Inventory,

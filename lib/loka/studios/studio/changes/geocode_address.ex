@@ -1,4 +1,10 @@
 defmodule Loka.Studios.Studio.Changes.GeocodeAddress do
+  @moduledoc """
+  Sets latitude and longitude from the postal code.
+
+  Leaves them unchanged if the postal code is unknown.
+  """
+
   use Ash.Resource.Change
 
   def change(changeset, _opts, _context) do

@@ -1,4 +1,6 @@
 defmodule Loka.Changes.Image.RemoveFile do
+  @moduledoc "Deletes an image's file from disk after the record is destroyed."
+
   use Ash.Resource.Change
 
   def change(changeset, _opts, _context) do
@@ -10,6 +12,11 @@ defmodule Loka.Changes.Image.RemoveFile do
 end
 
 defmodule Loka.Changes.Image.UploadFile do
+  @moduledoc """
+  Saves an uploaded image under `priv/static/uploads/items/` and appends it
+  after the item's existing images.
+  """
+
   use Ash.Resource.Change
 
   def change(changeset, _opts, %{actor: actor}) do

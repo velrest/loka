@@ -1,4 +1,12 @@
 defmodule Loka.Address.Localities do
+  @moduledoc """
+  Swiss localities (name and postal code), from `priv/data/localities.csv`,
+  loaded at compile time.
+
+  Used for address autocompletion and for turning postal codes into WGS84
+  coordinates (converted from Swiss LV95).
+  """
+
   @csv_path Path.join(:code.priv_dir(:loka), "data/localities.csv")
   @external_resource @csv_path
 

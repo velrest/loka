@@ -1,4 +1,15 @@
 defmodule Loka.Commerce.Cart.EnsureForSession do
+  @moduledoc """
+  Returns the cart to use for the current session, creating one if needed.
+
+  Given the actor (if signed in) and an anonymous cart id from the browser:
+
+    * neither cart exists → create a new one
+    * only the anonymous cart → assign it to the user if signed in
+    * only the user cart → use it
+    * both → merge the anonymous cart into the user cart
+  """
+
   alias Loka.Commerce
 
   def run(input, _opts, context) do

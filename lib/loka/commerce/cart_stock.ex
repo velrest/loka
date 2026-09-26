@@ -1,4 +1,6 @@
 defmodule Loka.Commerce.CartStock do
+  @moduledoc "Join between a cart and a piece of stock in it."
+
   use Ash.Resource,
     otp_app: :loka,
     domain: Loka.Commerce,

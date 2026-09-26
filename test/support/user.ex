@@ -1,10 +1,10 @@
 defmodule Loka.Support.UserHelpers do
   @moduledoc false
-  use LokaWeb.ConnCase, async: true
+  import PhoenixTest
 
   alias Loka.Accounts.User
 
-  def create_studio_owner() do
+  def create_studio_owner do
     owner = create_user()
 
     studio =

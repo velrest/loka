@@ -61,13 +61,7 @@ defmodule LokaWeb.Shop.CartWidgetLive do
     if user do
       {:ok, cart} = Commerce.get_user_cart(load: [:item_count, :subtotal], actor: user)
 
-      if connected?(socket) do
-        if cart do
-          Phoenix.PubSub.subscribe(Loka.PubSub, "cart:#{cart.id}")
-        else
-          Phoenix.PubSub.subscribe(Loka.PubSub, "user:#{user.id}:cart_created")
-        end
-      end
+      if connected?(socket), do: subscribe_to_cart(cart, user)
 
       {:ok, assign(socket, cart: cart)}
     else
@@ -121,4 +115,10 @@ defmodule LokaWeb.Shop.CartWidgetLive do
 
     {:noreply, assign(socket, cart: updated_cart)}
   end
+
+  defp subscribe_to_cart(nil, user),
+    do: Phoenix.PubSub.subscribe(Loka.PubSub, "user:#{user.id}:cart_created")
+
+  defp subscribe_to_cart(cart, _user),
+    do: Phoenix.PubSub.subscribe(Loka.PubSub, "cart:#{cart.id}")
 end

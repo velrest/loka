@@ -1,4 +1,6 @@
 defmodule Loka.Inventory do
+  @moduledoc "Items studios sell, the stock offered for them, and their images."
+
   use Ash.Domain,
     otp_app: :loka,
     extensions: [AshPaperTrail.Domain, AshPhoenix, AshAdmin.Domain]

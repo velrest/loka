@@ -12,18 +12,18 @@ defmodule LokaWeb.CoreComponents do
   augmented with daisyUI, a Tailwind CSS plugin that provides UI components
   and themes. Here are useful references:
 
-    * [daisyUI](https://daisyui.com/docs/intro/) - a good place to get
-      started and see the available components.
+  * [daisyUI](https://daisyui.com/docs/intro/) - a good place to get
+    started and see the available components.
 
-    * [Tailwind CSS](https://tailwindcss.com) - the foundational framework
-      we build on. You will use it for layout, sizing, flexbox, grid, and
-      spacing.
+  * [Tailwind CSS](https://tailwindcss.com) - the foundational framework
+    we build on. You will use it for layout, sizing, flexbox, grid, and
+    spacing.
 
-    * [Heroicons](https://heroicons.com) - see `icon/1` for usage.
+  * [Heroicons](https://heroicons.com) - see `icon/1` for usage.
 
-    * [Phoenix.Component](https://hexdocs.pm/phoenix_live_view/Phoenix.Component.html) -
-      the component system used by Phoenix. Some components, such as `<.link>`
-      and `<.form>`, are defined there.
+  * [Phoenix.Component](https://hexdocs.pm/phoenix_live_view/Phoenix.Component.html) -
+    the component system used by Phoenix. Some components, such as `<.link>`
+    and `<.form>`, are defined there.
 
   """
   use Phoenix.Component

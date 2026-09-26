@@ -1,4 +1,11 @@
 defmodule LokaWeb.AddToCartComponent do
+  @moduledoc """
+  "Add to cart" button for a piece of stock.
+
+  For anonymous visitors it first makes sure a cart exists and has the
+  browser remember its id.
+  """
+
   alias Loka.Commerce
   use LokaWeb, :live_component
 

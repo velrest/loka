@@ -1,4 +1,6 @@
 defmodule Loka.Accounts.Token do
+  @moduledoc "Authentication tokens issued and revoked by AshAuthentication."
+
   use Ash.Resource,
     otp_app: :loka,
     domain: Loka.Accounts,

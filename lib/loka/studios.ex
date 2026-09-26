@@ -1,4 +1,6 @@
 defmodule Loka.Studios do
+  @moduledoc "Pottery studios, each owned by a single user."
+
   use Ash.Domain,
     otp_app: :loka,
     extensions: [AshPaperTrail.Domain, AshPhoenix, AshAdmin.Domain]

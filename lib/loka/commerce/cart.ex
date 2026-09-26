@@ -1,4 +1,11 @@
 defmodule Loka.Commerce.Cart do
+  @moduledoc """
+  A shopping cart, owned by a user or anonymous (no user).
+
+  Anonymous carts that haven't been touched in 30 days are deleted by a daily
+  Oban job (see `Loka.Commerce.Cart.Actions.CleanupAnonymous`).
+  """
+
   use Ash.Resource,
     otp_app: :loka,
     domain: Loka.Commerce,
@@ -136,6 +143,8 @@ defmodule Loka.Commerce.Cart do
 end
 
 defmodule Loka.Commerce.Cart.SubtotalCalc do
+  @moduledoc "Sums the prices of all stock in a cart. `nil` for an empty cart."
+
   use Ash.Resource.Calculation
 
   @impl true
