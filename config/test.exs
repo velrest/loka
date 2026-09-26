@@ -54,6 +54,8 @@ config :phoenix_test, otp_app: :loka
 # only the test server on localhost resolves
 config :phoenix_test,
   playwright: [
+    # Default is 2s, too short when the whole suite runs in parallel
+    timeout: to_timeout(second: 5),
     browser_launch_opts: [args: ["--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost"]]
   ]
 

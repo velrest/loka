@@ -34,6 +34,8 @@ defmodule LokaWeb.Browser.CartTest do
   defp sign_in(conn, user) do
     conn
     |> visit(~p"/sign-in")
+    # Input typed before the LiveView connects is lost when it re-renders
+    |> connected()
     |> within("#user-password-sign-in-with-password", fn session ->
       session
       |> fill_in("Email", with: to_string(user.email))
