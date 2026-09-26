@@ -178,10 +178,16 @@ defmodule LokaWeb.Layouts do
       locale goes through LokaWeb.Plugs.SetLocale so the choice is actually
       persisted to the session, not just reflected in this one socket. --%>
       <div class="hidden lg:join shrink-0">
-        <a href="?locale=de" class={["join-item btn btn-sm seg-toggle", @locale == "de" && "seg-toggle-active"]}>
+        <a
+          href="?locale=de"
+          class={["join-item btn btn-sm seg-toggle", @locale == "de" && "seg-toggle-active"]}
+        >
           DE
         </a>
-        <a href="?locale=en" class={["join-item btn btn-sm seg-toggle", @locale == "en" && "seg-toggle-active"]}>
+        <a
+          href="?locale=en"
+          class={["join-item btn btn-sm seg-toggle", @locale == "en" && "seg-toggle-active"]}
+        >
           EN
         </a>
       </div>

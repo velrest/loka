@@ -17,7 +17,9 @@ defmodule LokaWeb.Shop.MarketLive do
         <div class="order-2 lg:order-1 pb-0 lg:pb-9">
           <h1 class="hero-title m-0 mb-3.5">
             {gettext("Von Hand")}<br />{gettext("gemacht,")}<br />
-            <span class="text-primary" phx-click={JS.dispatch("loka:toggle-pioneer")}>{gettext("für immer")}</span> <br />{gettext("geliebt")}
+            <span class="text-primary" phx-click={JS.dispatch("loka:toggle-pioneer")}>{gettext(
+              "für immer"
+            )}</span> <br />{gettext("geliebt")}
           </h1>
           <p class="text-base max-w-[34ch] text-secondary mb-5">
             {gettext(
