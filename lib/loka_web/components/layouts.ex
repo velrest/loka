@@ -213,28 +213,47 @@ defmodule LokaWeb.Layouts do
 
       {live_render(@socket, LokaWeb.Shop.CartWidgetLive, id: "cart-widget")}
 
-      <div class="dropdown dropdown-end">
-        <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-          <div class="w-10 rounded-full">
-            <.icon name="hero-user-circle" class="size-8" />
-          </div>
+      <.profile_dropdown current_user={@current_user}/>
+    </div>
+    """
+  end
+
+  @doc """
+  Renders the Profile dropdown in the nav bar.
+  ## Examples
+
+      <.profile_dropdown current_user={@current_user} />
+  """
+  attr :current_user, Loka.Accounts.User, required: false
+
+  def profile_dropdown(assigns) do
+    ~H"""
+    <div class="dropdown dropdown-end">
+      <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+        <div class="w-10 rounded-full">
+          <.icon name="hero-user-circle" class="size-8" />
         </div>
-        <div
-          tabindex="-1"
-          class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
-        >
-          <ul>
-            <%= if @current_user do %>
-              <li><.link navigate={~p"/me"}>{gettext("Profil")}</.link></li>
-              <li><.link navigate={~p"/inventory/studio"}>{gettext("Studio verwalten")}</.link></li>
-              <li><.link patch={~p"/sign-out"}>{gettext("Abmelden")}</.link></li>
-            <% else %>
-              <li><.link patch={~p"/sign-in"}>{gettext("Anmelden")}</.link></li>
-              <li><.link patch={~p"/register"}>{gettext("Registrieren")}</.link></li>
+      </div>
+      <div
+        tabindex="-1"
+        class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
+      >
+        <ul>
+          <%= if @current_user do %>
+            <li><.link navigate={~p"/me"}>{gettext("Profil")}</.link></li>
+            <li><.link navigate={~p"/inventory/studio"}>{gettext("Studio verwalten")}</.link></li>
+            <li><.link patch={~p"/sign-out"}>{gettext("Abmelden")}</.link></li>
+            <%= if @current_user.admin? do %>
+            <li><.link navigate={~p"/admin"}>{gettext("Ash Admin")}</.link></li>
+            <li><.link navigate={~p"/dashboard"}>{gettext("Phoenix Dashboard")}</.link></li>
+            <li><.link navigate={~p"/oban"}>{gettext("Oban")}</.link></li>
             <% end %>
-          </ul>
-          <.theme_toggle />
-        </div>
+          <% else %>
+            <li><.link patch={~p"/sign-in"}>{gettext("Anmelden")}</.link></li>
+            <li><.link patch={~p"/register"}>{gettext("Registrieren")}</.link></li>
+          <% end %>
+        </ul>
+        <.theme_toggle />
       </div>
     </div>
     """
