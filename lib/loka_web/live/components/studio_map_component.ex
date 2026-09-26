@@ -21,30 +21,96 @@ defmodule LokaWeb.StudioMapComponent do
     {:ok,
      socket
      |> assign(assigns)
+     |> assign_new(:snapshot, fn -> false end)
      |> push_event("set_markers", %{markers: markers})}
   end
+
+  @doc """
+  Renders the studio map.
+
+  Two variants: the default full map (draggable, zoomable, filters the
+  market list by viewport via `bounds_changed`) and `snapshot={true}`, a
+  small non-interactive map centered on a single studio's location.
+  """
+  attr :id, :string, required: true
+  attr :studios, :list, required: true
+  attr :snapshot, :boolean, default: false
+  attr :thunderforest_key, :string, default: nil
 
   @impl true
   def render(assigns) do
     ~H"""
-    <div id={@id} class="relative mb-12" style="z-index: 0">
-      <div id={"#{@id}-canvas"} phx-hook=".StudioMap" class="h-80 w-full rounded-box" />
+    <div id={@id} class="relative" style="z-index: 0">
+      <div
+        id={"#{@id}-canvas"}
+        phx-hook=".StudioMap"
+        data-snapshot={to_string(@snapshot)}
+        data-tf-key={@thunderforest_key}
+        class={[
+          "w-full bg-base-300",
+          if(@snapshot, do: "h-[150px] rounded-box", else: "h-[400px] rounded-t-box")
+        ]}
+      />
 
       <script :type={Phoenix.LiveView.ColocatedHook} name=".StudioMap">
         import L from "leaflet"
+
+        function glowIcon(size) {
+          return L.divIcon({
+            className: "",
+            html: `<span style="display:block;width:100%;height:100%;border-radius:50%;background:var(--color-primary);box-shadow:0 0 0 6px color-mix(in srgb, var(--color-primary) 22%, transparent)"></span>`,
+            iconSize: [size, size],
+            iconAnchor: [size / 2, size / 2],
+            popupAnchor: [0, -size / 2]
+          })
+        }
 
         export default {
           _markers: [],
           _map: null,
           _userLocated: false,
           mounted() {
-            this._map = L.map(this.el).setView([46.8182, 8.2275], 8)
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            const snapshot = this.el.dataset.snapshot === "true"
+            this._snapshot = snapshot
+
+            this._map = L.map(this.el, {
+              zoomControl: !snapshot,
+              dragging: !snapshot,
+              scrollWheelZoom: !snapshot,
+              doubleClickZoom: !snapshot,
+              boxZoom: !snapshot,
+              keyboard: !snapshot,
+              touchZoom: !snapshot,
+              attributionControl: !snapshot
+            }).setView([46.8182, 8.2275], 8)
+
+            this._osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
               attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
               maxZoom: 19
             }).addTo(this._map)
 
-            if (navigator.geolocation) {
+            const tfKey = this.el.dataset.tfKey
+            if (tfKey) {
+              this._pioneerLayer = L.tileLayer(
+                `https://{s}.tile.thunderforest.com/pioneer/{z}/{x}/{y}{r}.png?apikey=${tfKey}`,
+                {
+                  attribution: '© <a href="https://www.thunderforest.com/">Thunderforest</a>, © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                  maxZoom: 22
+                }
+              )
+              this._pioneerHandler = () => {
+                if (this._map.hasLayer(this._pioneerLayer)) {
+                  this._map.removeLayer(this._pioneerLayer)
+                  this._map.addLayer(this._osmLayer)
+                } else {
+                  this._map.removeLayer(this._osmLayer)
+                  this._map.addLayer(this._pioneerLayer)
+                }
+              }
+              window.addEventListener("loka:toggle-pioneer", this._pioneerHandler)
+            }
+
+            if (!snapshot && navigator.geolocation) {
               let watchId = navigator.geolocation.watchPosition(
                 pos => {
                   navigator.geolocation.clearWatch(watchId)
@@ -58,23 +124,26 @@ defmodule LokaWeb.StudioMapComponent do
 
             this.handleEvent("set_markers", ({markers}) => this._setMarkers(markers))
 
-            const emit = () => {
-              const b = this._map.getBounds()
-              this.pushEvent("bounds_changed", {
-                north: b.getNorth(),
-                south: b.getSouth(),
-                east: b.getEast(),
-                west: b.getWest(),
-                zoom: this._map.getZoom()
-              })
+            if (!snapshot) {
+              const emit = () => {
+                const b = this._map.getBounds()
+                this.pushEvent("bounds_changed", {
+                  north: b.getNorth(),
+                  south: b.getSouth(),
+                  east: b.getEast(),
+                  west: b.getWest(),
+                  zoom: this._map.getZoom()
+                })
+              }
+              this._map.on('moveend', emit)
+              this._map.on('zoomend', emit)
             }
-            this._map.on('moveend', emit)
-            this._map.on('zoomend', emit)
           },
           updated() {
             if (this._map) this._map.invalidateSize()
           },
           _setMarkers(markers) {
+            const snapshot = this._snapshot
             this._markers.forEach(m => m.remove())
             this._markers = []
             const latlngs = []
@@ -94,15 +163,22 @@ defmodule LokaWeb.StudioMapComponent do
                     ${desc}
                   </div>
                 </div>`
-              const m = L.marker([lat, lng])
-                .bindPopup(popup, {maxWidth: 240})
-                .addTo(this._map)
-              this._markers.push(m)
+              const marker = L.marker([lat, lng], {
+                icon: glowIcon(snapshot ? 12 : 14),
+                interactive: !snapshot
+              })
+              if (!snapshot) marker.bindPopup(popup, {maxWidth: 240})
+              marker.addTo(this._map)
+              this._markers.push(marker)
               latlngs.push([lat, lng])
             })
 
-            if (latlngs.length > 0 && !this._userLocated) {
-              this._map.fitBounds(latlngs, {padding: [40, 40], maxZoom: 12})
+            if (latlngs.length > 0) {
+              if (snapshot) {
+                this._map.setView(latlngs[0], 13)
+              } else if (!this._userLocated) {
+                this._map.fitBounds(latlngs, {padding: [40, 40], maxZoom: 12})
+              }
             }
           }
         }

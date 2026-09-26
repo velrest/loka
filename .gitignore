@@ -1,3 +1,6 @@
+# Local secrets (API keys, etc.) loaded by config/runtime.exs
+/.env
+
 # The directory Mix will write compiled artifacts to.
 /_build/
 

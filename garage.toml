@@ -1,0 +1,27 @@
+# Dev-only single-node Garage config (S3-compatible object storage), replacing MinIO.
+# Not for production use: replication_factor 1 and secrets committed in plaintext.
+
+metadata_dir = "/var/lib/garage/meta"
+data_dir = "/var/lib/garage/data"
+db_engine = "sqlite"
+
+replication_factor = 1
+
+rpc_bind_addr = "[::]:3901"
+rpc_public_addr = "garage:3901"
+rpc_secret = "5924c437aa93c57b972a625e7fddf4a27f5a89151ec2b42b34c2cb3974d758dd"
+
+[s3_api]
+s3_region = "garage"
+api_bind_addr = "[::]:3900"
+root_domain = ".s3.garage.localhost"
+
+[s3_web]
+bind_addr = "[::]:3902"
+root_domain = ".web.garage.localhost"
+index = "index.html"
+
+[admin]
+api_bind_addr = "[::]:3903"
+admin_token = "a5ac3272755d58152e40a52bdf7ded625b4353bd7cafe40917ea3bf345240151"
+metrics_token = "458b72fd1b532b4a5721e416f2bcd3cae376c738303a17734b9617b5e6d74eef"
