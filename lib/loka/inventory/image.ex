@@ -1,5 +1,5 @@
 defmodule Loka.Inventory.Image do
-  @moduledoc "An image of an item. Files live under `priv/static/uploads/items/`."
+  @moduledoc "An image of an item. Files live under `items/` in `Loka.Uploads.dir/0`."
 
   use Ash.Resource,
     otp_app: :loka,

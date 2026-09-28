@@ -1,6 +1,6 @@
 defmodule Loka.Studios.Studio.Changes.UploadLogo do
   @moduledoc """
-  Saves an uploaded logo under `priv/static/uploads/studios/` and deletes the
+  Saves an uploaded logo under `studios/` in `Loka.Uploads.dir/0` and deletes the
   previous one.
   """
 
@@ -27,15 +27,11 @@ defmodule Loka.Studios.Studio.Changes.UploadLogo do
   end
 
   defp replace_file(file, web_path, old_path) do
-    dest = static_path(web_path)
+    dest = Loka.Uploads.path(web_path)
     File.mkdir_p!(Path.dirname(dest))
     {:ok, src_path} = Ash.Type.File.path(file)
     File.cp!(src_path, dest)
 
-    if old_path, do: File.rm(static_path(old_path))
-  end
-
-  defp static_path(web_path) do
-    Path.join([:code.priv_dir(:loka), "static", String.trim_leading(web_path, "/")])
+    if old_path, do: File.rm(Loka.Uploads.path(old_path))
   end
 end

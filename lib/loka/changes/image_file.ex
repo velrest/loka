@@ -5,7 +5,7 @@ defmodule Loka.Changes.Image.RemoveFile do
 
   def change(changeset, _opts, _context) do
     Ash.Changeset.after_action(changeset, fn _changeset, record ->
-      File.rm(Path.join([:code.priv_dir(:loka), "static", String.trim_leading(record.path, "/")]))
+      File.rm(Loka.Uploads.path(record.path))
       {:ok, record}
     end)
   end
@@ -13,7 +13,7 @@ end
 
 defmodule Loka.Changes.Image.UploadFile do
   @moduledoc """
-  Saves an uploaded image under `priv/static/uploads/items/` and appends it
+  Saves an uploaded image under `items/` in `Loka.Uploads.dir/0` and appends it
   after the item's existing images.
   """
 
@@ -39,7 +39,7 @@ defmodule Loka.Changes.Image.UploadFile do
         |> Ash.count!(actor: actor)
       )
       |> Ash.Changeset.after_action(fn _changeset, record ->
-        dest = Path.join([:code.priv_dir(:loka), "static", String.trim_leading(record.path, "/")])
+        dest = Loka.Uploads.path(record.path)
         File.mkdir_p!(Path.dirname(dest))
         {:ok, src_path} = Ash.Type.File.path(file)
         File.cp!(src_path, dest)
