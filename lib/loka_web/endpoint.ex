@@ -32,6 +32,11 @@ defmodule LokaWeb.Endpoint do
     only: LokaWeb.static_paths(),
     raise_on_missing_only: code_reloading?
 
+  # User uploads, directory resolved at runtime (see Loka.Uploads)
+  plug Plug.Static,
+    at: "/uploads",
+    from: {Loka.Uploads, :dir, []}
+
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
   if code_reloading? do

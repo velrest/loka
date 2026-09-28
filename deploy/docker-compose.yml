@@ -1,0 +1,98 @@
+x-loka: &loka
+  image: ghcr.io/velrest/loka:latest
+  env_file: .env
+  environment:
+    DATABASE_URL: ecto://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB}
+    SMTP_HOST: mailpit
+    SMTP_PORT: 1025
+  depends_on:
+    db:
+      condition: service_healthy
+  volumes:
+    - uploads:/app/uploads
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  migrate:
+    <<: *loka
+    command: ["/app/bin/migrate"]
+    restart: "no"
+
+  loka:
+    <<: *loka
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+      mailpit:
+        condition: service_started
+
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    environment:
+      MP_WEBROOT: /mailpit
+      MP_UI_AUTH: ${MAILPIT_UI_AUTH:?set MAILPIT_UI_AUTH in .env}
+      MP_DATABASE: /data/mailpit.db
+      MP_MAX_MESSAGES: 5000
+    volumes:
+      - mailpit_data:/data
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - loka
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    configs:
+      - source: caddyfile
+        target: /etc/caddy/Caddyfile
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+
+configs:
+  caddyfile:
+    content: |
+      {
+        email ${ACME_EMAIL}
+      }
+
+      ${PHX_HOST} {
+        encode zstd gzip
+
+        handle /mailpit* {
+          reverse_proxy mailpit:8025
+        }
+
+        handle {
+          reverse_proxy loka:4000
+        }
+      }
+
+volumes:
+  pgdata:
+  uploads:
+  caddy_data:
+  caddy_config:
+  mailpit_data:

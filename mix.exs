@@ -4,7 +4,7 @@ defmodule Loka.MixProject do
   def project do
     [
       app: :loka,
-      version: "0.1.0",
+      version: System.get_env("LOKA_VERSION", "0.1.0"),
       licenses: ["AGPL-3.0-or-later"],
       elixir: "~> 1.15",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -83,6 +83,7 @@ defmodule Loka.MixProject do
        compile: false,
        depth: 1},
       {:swoosh, "~> 1.16"},
+      {:gen_smtp, "~> 1.3"},
       {:req, "~> 0.5"},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},

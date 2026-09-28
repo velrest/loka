@@ -6,6 +6,7 @@ source!([Path.absname(".env"), System.get_env()])
 
 config :loka, :thunderforest_api_key, env!("THUNDERFOREST_API_KEY", :string, nil)
 config :loka, :email_from, env!("EMAIL_FROM", :string, "noreply@example.com")
+config :loka, :uploads_dir, env!("UPLOADS_DIR", :string, nil)
 
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
@@ -114,21 +115,23 @@ if config_env() == :prod do
   #
   # Check `Plug.SSL` for all available options in `force_ssl`.
 
-  # ## Configuring the mailer
-  #
-  # In production you need to configure the mailer to use a different adapter.
-  # Here is an example configuration for Mailgun:
-  #
-  #     config :loka, Loka.Mailer,
-  #       adapter: Swoosh.Adapters.Mailgun,
-  #       api_key: System.get_env("MAILGUN_API_KEY"),
-  #       domain: System.get_env("MAILGUN_DOMAIN")
-  #
-  # Most non-SMTP adapters require an API client. Swoosh supports Req, Hackney,
-  # and Finch out-of-the-box. This configuration is typically done at
-  # compile-time in your config/prod.exs:
-  #
-  #     config :swoosh, :api_client, Swoosh.ApiClient.Req
-  #
-  # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
+  smtp_host =
+    System.get_env("SMTP_HOST") ||
+      raise "environment variable SMTP_HOST is missing."
+
+  config :loka,
+         Loka.Mailer,
+         [
+           adapter: Swoosh.Adapters.SMTP,
+           relay: smtp_host,
+           port: String.to_integer(System.get_env("SMTP_PORT", "25")),
+           username: System.get_env("SMTP_USERNAME"),
+           password: System.get_env("SMTP_PASSWORD"),
+           ssl: false,
+           tls: :if_available,
+           auth: :if_available,
+           retries: 2,
+           no_mx_lookups: true
+         ]
+         |> Enum.reject(fn {_key, value} -> is_nil(value) end)
 end
